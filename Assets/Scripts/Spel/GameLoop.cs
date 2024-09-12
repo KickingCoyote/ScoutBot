@@ -1,21 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameLoop : MonoBehaviour
 {
+ 
     
+    public GameObject inputField;
+
+    private string inputString;
 
     //The deck of all cards before distribution
     public List<int> deck;
 
 
-    //Used for debugging purposes so that the players' cards show up in the editor
-    public List<int> p1;
-    public List<int> p2;
-    public List<int> p3;
-    public List<int> p4;
+
+    //Used for UI
+    [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[4];
+    [SerializeField] TextMeshProUGUI infoText;
 
     //Start of the game
     void Start()
@@ -37,12 +42,7 @@ public class GameLoop : MonoBehaviour
             SBF.players[i] = new Player(DistributeCards());
         }
 
-        //Used for debugging purposes so that the players' cards show up in the editor
-        p1 = SBF.players[0].hand;
-        p2 = SBF.players[1].hand;
-        p3 = SBF.players[2].hand;
-        p4 = SBF.players[3].hand;
-
+        UpdateUI();
 
     }
 
@@ -103,5 +103,51 @@ public class GameLoop : MonoBehaviour
 
         return cards;
     }
-    
+
+    //Activated from buttons ingame
+    public void TakeCard()
+    {
+        Debug.Log(inputString);
+
+        UpdateUI();
+    }
+
+    public void PutCard()
+    {
+        Debug.Log("Put Card");
+
+        UpdateUI();
+    }
+
+    public void UpdateString(string s)
+    {
+        inputString = s;
+    }
+
+    //Renders the ingame UI
+    private void UpdateUI()
+    {
+
+        for (int i = 0; i < 4; i++)
+        {
+
+            pText[i].text = "Player " + i + ":";
+
+            for (int j = 0; j < SBF.players[i].hand.Count; j++)
+            {
+                pText[i].text += " " + SBF.players[i].hand[j];
+            }
+        }
+
+
+        infoText.text = "Turn: " + SBF.turn + "       |       Table Pile: ";
+
+        for (int i = 0; i < SBF.tablePile.Count; i++)
+        {
+            infoText.text += " " + SBF.tablePile[i];
+        }
+
+        
+    }
+
 }
