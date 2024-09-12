@@ -18,7 +18,7 @@ public static class SBF
     static public Player[] players;
 
     //the current turn
-    static public int turn = 0;
+    static public int turn = 1;
 
 
     //Flip a card upside down
