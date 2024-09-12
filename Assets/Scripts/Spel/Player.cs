@@ -14,13 +14,16 @@ public class Player
     int points;
 
     //All possible combinations of cards the player can lay out
-    public List<byte> moves;
+    public List<byte[]> moves;
+
+
+    //0010 xxxx, 0010 xxxx, 0010 xxx
 
     public Player(List<int> hand)
     {
         this.hand = hand;
         points = 0;
-        moves = new List<byte>();
+        moves = new List<byte[]>();
         CalculatePossibleMoves();
     }
 
@@ -32,7 +35,7 @@ public class Player
     {
         
         //Sees if the cards have a higher value then the cards on the table
-        if (SBF.tablePile.Count > 0 && SBF.RawEval(SBF.MoveEncrypter(cards)) <= SBF.RawEval(SBF.MoveEncrypter(SBF.tablePile)))
+        if (SBF.tablePile.Count > 0 && SBF.RawEval(cards) <= SBF.RawEval(SBF.tablePile))
         {
             Debug.Log("Invalid Action");
             return;
@@ -72,15 +75,14 @@ public class Player
 
 
     //Finds all possible combinations of cards the player can put
-    //Encrypts these moves to byte form and adds the to the moves list
+    //Encrypts these moves to byte[] form and adds the to the moves list
     public void CalculatePossibleMoves()
     {
 
         moves.Clear();
 
+        //Adds all possible moves in List<int> form
         List<List<int>> DecryptedMoves = new List<List<int>>();
-
-
         for (int i = 0; i < hand.Count; i++) { 
             List<int> temp = new List<int>() { hand[i] };
             DecryptedMoves.Add(temp);
@@ -126,9 +128,15 @@ public class Player
             }
         }
 
-        //Compress moves into byte form for optimization
+        //Compress moves from list<int> into byte[] form for optimization
         foreach (List<int> move in DecryptedMoves) {
-            moves.Add(SBF.MoveEncrypter(move));
+
+            byte[] b = new byte[move.Count];
+
+            for(int i = 0; i < move.Count; i++)
+            {
+                b[i] = SBF.int8ToByte(move[i]);
+            }
         }
     }
 

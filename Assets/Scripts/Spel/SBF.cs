@@ -17,7 +17,8 @@ public static class SBF
     //Array of all players, each player has their list of cards and their points
     static public Player[] players;
 
-
+    //the current turn
+    static public int turn = 0;
 
 
     //Flip a card upside down
@@ -39,6 +40,12 @@ public static class SBF
 
         return a[0];
 
+    }
+
+    //converts a int lower than 256 to a byte
+    public static byte int8ToByte(int i)
+    {
+        return BitConverter.GetBytes(i)[0];
     }
     
 
@@ -73,69 +80,40 @@ public static class SBF
 
     //Evaluate the raw quality a move compared to all other moves
     //this is done by converting the byte formated move into a int.
-    // Where the biggest digits are the number of cards,
+    // Where the biggest digit is the number of cards -1,
     // middle digit (1 or 0) is if its a match (1) or a ladder (0),
-    // last digits is the smallest value in the move.
+    // last digits is the smallest value card in the move - 1.
     // This means that the integer will be bigger then the integer for all worse moves and smaller then the integer for all better moves,
 
     //TO BE DONE: // this is then used with a lookup table of all possible 133 values to convert the number into a percentile representing the move quality
-    public static int RawEval(byte move)
+    public static int RawEval(List<byte> cards)
     {
-        byte[] b = new byte[1] { move };
-        BitArray bits = new BitArray(b);
-        int n = move;
+        
+        //The leading digit is the amount of cards 1, the last digit is the smallest valued cards value - 1
+        int i = (cards.Count - 1) * 100 + CardToValue(cards.Min()) - 1;
 
-
-        if (bits[8]) { n -= 128; } //If match, remove the indicator bit (last 128)
-
-        // (n / 10) extracts the leading digit as integer division deletes all decimals
-        n = (n / 10) * 100 + (n - (n / 10));  
-
-        if (bits[8]){n += 10;}  //Add back the indicator incase of a match to make matches valued over ladders
-
-        return n;
-    }
-
-    //Encrypts a set of cards into a move, the move must be valid for this to work.
-    //this is done to compress the size of moves for optimization
-    public static byte MoveEncrypter(List<int> cards)
-    {
-        List<byte> b = new List<byte>();
-        foreach(int card in cards)
-        {
-            b.Add(Convert.ToByte(card));
-        }
-        return MoveEncrypter(b); 
-    }
-
-    //a move is stored in a byte in the format 0 0000000,
-    //where the first 7 digits are (card count * 10) + lowest card value, and the last digit is 1 incase of matching and 0 incase of a ladder
-    public static byte MoveEncrypter(List<byte> cards)
-    {
-        //Compresses the list to a 2 digit number between 00 representing 1 one, and 88 representing 9 nines.
-        //The first digit represents how many cards the move consists of, the second digit represents what the lowest value card in the move is.
-        //Both values are reduced by 1 to take use of the zeros
-        int i = (cards.Count -1) * 10 + CardToValue(cards.Min()) - 1;
-
-        //if cards are matching make the last digit 1, single digit moves are still counted as matching, otherwise if the cards are in a ladder the digit is a 0
-        //The last digit in a byte is worth 2^7 hence the + 128.
+        //if cards are matching make the middle digit is 1, single digit moves are still counted as matching, otherwise if the cards are in a ladder the digit is a 0
+        //The middle digit is in the 10 spot, hence +10.
         if (cards.Count > 1 && cards[0] == cards[1])
         {
-            i += 128;
+            i += 10;
         }
-        
-        return BitConverter.GetBytes(i)[0];
+
+        return i;
     }
 
-    public static List<int> MoveDecrypter(byte move)
+    //Makes RawEval compatible with integers
+    public static int RawEval(List<int> cards)
     {
-        int amount;
-        int smallest;
-        bool match;
-
-
-        return new List<int>();
+        List<byte> b = new List<byte>();
+        foreach (int card in cards)
+        {
+            b.Add(int8ToByte(card));
+        }
+        return RawEval(b);
     }
+
+
 
 
 }
