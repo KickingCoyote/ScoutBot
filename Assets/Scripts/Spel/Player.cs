@@ -11,7 +11,7 @@ public class Player
     public List<int> hand;
 
     //The points
-    int points;
+    public int points;
 
     //All possible combinations of cards the player can lay out
     public List<byte[]> moves;
@@ -40,6 +40,8 @@ public class Player
             Debug.Log("Invalid Action");
             return;
         }
+
+        points += SBF.tablePile.Count;
 
         SBF.tablePile = cards;
         foreach (int card in cards) {
@@ -90,7 +92,7 @@ public class Player
             for (int j = 1; j < hand.Count - i; j++) 
             { 
 
-                if (SBF.CardToValue(hand[i]) == SBF.CardToValue(hand[i + j]))
+                if (SBF.getCardValue(hand[i]) == SBF.getCardValue(hand[i + j]))
                 {
                     temp.Add(hand[i + j]);
                     DecryptedMoves.Add(temp);
@@ -103,7 +105,7 @@ public class Player
             for (int j = 1; j < hand.Count - i; j++)
             {
 
-                if (SBF.CardToValue(hand[i]) == SBF.CardToValue(hand[i + j]) + j)
+                if (SBF.getCardValue(hand[i]) == SBF.getCardValue(hand[i + j]) + j)
                 {
                     temp.Add(hand[i + j]);
                     DecryptedMoves.Add(temp);
@@ -116,7 +118,7 @@ public class Player
             for (int j = 1; j < hand.Count - i; j++)
             {
 
-                if (SBF.CardToValue(hand[i]) == SBF.CardToValue(hand[i + j]) - j)
+                if (SBF.getCardValue(hand[i]) == SBF.getCardValue(hand[i + j]) - j)
                 {
                     temp.Add(hand[i + j]);
                     DecryptedMoves.Add(temp);

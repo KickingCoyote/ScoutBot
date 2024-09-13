@@ -114,11 +114,19 @@ public class GameLoop : MonoBehaviour
 
     public void PutCard()
     {
-        Debug.Log("Put Card");
+        string[] s = inputString.Split(' ');
+        List<int> cards = new List<int>();
+        foreach (string sCard in s)
+        {
+            cards.Add(SBF.CardFromString(sCard));
+        }
 
+        SBF.players[(SBF.turn - 1)% 4].LayDownCards(cards);
+        SBF.turn++;
         UpdateUI();
     }
 
+    //ran anytime input field is deselected
     public void UpdateString(string s)
     {
         inputString = s;
@@ -131,11 +139,11 @@ public class GameLoop : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
 
-            pText[i].text = "Player " + i + ":";
+            pText[i].text = "Player " + (i + 1) + " P:"  + SBF.players[i].points + " |";
 
             for (int j = 0; j < SBF.players[i].hand.Count; j++)
             {
-                pText[i].text += " " + SBF.players[i].hand[j];
+                pText[i].text += " " + SBF.CardToString(SBF.players[i].hand[j]);
             }
         }
 
@@ -144,7 +152,7 @@ public class GameLoop : MonoBehaviour
 
         for (int i = 0; i < SBF.tablePile.Count; i++)
         {
-            infoText.text += " " + SBF.tablePile[i];
+            infoText.text += " " + SBF.CardToString(SBF.tablePile[i]);
         }
 
         

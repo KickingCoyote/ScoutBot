@@ -19,7 +19,7 @@ public static class SBF
 
     //the current turn
     static public int turn = 1;
-
+    
 
     //Flip a card upside down
     public static int FlipCard(int card)
@@ -66,7 +66,7 @@ public static class SBF
 
 
     //Returns the upwards facing value on a card
-    public static int CardToValue(int card)
+    public static int getCardValue(int card)
     {
         byte[] b = new byte[1] { BitConverter.GetBytes(card)[0] };
         BitArray bits = new BitArray(b);
@@ -90,7 +90,7 @@ public static class SBF
     {
         
         //The leading digit is the amount of cards 1, the last digit is the smallest valued cards value - 1
-        int i = (cards.Count - 1) * 100 + CardToValue(cards.Min()) - 1;
+        int i = (cards.Count - 1) * 100 + getCardValue(cards.Min()) - 1;
 
         //if cards are matching make the middle digit is 1, single digit moves are still counted as matching, otherwise if the cards are in a ladder the digit is a 0
         //The middle digit is in the 10 spot, hence +10.
@@ -111,6 +111,16 @@ public static class SBF
             b.Add(int8ToByte(card));
         }
         return RawEval(b);
+    }
+
+    public static string CardToString(int card)
+    {
+        return getCardValue(card) + ":" + (card - (16 * getCardValue(card)));
+    }
+    public static int CardFromString(string cardStr)
+    {
+        string[] str = cardStr.Split(':');
+        return int.Parse(str[0]) * 16 + int.Parse(str[1]);
     }
 
 
