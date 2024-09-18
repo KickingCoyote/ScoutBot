@@ -52,15 +52,27 @@ public class Player
     }
 
 
-    //Pick Up 1 card from middle pile
-    public void PickUp(int card, bool flip, int placement)
+    /// <summary>
+    /// Pick up 1 card from table pile
+    /// </summary>
+    /// <param name="top">If its the top or bottom card thats picked up</param>
+    /// <param name="flip">To flip or not flip the card before putting it the hand</param>
+    /// <param name="placement">Where in the hand the card is placed</param>
+    public void PickUp(bool top, bool flip, int placement)
     {
-        //Looks if card exists on the top / bottom of middle stack
-        if (!(SBF.tablePile[0] == card && SBF.tablePile[SBF.tablePile.Count - 1] == card))
+
+        int card;
+
+        //Looks if card exists on the top or bottom of middle stack
+        if (top)
         {
-            Debug.Log("Invalid Action");
-            return;
+            card = SBF.tablePile[SBF.tablePile.Count - 1];
         }
+        else
+        {
+            card = SBF.tablePile[0];
+        }
+
         if (flip) 
         {
             hand.Insert(placement, SBF.FlipCard(card));
@@ -71,6 +83,10 @@ public class Player
         }
 
         CalculatePossibleMoves();
+
+        //Gives a point to the person that laid down that card
+        SBF.players[SBF.tablePileHolder].points++;
+
         SBF.tablePile.Remove(card);
 
     }
