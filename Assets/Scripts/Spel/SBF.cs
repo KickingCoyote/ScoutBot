@@ -18,10 +18,10 @@ public static class SBF
     static public Player[] players;
 
     //the current turn
-    static public int turn = 1;
+    static public int turn = 0;
 
     //Index of what player the table cards were put down by 
-    static public int tablePileHolder = 0; 
+    static public int tablePileHolder = 5; 
     
 
     //Flip a card upside down
