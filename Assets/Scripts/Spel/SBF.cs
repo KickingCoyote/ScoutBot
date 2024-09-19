@@ -127,6 +127,20 @@ public static class SBF
     }
 
 
+    //Converts a list<int> to byte array for efficiency 
+    public static byte[] encryptMove(List<int> move)
+    {
+        byte[] b = new byte[move.Count];
+
+        for (int i = 0; i < move.Count; i++)
+        {
+            b[i] = SBF.int8ToByte(move[i]);
+        }
+
+        return b;
+    }
+
+
 
 
 }

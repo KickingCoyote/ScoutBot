@@ -33,13 +33,30 @@ public class Player
      */
     public void LayDownCards(List<int> cards)
     {
+
         
+
+        //Sees if it is possible to put down that combination of cards
+        if (!moves.Contains(SBF.encryptMove(cards)))
+        {
+            Debug.Log("Not a Valid Move");
+            foreach (byte b in SBF.encryptMove(cards))
+            {
+                Debug.Log(b + " :");
+            }
+
+            return;
+        }
+        
+
+
         //Sees if the cards have a higher value then the cards on the table
         if (SBF.tablePile.Count > 0 && SBF.RawEval(cards) <= SBF.RawEval(SBF.tablePile))
         {
             Debug.Log("Invalid Action");
             return;
         }
+
 
         points += SBF.tablePile.Count;
 
@@ -146,15 +163,21 @@ public class Player
             }
         }
 
+
+
         //Compress moves from list<int> into byte[] form for optimization
-        foreach (List<int> move in DecryptedMoves) {
+        foreach (List<int> move in DecryptedMoves)
+        {
 
-            byte[] b = new byte[move.Count];
+            moves.Add(SBF.encryptMove(move));
 
-            for(int i = 0; i < move.Count; i++)
+
+            foreach (byte b in SBF.encryptMove(move))
             {
-                b[i] = SBF.int8ToByte(move[i]);
+                Debug.Log(b);
             }
+            Debug.Log("///////////////////////////////");
+
         }
     }
 
