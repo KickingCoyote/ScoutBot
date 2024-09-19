@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -34,20 +35,27 @@ public class Player
     public void LayDownCards(List<int> cards)
     {
 
-        
+        bool isLegal = false;
 
         //Sees if it is possible to put down that combination of cards
-        if (!moves.Contains(SBF.encryptMove(cards)))
+        foreach (byte[] move in moves)
+        {
+
+
+            if (Enumerable.SequenceEqual(move, SBF.encryptMove(cards)))
+            {
+                isLegal = true; 
+                break;
+            }
+        }
+
+        if (!isLegal)
         {
             Debug.Log("Not a Valid Move");
-            foreach (byte b in SBF.encryptMove(cards))
-            {
-                Debug.Log(b + " :");
-            }
-
             return;
         }
-        
+
+
 
 
         //Sees if the cards have a higher value then the cards on the table
@@ -168,15 +176,7 @@ public class Player
         //Compress moves from list<int> into byte[] form for optimization
         foreach (List<int> move in DecryptedMoves)
         {
-
             moves.Add(SBF.encryptMove(move));
-
-
-            foreach (byte b in SBF.encryptMove(move))
-            {
-                Debug.Log(b);
-            }
-            Debug.Log("///////////////////////////////");
 
         }
     }

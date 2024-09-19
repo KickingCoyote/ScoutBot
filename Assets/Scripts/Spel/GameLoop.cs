@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class GameLoop : MonoBehaviour
 {
@@ -42,7 +43,7 @@ public class GameLoop : MonoBehaviour
             SBF.players[i] = new Player(DistributeCards());
         }
 
-        UpdateUI();
+        GameUpdate();
 
     }
 
@@ -110,8 +111,7 @@ public class GameLoop : MonoBehaviour
         string[] s = inputString.Split(' ');
         // true / false for top/bottom card, true / false for fliping the card, int for card placement
         SBF.players[(SBF.turn - 1) % 4].PickUp(bool.Parse(s[0]), bool.Parse(s[1]), int.Parse(s[2]));
-        SBF.turn++;
-        UpdateUI();
+        GameUpdate();
     }
 
     public void PutCard()
@@ -125,8 +125,9 @@ public class GameLoop : MonoBehaviour
 
         SBF.players[(SBF.turn - 1)% 4].LayDownCards(cards);
         SBF.tablePileHolder = (SBF.turn - 1) % 4;
-        SBF.turn++;
-        UpdateUI();
+
+        GameUpdate();
+
     }
 
     //ran every input field is deselected
@@ -159,6 +160,35 @@ public class GameLoop : MonoBehaviour
         }
 
         
+    }
+
+    //Runs every time an turn is done
+    private void GameUpdate()
+    {
+
+        if (SBF.turn > 0 &&  SBF.players[(SBF.turn - 1) % 4].hand.Count == 0)
+        {
+            GameEnd();
+            return;
+        }
+
+        SBF.turn++;
+        UpdateUI();
+
+
+        if (SBF.tablePileHolder == (SBF.turn - 1) % 4)
+        {
+            GameEnd();
+            return;
+        }
+
+
+    }
+
+
+    public void GameEnd()
+    {
+        Debug.Log("The Game is Over");
     }
 
 }
