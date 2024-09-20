@@ -11,13 +11,15 @@ using UnityEngine.Scripting.APIUpdating;
 public static class SBU
 {
 
-    // 0000, 0, 000. (hand) index, flip, owner
-
+    //All cards are stored in 1 44 length int[], the index represents which card it is and the value has all the needed data about that card 
+    //each value is stored such as that when viewed in byte form it looks like XXXX X XXX.
+    //the left most 3 digits represents who has the card (0 for middle pile, 1..4 for player 1..4)
+    //the middle digit represents if the card is flipped or not, where the largest value is always flipped down if it's 0
+    //the right most 4 digit represents the index of where in the players hand (or middle pile) the card is located, if the digits are 1111 that represents the card being a point instead of a card
     public static int[] cards = new int[44];
 
-    public static int[] scores = new int[4] {0,0,0,0};
-
-    public static int turn = -1;
+    //A variable between 1 and 4 representing which players turn it is
+    public static int turn = 0;
 
     public static int[] cardValues = new int[44];
 
@@ -74,12 +76,9 @@ public static class SBU
     }
 
 
-    //The following functions may not work with negative numbers
-    /// <summary>
-    /// Get the hand index of a card
-    /// </summary>
-    /// <param name="card">the card</param>
-    /// <returns></returns>
+
+    //The following 3 functions takes in the int that is the card data of a card and extracts specific information  
+    //The following functions returns incorrect values if anything is negative hence inputing a move array will not return the correct information in most cases
     public static int getCardIndex(int card)
     {
         //Uses same logic as getCurrentCardValue
@@ -120,7 +119,12 @@ public static class SBU
     }
 
 
-    //doom, fix this sphagetti code
+    /// <summary>
+    /// This function generates all possible moves. THIS METHOD NEEDS TO BE EXTREMELY FAST.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="cards"></param>
+    /// <returns>a 2 dimensional array of all possible moves a player can play</returns>
     //Move Generation for putting down cards
     public static int[,] GetPossibleMoves(int player, int[] cards)
     {
@@ -193,11 +197,11 @@ public static class SBU
     }
 
     /// <summary>
-    /// Generates a move array from a set of cards (move) and a GameState
+    /// Generates a move array from a set of cards (move) and a GameState used for putting down cards
     /// </summary>
     /// <param name="cards">the global cards (GameState)</param>
     /// <param name="move">the set of cards that the move consists of, must be in order</param>
-    /// <returns></returns>
+    /// <returns>int[44] with values so that when added to cards[] plays the move</returns>
     public static int[] GenerateMove(int[] cards, int[] move, int player)
     {
 
@@ -231,11 +235,30 @@ public static class SBU
     }
 
     /// <summary>
+    /// Generates a move array for taking a card from the middle pile
+    /// </summary>
+    /// <param name="cards"></param>
+    /// <param name="top"></param>
+    /// <param name="flip"></param>
+    /// <param name="player"></param>
+    /// <param name="handIndex"></param>
+    /// <returns>int[44] with values so that when added to cards[] plays the move</returns>
+    public static int[] GenerateDrawCardMove(int[] cards, bool top, bool flip, int player, int handIndex)
+    {
+
+
+        return new int[3];
+    }
+
+
+
+
+    /// <summary>
     /// Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
     /// </summary>
     /// <param name="cards"></param>
     /// <param name="player"></param>
-    /// <returns></returns>
+    /// <returns>A 15 long array of card indexes where emtpy values are -10</returns>
     private static int[] getPlayerCards(int[] cards, int player)
     {
         int[] pCards = new int[15];

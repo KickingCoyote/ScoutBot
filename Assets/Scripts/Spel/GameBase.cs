@@ -52,6 +52,8 @@ public class GameBase : MonoBehaviour
     public void PutCard()
     {
 
+
+
         GameUpdate();
     }
 
