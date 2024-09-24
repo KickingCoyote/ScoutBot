@@ -18,10 +18,10 @@ public static class SBF
     static public Player[] players;
 
     //the current turn
-    static public int turn = 1;
+    static public int turn = 0;
 
     //Index of what player the table cards were put down by 
-    static public int tablePileHolder = 0; 
+    static public int tablePileHolder = 5; 
     
 
     //Flip a card upside down
@@ -124,6 +124,20 @@ public static class SBF
     {
         string[] str = cardStr.Split(':');
         return int.Parse(str[0]) * 16 + int.Parse(str[1]);
+    }
+
+
+    //Converts a list<int> to byte array for efficiency 
+    public static byte[] encryptMove(List<int> move)
+    {
+        byte[] b = new byte[move.Count];
+
+        for (int i = 0; i < move.Count; i++)
+        {
+            b[i] = SBF.int8ToByte(move[i]);
+        }
+
+        return b;
     }
 
 
