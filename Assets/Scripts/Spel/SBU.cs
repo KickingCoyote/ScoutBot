@@ -154,7 +154,7 @@ public static class SBU
             }
             for (int j = 1; j < pCards.Length - 1; j++)
             {
-                if (getCurrentCardValue(getValueOfCard(pCards[i])) == getCurrentCardValue(getValueOfCard(pCards[i + j])) - 1)
+                if (getCurrentCardValue(getValueOfCard(pCards[i])) == getCurrentCardValue(getValueOfCard(pCards[i + j])) - j)
                 {
                     for (int k = 0; k < j + 1; k++)
                     {
@@ -167,7 +167,7 @@ public static class SBU
             }
             for (int j = 1; j < pCards.Length - 1; j++)
             {
-                if (getCurrentCardValue(getValueOfCard(pCards[i])) == getCurrentCardValue(getValueOfCard(pCards[i + j])) + 1)
+                if (getCurrentCardValue(getValueOfCard(pCards[i])) == getCurrentCardValue(getValueOfCard(pCards[i + j])) + j)
                 {
                     for (int k = 0; k < j + 1; k++)
                     {
