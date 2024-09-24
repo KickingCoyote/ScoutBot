@@ -18,10 +18,9 @@ public static class SBA
 
 public struct GameState
 {
-    Player[] players;
-    List<int> tablePile;
+    int[] cards;
 
     int turn;
-    int tablePileHolder;
+
 
 }
