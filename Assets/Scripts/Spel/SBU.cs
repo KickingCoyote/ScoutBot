@@ -245,9 +245,53 @@ public static class SBU
     /// <returns>int[44] with values so that when added to cards[] plays the move</returns>
     public static int[] GenerateDrawCardMove(int[] cards, bool top, bool flip, int player, int handIndex)
     {
+        //Gets the cards on the table
+        int[] tCards = getPlayerCards(cards, 0);
+        int tCard = -10;
+        int[] pCards = getPlayerCards(cards, player);
 
 
-        return new int[3];
+        //if there are no cards on the table or the hand is full return null 
+        if (tCards.Length == 0 || pCards.Length == 15) { return null; }
+
+        
+
+
+        if (!top) { tCard = tCards[0]; }
+        else
+        {
+            for (int i = 0; i < tCards.Length; i++)
+            {
+                if(i == tCards.Length - 1 || tCards[i + 1] == -10)
+                {
+                    tCard = tCards[i];
+                }
+            }
+        }
+
+        //if no card is picked return null
+        if(tCard == -10) 
+        {
+            return null;
+            Debug.Log("No Card Found");
+        }
+
+        for (int i = pCards.Length -1; i > handIndex; i--)
+        {
+            pCards[i] = pCards[i - 1];
+        }
+        pCards[handIndex] = tCard;
+
+
+        int[] move = new int[44];
+
+        for (int i = handIndex; i < pCards.Length; i++)
+        {
+            //NOT DONE
+        }
+
+
+        return move;
     }
 
 
