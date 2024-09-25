@@ -108,7 +108,10 @@ public static class SBU
     }
 
 
-    public static int[] Move(int[] cards, int[] move)
+
+    //Stupid function that is used to make up for my mistakes in the GenerateMove function
+    //One day it will die when I remake GenerateMove
+    private static int[] Move(int[] cards, int[] move)
     {
         for (int i = 0; i < move.Length; i++)
         {
@@ -196,12 +199,15 @@ public static class SBU
         return moves;
     }
 
+
+
+    //this method is done in a SUPER stupid and inefficient way cause im dumb
     /// <summary>
     /// Generates a move array from a set of cards (move) and a GameState used for putting down cards
     /// </summary>
     /// <param name="cards">the global cards (GameState)</param>
-    /// <param name="move">the set of cards that the move consists of, must be in order</param>
-    /// <returns>int[44] with values so that when added to cards[] plays the move</returns>
+    /// <param name="move">the set of card indexes that the move consists of, must be in order</param>
+    /// <returns>int[44] with values of what a position would be after a move</returns>
     public static int[] GenerateMove(int[] cards, int[] move, int player)
     {
 
@@ -231,7 +237,8 @@ public static class SBU
 
         }
 
-        return moveArray;
+        
+        return Move(cards, moveArray);
     }
 
     /// <summary>
@@ -254,7 +261,7 @@ public static class SBU
         //if there are no cards on the table or the hand is full return null 
         if (tCards.Length == 0 || pCards.Length == 15) { return null; }
 
-        
+
 
 
         if (!top) { tCard = tCards[0]; }
@@ -262,7 +269,7 @@ public static class SBU
         {
             for (int i = 0; i < tCards.Length; i++)
             {
-                if(i == tCards.Length - 1 || tCards[i + 1] == -10)
+                if (i == tCards.Length - 1 || tCards[i + 1] == -10)
                 {
                     tCard = tCards[i];
                 }
@@ -270,25 +277,27 @@ public static class SBU
         }
 
         //if no card is picked return null
-        if(tCard == -10) 
+        if (tCard == -10)
         {
             return null;
             Debug.Log("No Card Found");
         }
 
-        for (int i = pCards.Length -1; i > handIndex; i--)
-        {
-            pCards[i] = pCards[i - 1];
-        }
-        pCards[handIndex] = tCard;
-
-
         int[] move = new int[44];
 
-        for (int i = handIndex; i < pCards.Length; i++)
+
+        for (int i = pCards.Length - 1; i > handIndex; i--)
         {
-            //NOT DONE
+
+            if (pCards[i] != -10)
+            {
+                //Shift all cards after the insertion point by 1 spot (aka 16)
+                move[pCards[i]] = cards[pCards[i]] + 16;
+            }
+
         }
+        move[tCard] = 16 * handIndex + player;
+        if (flip) { move[tCard] += 8; }
 
 
         return move;
