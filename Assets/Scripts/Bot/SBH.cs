@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Scout Bot Heuristics.
 /// The code for calculating how beneficial a position is for the bot
-/// following the paranoid algorithm
+/// using the assumptions from the paranoid algorithm
 /// </summary>
 public static class SBH
 {

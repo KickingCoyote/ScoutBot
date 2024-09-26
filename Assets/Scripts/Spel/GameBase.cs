@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+
+
+/// <summary>
+/// GameBase, where the actuall game runs, executing the SBU functions and interacting with the unity editor
+/// </summary>
 public class GameBase : MonoBehaviour
 {
 
@@ -11,9 +16,9 @@ public class GameBase : MonoBehaviour
 
 
     //Used for UI
-    [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[4];
+    [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
     [SerializeField] TextMeshProUGUI infoText;
-
+    [SerializeField] int[] cards;
 
     void Start()
     {
@@ -22,6 +27,8 @@ public class GameBase : MonoBehaviour
         SBU.CreateCardValues();
 
         DistributeCards();
+
+        GameUpdate();
     }
 
     private void DistributeCards()
@@ -42,6 +49,9 @@ public class GameBase : MonoBehaviour
         if (SBU.turn == 4) { SBU.turn = 1; }
         else { SBU.turn++; }
 
+
+        cards = SBU.cards;
+
         UpdateGUI();
     }
 
@@ -53,11 +63,11 @@ public class GameBase : MonoBehaviour
     {
         string[] s = inputString.Split(' ');
 
-        
+
 
         int[] m = SBU.GenerateDrawCardMove(SBU.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.turn, int.Parse(s[2]));
 
-        if(m != null)
+        if (m != null)
         {
             SBU.cards = m;
         }
@@ -66,6 +76,7 @@ public class GameBase : MonoBehaviour
             Debug.Log("Invalid Move, Cannot take that card");
         }
         GameUpdate();
+
     }
 
     public void PutCard()
@@ -79,7 +90,7 @@ public class GameBase : MonoBehaviour
 
         for (int i = 0; i < s.Length; i++)
         {
-            move[i] = SBU.CardFromString(s[i]);
+            move[i] = SBU.CardFromString(SBU.cards, s[i]);
         }
 
 
@@ -97,6 +108,7 @@ public class GameBase : MonoBehaviour
         }
 
         GameUpdate();
+
     }
 
     //ran every input field is deselected
@@ -108,14 +120,25 @@ public class GameBase : MonoBehaviour
 
     private void UpdateGUI()
     {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
         {
-            string s = "";
-            for (int j = 0; j < 15; j++)
+            string s;
+            if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.cards, SBU.turn) + ") : "; }
+            else { s = "Table Pile: "; }
+
+            int[] playerCards = SBU.getPlayerCards(SBU.cards, i);
+            for (int j = 0; j < playerCards.Length; j++)
             {
+
+                if (playerCards[j] == -10) { continue; }
+
+                
+                s += SBU.CardToString(SBU.cards, playerCards[j]);
+                s += " ";
 
             }
 
+            pText[i].text = s;
         }
 
     }
