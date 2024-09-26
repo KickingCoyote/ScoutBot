@@ -129,7 +129,7 @@ public static class SBU
     /// <param name="cards"></param>
     /// <returns>a 2 dimensional array of all possible moves a player can play</returns>
     //Move Generation for putting down cards
-    public static int[,] GetPossibleMoves(int player, int[] cards)
+    public static int[][] GetPossibleMoves(int player, int[] cards)
     {
 
         //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
@@ -185,13 +185,15 @@ public static class SBU
 
 
         //reformat the moves
-        int[,] moves = new int[44, temp.Count];
+        int[][] moves = new int[temp.Count][];
 
         for (int i = 0; i < temp.Count; i++)
         {
             int[] move = GenerateMove(cards, temp.ElementAt(i), player);
 
-            for (int j = 0; j < 44; j++) { moves[j, i] = move[j]; }
+
+            moves[i] = move;
+            //for (int j = 0; j < 44; j++) { moves[j, i] = move[j]; }
 
         }
 
@@ -199,6 +201,35 @@ public static class SBU
         return moves;
     }
 
+    //compare two integer arrays by value 
+    public static bool CompareArray(int[] a, int[] b)
+    {
+        if(a.Length != b.Length) { return false; }
+
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (a[i] != b[i]) { return false; }
+        }
+
+
+        return true;
+    }
+
+
+    //checks if a 2 dimensional array contains a 1 dimensional array
+    public static bool ContainsArray(int[][] a, int[] b)
+    {
+
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (CompareArray(a[i], b))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 
     //this method is done in a SUPER stupid and inefficient way cause im dumb
@@ -237,7 +268,7 @@ public static class SBU
 
         }
 
-        
+        //Stupid middle step cause I'm stupid
         return Move(cards, moveArray);
     }
 
@@ -330,7 +361,7 @@ public static class SBU
     }
 
 
-    private static void CreateCardValues()
+    public static void CreateCardValues()
     {
         int n = 0;
         for (int i = 1; i < 11; i++) //I is upper number
