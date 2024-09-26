@@ -626,7 +626,7 @@ GameObject:
   - component: {fileID: 537397710}
   - component: {fileID: 537397709}
   m_Layer: 5
-  m_Name: P5Text
+  m_Name: P0Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -812,6 +812,7 @@ MonoBehaviour:
   - {fileID: 630941454}
   - {fileID: 684138110}
   infoText: {fileID: 2064769862}
+  cards: 
 --- !u!1 &630941452
 GameObject:
   m_ObjectHideFlags: 0
