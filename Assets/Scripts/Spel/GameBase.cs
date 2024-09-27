@@ -29,7 +29,12 @@ public class GameBase : MonoBehaviour
         DistributeCards();
 
         GameUpdate();
+
     }
+
+
+    
+
 
     private void DistributeCards()
     {
@@ -53,6 +58,7 @@ public class GameBase : MonoBehaviour
         cards = SBU.cards;
 
         UpdateGUI();
+
     }
 
 
@@ -69,11 +75,12 @@ public class GameBase : MonoBehaviour
 
         if (m != null)
         {
-            SBU.cards = m;
+            SBU.cards = SBU.CopyArray(m);
         }
         else
         {
             Debug.Log("Invalid Move, Cannot take that card");
+            return;
         }
         GameUpdate();
 
@@ -100,13 +107,15 @@ public class GameBase : MonoBehaviour
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
         if (SBU.ContainsArray(SBU.GetPossibleMoves(SBU.turn, SBU.cards), m))
         {
-            SBU.cards = m;
+            SBU.cards = SBU.CopyArray(m);
         }
         else
         {
             Debug.Log("Invalid Move, Cannot put down those cards");
+            return;
         }
 
+        SBU.currentPileHolder = SBU.turn;
         GameUpdate();
 
     }
@@ -123,16 +132,16 @@ public class GameBase : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             string s;
-            if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.cards, SBU.turn) + ") : "; }
+            if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.cards, i) + ") : "; }
             else { s = "Table Pile: "; }
 
             int[] playerCards = SBU.getPlayerCards(SBU.cards, i);
             for (int j = 0; j < playerCards.Length; j++)
             {
 
-                if (playerCards[j] == -10) { continue; }
+                if (playerCards[j] == -10) { break; }
 
-                
+
                 s += SBU.CardToString(SBU.cards, playerCards[j]);
                 s += " ";
 
@@ -140,6 +149,9 @@ public class GameBase : MonoBehaviour
 
             pText[i].text = s;
         }
+
+
+        infoText.text = "Turn: " + SBU.turn;
 
     }
 
