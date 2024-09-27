@@ -18,9 +18,9 @@ public static class SBA
 
 public struct GameState
 {
-    int[] cards;
+    public int[] cards;
 
-    int turn;
+    public int turn;
 
 
 }

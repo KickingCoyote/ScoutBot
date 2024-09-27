@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+
+
+/// <summary>
+/// GameBase, where the actuall game runs, executing the SBU functions and interacting with the unity editor
+/// </summary>
 public class GameBase : MonoBehaviour
 {
 
@@ -11,13 +16,19 @@ public class GameBase : MonoBehaviour
 
 
     //Used for UI
-    [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[4];
+    [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
     [SerializeField] TextMeshProUGUI infoText;
-
+    [SerializeField] int[] cards;
 
     void Start()
     {
+
+        //Maps all card indexes (0 - 44) to their actual values
+        SBU.CreateCardValues();
+
         DistributeCards();
+
+        GameUpdate();
     }
 
     private void DistributeCards()
@@ -33,7 +44,14 @@ public class GameBase : MonoBehaviour
 
     private void GameUpdate()
     {
-        SBU.turn++;
+
+        //Turn is a number between 1 and 4 dictating whose turn it is
+        if (SBU.turn == 4) { SBU.turn = 1; }
+        else { SBU.turn++; }
+
+
+        cards = SBU.cards;
+
         UpdateGUI();
     }
 
@@ -43,18 +61,54 @@ public class GameBase : MonoBehaviour
     //Activated from buttons ingame
     public void TakeCard()
     {
+        string[] s = inputString.Split(' ');
 
 
 
+        int[] m = SBU.GenerateDrawCardMove(SBU.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.turn, int.Parse(s[2]));
+
+        if (m != null)
+        {
+            SBU.cards = m;
+        }
+        else
+        {
+            Debug.Log("Invalid Move, Cannot take that card");
+        }
         GameUpdate();
+
     }
 
     public void PutCard()
     {
 
+        string[] s = inputString.Split(' ');
 
+
+        //the inputed cards (indexes)
+        int[] move = new int[s.Length];
+
+        for (int i = 0; i < s.Length; i++)
+        {
+            move[i] = SBU.CardFromString(SBU.cards, s[i]);
+        }
+
+
+        int[] m = SBU.GenerateMove(SBU.cards, move, SBU.turn);
+
+
+        //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
+        if (SBU.ContainsArray(SBU.GetPossibleMoves(SBU.turn, SBU.cards), m))
+        {
+            SBU.cards = m;
+        }
+        else
+        {
+            Debug.Log("Invalid Move, Cannot put down those cards");
+        }
 
         GameUpdate();
+
     }
 
     //ran every input field is deselected
@@ -66,6 +120,26 @@ public class GameBase : MonoBehaviour
 
     private void UpdateGUI()
     {
+        for (int i = 0; i < 5; i++)
+        {
+            string s;
+            if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.cards, SBU.turn) + ") : "; }
+            else { s = "Table Pile: "; }
+
+            int[] playerCards = SBU.getPlayerCards(SBU.cards, i);
+            for (int j = 0; j < playerCards.Length; j++)
+            {
+
+                if (playerCards[j] == -10) { continue; }
+
+                
+                s += SBU.CardToString(SBU.cards, playerCards[j]);
+                s += " ";
+
+            }
+
+            pText[i].text = s;
+        }
 
     }
 
