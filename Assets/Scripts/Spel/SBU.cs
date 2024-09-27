@@ -332,14 +332,14 @@ public static class SBU
 
 
     /// <summary>
-    /// Generates a move array for taking a card from the middle pile
+    /// Generates a move for taking a card from the middle pile
     /// </summary>
     /// <param name="cards"></param>
-    /// <param name="top"></param>
-    /// <param name="flip"></param>
-    /// <param name="player"></param>
-    /// <param name="handIndex"></param>
-    /// <returns>int[44] with values so that when added to cards[] plays the move</returns>
+    /// <param name="top">if its the bottom or top card of the middle pile that is taken</param>
+    /// <param name="flip">whether to change the rotation of the picked up card</param>
+    /// <param name="player">who the card is picked up by</param>
+    /// <param name="handIndex">where in the hand the card is placed</param>
+    /// <returns>int[44] with values that represent the gameState post move</returns>
     public static int[] GenerateDrawCardMove(int[] cards, bool top, bool flip, int player, int handIndex)
     {
         //Gets the cards on the table
