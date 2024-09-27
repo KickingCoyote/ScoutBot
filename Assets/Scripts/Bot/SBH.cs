@@ -14,6 +14,8 @@ public static class SBH
     //Takes in the state of the game and calculates its value
     public static float heuristic(GameState g)
     {
+        
+
         return 0;
     }
 
