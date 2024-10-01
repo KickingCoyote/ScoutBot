@@ -26,7 +26,8 @@ public static class SBU
     //A variable between 1 and 4 representing which players turn it is
     public static int turn = 0;
 
-
+    //Keeps track of who the cards in the middle belonged to, for giving points
+    public static int currentPileHolder = 0;
 
     //Array containing the value of each card index, the value is value 1 * 16 + value 2, where value 1 always is the smaller of the two
     public static int[] cardValues = new int[44];
@@ -79,7 +80,7 @@ public static class SBU
     }
 
 
-    //Returns the upwards facing value on a card
+    //Returns the upwards facing value on a card given the card value
     public static int getCurrentCardValue(int cardValue)
     {
         byte[] b = new byte[1] { BitConverter.GetBytes(cardValue)[0] };
@@ -95,11 +96,22 @@ public static class SBU
 
     //The following 3 functions takes in the int that is the card data of a card and extracts specific information  
     //The following functions returns incorrect values if anything is negative hence inputing a move array will not return the correct information in most cases
+    /// <summary>
+    /// Gets where in the player hand the card is located, where 0 is the first (left most) card
+    /// </summary>
+    /// <param name="card">card</param>
+    /// <returns></returns>
     public static int getCardHandIndex(int card)
     {
         //Uses same logic as getCurrentCardValue
         return getCurrentCardValue(card);
     }
+
+    /// <summary>
+    /// Gets the owner of the card where 0 is the table pile and 1-4 is player 1-4
+    /// </summary>
+    /// <param name="card">card</param>
+    /// <returns></returns>
     public static int getCardOwner(int card)
     {
 
@@ -113,6 +125,13 @@ public static class SBU
 
         return b[0];
     }
+
+
+    /// <summary>
+    /// Gets if the card is flipped or not, flipped cards (1) has the largest value first
+    /// </summary>
+    /// <param name="card">card</param>
+    /// <returns>0 or 1 for unflipped / flipped cards</returns>
     public static int getCardFlip(int card)
     {
         byte[] b = new byte[1] { BitConverter.GetBytes(card)[0] };
@@ -123,19 +142,6 @@ public static class SBU
 
     }
 
-
-
-    //Stupid function that is used to make up for my mistakes in the GenerateMove function
-    //One day it will die when I remake GenerateMove
-    private static int[] Move(int[] cards, int[] move)
-    {
-        for (int i = 0; i < move.Length; i++)
-        {
-            cards[i] += move[i];
-        }
-
-        return cards;
-    }
 
 
     /// <summary>
@@ -236,7 +242,7 @@ public static class SBU
     }
 
 
-    //checks if a 2 dimensional array contains a 1 dimensional array
+    //checks if a array of arrays contains a array
     public static bool ContainsArray(int[][] a, int[] b)
     {
 
@@ -261,36 +267,47 @@ public static class SBU
     public static int[] GenerateMove(int[] cards, int[] move, int player)
     {
 
-
+        //List of all the players cards by index
         int[] pCards = getPlayerCards(cards, player);
+
+        //The cards on the table
+        int[] tCards = getPlayerCards(cards, 0);
 
         int[] moveArray = CopyArray(cards);
 
         int k = 0;
         bool foundMove = false;
-        for (int j = 0; j < pCards.Length; j++)
+
+
+        for (int i = 0; i < tCards.Length; i++)
+        {
+            if (tCards[i] == -10) { break; }
+
+            //Takes all cards currently in the pile and gives them as points to the player
+            //(handIndex = 15 represents it being a point)
+            moveArray[tCards[i]] = 16 * 15 + player;
+        }
+        for (int i = 0; i < pCards.Length; i++)
         {
 
 
-            if (pCards[j] == -10) { break; }
+            if (pCards[i] == -10) { break; }
 
 
-            if (k < move.Length && pCards[j] == move[k])
+            if (k < move.Length && pCards[i] == move[k])
             {
                 //Move card to center pile and set its new index in center pile
-                moveArray[move[k]] = 16 * k + getCardFlip(cards[move[k]]);
+                moveArray[move[k]] = 16 * k + 8 * getCardFlip(cards[move[k]]);
 
                 foundMove = true;
                 k++;
             }
-            else if (foundMove && pCards[j] != -10)
+            else if (foundMove && pCards[i] != -10)
             {
                 //Reduce index by move.length;
-                moveArray[pCards[j]] = cards[pCards[j]] - 16 * move.Length;
+                moveArray[pCards[i]] = cards[pCards[i]] - 16 * move.Length;
 
             }
-
-
         }
 
         return moveArray;
@@ -299,8 +316,8 @@ public static class SBU
     /// <summary>
     /// Copy a array by value
     /// </summary>
-    /// <param name="a"></param>
-    /// <returns></returns>
+    /// <param name="a">Array to be copied</param>
+    /// <returns>Array copied by value</returns>
     public static int[] CopyArray(int[] a)
     {
         int[] b = new int[a.Length];
@@ -315,14 +332,14 @@ public static class SBU
 
 
     /// <summary>
-    /// Generates a move array for taking a card from the middle pile
+    /// Generates a move for taking a card from the middle pile
     /// </summary>
     /// <param name="cards"></param>
-    /// <param name="top"></param>
-    /// <param name="flip"></param>
-    /// <param name="player"></param>
-    /// <param name="handIndex"></param>
-    /// <returns>int[44] with values so that when added to cards[] plays the move</returns>
+    /// <param name="top">if its the bottom or top card of the middle pile that is taken</param>
+    /// <param name="flip">whether to change the rotation of the picked up card</param>
+    /// <param name="player">who the card is picked up by</param>
+    /// <param name="handIndex">where in the hand the card is placed</param>
+    /// <returns>int[44] with values that represent the gameState post move</returns>
     public static int[] GenerateDrawCardMove(int[] cards, bool top, bool flip, int player, int handIndex)
     {
         //Gets the cards on the table
@@ -332,7 +349,7 @@ public static class SBU
 
 
         //if there are no cards on the table or the hand is full return null 
-        if (tCards.Length == 0 || pCards.Length == 15) { return null; }
+        if (tCards.Length == 0 || pCards[pCards.Length - 1] != -10) { return null; }
 
 
 
@@ -356,21 +373,30 @@ public static class SBU
             return null;
         }
 
-        int[] move = new int[44];
+        int[] move = CopyArray(cards);
 
 
-        for (int i = pCards.Length - 1; i > handIndex; i--)
+        for (int i = pCards.Length - 1; i >= handIndex; i--)
         {
 
             if (pCards[i] != -10)
             {
                 //Shift all cards after the insertion point by 1 spot (aka 16)
-                move[pCards[i]] = cards[pCards[i]] + 16;
+                move[pCards[i]] += 16;
             }
 
         }
-        move[tCard] = 16 * handIndex + player;
-        if (flip) { move[tCard] += 8; }
+        move[tCard] = 16 * handIndex + 8 * getCardFlip(cards[tCard]) + player;
+
+        //Flip the card incase flip == true
+        if (flip && getCardFlip(cards[tCard]) == 0) 
+        {
+            move[tCard] += 8; 
+        }
+        else if (flip)
+        {
+            move[tCard] -= 8;
+        }
 
 
         return move;
@@ -403,7 +429,9 @@ public static class SBU
         return pCards;
     }
 
-
+    /// <summary>
+    /// Creates all the card values that determine what card index relates to what card. This is ran once on start
+    /// </summary>
     public static void CreateCardValues()
     {
         int n = 0;
@@ -424,7 +452,12 @@ public static class SBU
 
 
     
-
+    /// <summary>
+    /// Gets the card index from a value
+    /// </summary>
+    /// <param name="cards"></param>
+    /// <param name="value"></param>
+    /// <returns>Card Index</returns>
     public static int getCardFromValue(int[] cards, int value)
     {
         for (int i = 0; i < 44; i++)
@@ -472,20 +505,26 @@ public static class SBU
                 score++;
             }
         }
-
         return score;
     }
 
     /// <summary>
     /// Gets the card in x:y string format
     /// </summary>
-    /// <param name="card">card index</param>
-    /// <returns>string in format [upper value]:[lower value] </returns>
+    /// <param name="cardIndex">card index</param>
+    /// <returns>string in format [value 1]:[value 2] </returns>
     public static string CardToString(int[] cards, int cardIndex)
     {
         int value = getValueOfCard(cards, cardIndex);
         return getCurrentCardValue(value) + ":" + (value - (16 * getCurrentCardValue(value)));
     }
+
+    /// <summary>
+    /// Gets a card index from a string of the format [value 1]:[value 2]
+    /// </summary>
+    /// <param name="cards"></param>
+    /// <param name="cardStr"></param>
+    /// <returns>Card Index</returns>
     public static int CardFromString(int[] cards, string cardStr)
     {
         string[] str = cardStr.Split(':');
@@ -494,36 +533,17 @@ public static class SBU
 
 
     //gets the points of a move
-
-    /*
-
-    public static int moveValue(int[] move)
+    /// <summary>
+    /// Gets the points of a combination of cards (by indexes) by refrencing a premade array
+    /// </summary>
+    /// <param name="move">the set of card indexes to be evaluated</param>
+    /// <returns>a int between 0 132 that is the value of that set of cards</returns>
+    public static int MoveValue(int[] move)
     {
 
-        int length = 0;
-        int startingValue = -1;
-        int isMatch = 1;
-        int previousCard = -2;
-
-        for (int i = 0; i < move.Length; i++)
-        {
-            //if the card owner isnt 0 means that the card owner is being changed. aka that card is being moved
-            if (getCardOwner(move[i]) != 0)
-            {
-                if (startingValue == -1) { startingValue = getCurrentCardValue(getValueOfCard(i)); }
-                length++;
-                if(i != move.Length - 1 && getCurrentCardValue(getValueOfCard(i)) == getCurrentCardValue(getValueOfCard(previousCard)) + 1)
-                {
-                    isMatch = 0;
-                }
-
-                previousCard = i;
-            }
-        }
-
-        return (length - 1) * 100 + isMatch * 10 + startingValue - 1;
+        return 0;
     }
-    */
+    
 
 
 }
