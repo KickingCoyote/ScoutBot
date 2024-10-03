@@ -18,9 +18,9 @@ public static class SBU
 
     //All cards are stored in 1 44 length int[], the index represents which card it is and the value has all the needed data about that card 
     //each value is stored such as that when viewed in byte form it looks like XXXX X XXX.
-    //the left most 3 digits represents who has the card (0 for middle pile, 1..4 for player 1..4)
+    //the right most 3 digits represents who has the card (0 for middle pile, 1..4 for player 1..4)
     //the middle digit represents if the card is flipped or not, where the LARGEST VALUE is always flipped DOWN if it's 0
-    //the right most 4 digit represents the index of where in the players hand (or middle pile) the card is located, if the digits are 1111 that represents the card being a point instead of a card
+    //the left most 4 digit represents the index of where in the players hand (or middle pile) the card is located, if the digits are 1111 that represents the card being a point instead of a card
     public static int[] cards = new int[44];
 
     //A variable between 1 and 4 representing which players turn it is
