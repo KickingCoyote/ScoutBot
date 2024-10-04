@@ -8,9 +8,17 @@ using UnityEngine;
 public static class SBA
 {
 
-    public static void DepthSearch(int depth)
+    public static int DepthSearch(GameState g, int depth)
     {
+        if(depth == 0)
+        {
+            return SBH.Evaluate(g);
+        }
 
+
+
+
+        return 0;
     }
 
 
@@ -22,5 +30,13 @@ public struct GameState
 
     public int turn;
 
+    public int currentPileHolder;
+
+    public GameState(int[] cards, int turn, int currentPileHolder)
+    {
+        this.cards = cards;
+        this.turn = turn;
+        this.currentPileHolder = currentPileHolder;
+    }
 
 }

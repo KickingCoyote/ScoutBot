@@ -615,6 +615,22 @@ public static class SBU
 
         return -10;
     }
+
+
+
+    public static bool CheckGameOver(GameState g)
+    {
+        if (g.currentPileHolder == g.turn)
+        {
+            return true;
+        }
+        if(getPlayerCards(g.cards, g.turn)[0] == -10)
+        {
+            return true;
+        }
+
+        return false;
+    }
     
 
 
