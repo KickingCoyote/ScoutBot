@@ -617,7 +617,11 @@ public static class SBU
     }
 
 
-
+    /// <summary>
+    /// Function that checks if its game over or not
+    /// </summary>
+    /// <param name="g">game state</param>
+    /// <returns>true if game over, otherwise false</returns>
     public static bool CheckGameOver(GameState g)
     {
         if (g.currentPileHolder == g.turn)
@@ -630,6 +634,26 @@ public static class SBU
         }
 
         return false;
+    }
+
+
+    /// <summary>
+    /// Gets which player is in the lead purely on score
+    /// </summary>
+    /// <param name="cards"></param>
+    /// <returns>int for winning player</returns>
+    public static int getWinningPlayer(int[] cards)
+    {
+        int winningPlayer = 0;
+        for (int i = 1; i < 5; i++)
+        {
+            if(SBU.getPlayerScore(cards, i) > SBU.getPlayerScore(cards, winningPlayer))
+            {
+                winningPlayer = i;
+            }
+        }
+
+        return winningPlayer;
     }
     
 

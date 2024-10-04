@@ -59,6 +59,11 @@ public class GameBase : MonoBehaviour
 
         UpdateGUI();
 
+        if (SBU.CheckGameOver(new GameState(SBU.cards, SBU.turn, SBU.currentPileHolder)))
+        {
+            GameEnd();
+        }
+
     }
 
 
@@ -117,10 +122,6 @@ public class GameBase : MonoBehaviour
 
         SBU.currentPileHolder = SBU.turn;
         GameUpdate();
-
-        //Must run after GameUpdate, otherwise the game will instantly end after a put card move
-        SBU.currentPileHolder = SBU.turn;
-
     }
 
     //ran every input field is deselected
@@ -156,6 +157,11 @@ public class GameBase : MonoBehaviour
 
         infoText.text = "Turn: " + SBU.turn;
 
+    }
+
+    private void GameEnd()
+    {
+        Debug.Log("GAME OVER, PLAYER " + SBU.getWinningPlayer(SBU.cards) + " WON!");
     }
 
 }
