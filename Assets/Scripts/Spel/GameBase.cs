@@ -118,6 +118,9 @@ public class GameBase : MonoBehaviour
         SBU.currentPileHolder = SBU.turn;
         GameUpdate();
 
+        //Must run after GameUpdate, otherwise the game will instantly end after a put card move
+        SBU.currentPileHolder = SBU.turn;
+
     }
 
     //ran every input field is deselected
