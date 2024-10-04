@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.SocialPlatforms.Impl;
 
@@ -32,6 +33,20 @@ public static class SBU
     //Array containing the value of each card index, the value is value 1 * 16 + value 2, where value 1 always is the smaller of the two
     public static int[] cardValues = new int[44];
 
+    //All possible moves written in the format X X X
+    //where the first number is the amount of cards in the move - 1
+    //second digit is 1 if match, 0 if flip
+    //third digit is the smallest value in the move - 1
+    public static int[] moveValues = new int[] { 
+        10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 100, 101, 102, 103, 104, 105, 106, 107, 108, 110,
+        111, 112, 113, 114, 115, 116, 117, 118, 119, 200, 201, 202, 203, 204, 205, 206, 207, 210,
+        211, 212, 213, 214, 215, 216, 217, 218, 219, 300, 301, 302, 303, 304, 305, 306, 310, 311, 
+        312, 313, 314, 315, 316, 317, 318, 319, 400, 401, 402, 403, 404, 405, 410, 411, 412, 413,
+        414, 415, 416, 417, 418, 419, 500, 501, 502, 503, 504, 510, 511, 512, 513, 514, 515, 516,
+        517, 518, 519, 600, 601, 602, 603, 610, 611, 612, 613, 614, 615, 616, 617, 618, 619, 700, 
+        701, 702, 710, 711, 712, 713, 714, 715, 716, 717, 718, 719, 800, 801, 810, 811, 812, 813, 
+        814, 815, 816, 817, 818, 819, 900 
+    };
 
     /// <summary>
     /// Shuffle a array of cards
@@ -174,12 +189,15 @@ public static class SBU
                 if (pCards[i + j] == -10) { break; }  
                 if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])))
                 {
-                    for (int k = 0; k < j + 1; k++)
-                    {
-                        int[] move = new int[j + 1];
+                    int[] move = new int[j + 1];
+                    move = SetArray(move, -10);
+                    move[0] = pCards[i];
+
+                    for (int k = 1; k < j + 1; k++)
+                    {                        
                         move[k] = pCards[i + k];
-                        temp.Add(move);
-                    }                    
+                        temp.Add(CopyArray(move));
+                    }
                 }
                 else { break; }
             }
@@ -188,11 +206,14 @@ public static class SBU
                 if (pCards[i + j] == -10) { break; }
                 if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])) - j)
                 {
-                    for (int k = 0; k < j + 1; k++)
+                    int[] move = new int[j + 1];
+                    move = SetArray(move, -10);
+                    move[0] = pCards[i];
+
+                    for (int k = 1; k < j + 1; k++)
                     {
-                        int[] move = new int[j + 1];
                         move[k] = pCards[i + k];
-                        temp.Add(move);
+                        temp.Add(CopyArray(move));
                     }
                 }
                 else { break; }
@@ -202,11 +223,14 @@ public static class SBU
                 if (pCards[i + j] == -10) { break; }
                 if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])) + j)
                 {
-                    for (int k = 0; k < j + 1; k++)
+                    int[] move = new int[j + 1];
+                    move = SetArray(move, -10);
+                    move[0] = pCards[i];
+
+                    for (int k = 1; k < j + 1; k++)
                     {
-                        int[] move = new int[j + 1];
                         move[k] = pCards[i + k];
-                        temp.Add(move);
+                        temp.Add(CopyArray(move));
                     }
                 }
                 else { break; }
@@ -219,13 +243,32 @@ public static class SBU
 
         for (int i = 0; i < temp.Count; i++)
         {
-            int[] move = GenerateMove(cards, temp.ElementAt(i), player);
-            moves[i] = move;
+            moves[i] = GenerateMove(cards, temp.ElementAt(i), player); ;
         }
 
 
         return moves;
     }
+
+    /// <summary>
+    /// Fills an array with a value
+    /// </summary>
+    /// <param name="array"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static int[] SetArray(int[] array, int value)
+    {
+        int[] a = new int[array.Length];
+
+        for (int i = 0; i < a.Length; i++)
+        {
+            a[i] = value;
+        }
+
+        return a;
+    }
+
+
 
     //compare two integer arrays by value 
     public static bool CompareArray(int[] a, int[] b)
@@ -262,7 +305,7 @@ public static class SBU
     /// Generates a move array from a set of cards (move) and a GameState used for putting down cards
     /// </summary>
     /// <param name="cards">the global cards (GameState)</param>
-    /// <param name="move">the set of card indexes that the move consists of, must be in order</param>
+    /// <param name="move">the set of card indexes that the move consists of, must be in order, is compatible with -10 values</param>
     /// <returns>int[44] with values of what a position would be after a move</returns>
     public static int[] GenerateMove(int[] cards, int[] move, int player)
     {
@@ -538,10 +581,39 @@ public static class SBU
     /// </summary>
     /// <param name="move">the set of card indexes to be evaluated</param>
     /// <returns>a int between 0 132 that is the value of that set of cards</returns>
-    public static int MoveValue(int[] move)
+    public static int MoveValue(int[] cards, int[] move)
     {
+        int moveLength = 0;
+        int moveMinCard = 1000;
+        int match;
+        if(move.Length == 1 || getCurrentCardValue(getValueOfCard(cards, move[0])) == getCurrentCardValue(getValueOfCard(cards, move[1]))){
+            match = 1;
+        }
+        else { match = 0; }
 
-        return 0;
+
+        for (int i = 0; i < move.Length; i++)
+        {
+            if (move[i] == -10) { continue; }
+            moveLength++;
+            if (moveMinCard > getCurrentCardValue(getValueOfCard(cards, move[i])))
+            {
+                moveMinCard = getCurrentCardValue(getValueOfCard(cards, move[i]));
+            } 
+
+        }
+
+        int moveValue = (moveLength - 1) * 100 + match * 10 + moveMinCard - 1;
+
+        for (int i = 0; i < moveValues.Length; i++)
+        {
+            if (moveValues[i] == moveValue)
+            {
+                return i + 1;
+            }
+        }
+
+        return -10;
     }
     
 
