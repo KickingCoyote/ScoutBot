@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,17 +13,21 @@ public static class SBH
 {
     
     //Takes in the state of the game and calculates its value
-    public static float heuristic(GameState g)
+    public static int Evaluate(GameState g)
     {
         int[] playercards = SBU.getPlayerCards(g.cards, 1);
-        int[] value = ;
-            = SBU.getValueOfCard();
-
+        int[] value = new int[playercards.Length];
         for (int i = 0; i < playercards.Length; i++)
         {
-            playercards[];
-            SBU.getCardHandIndex;
+            value[i] = SBU.getCurrentCardValue(playercards[i]);
+            Debug.Log(value[i].ToString());
         }
+
+        //for (int i = 0; i < playercards.Length; i++)
+        //{
+        //    playercards[];
+        //    SBU.getCardHandIndex;
+        //}
         return 0;
     }
 
