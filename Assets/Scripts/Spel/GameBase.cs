@@ -30,11 +30,6 @@ public class GameBase : MonoBehaviour
 
         GameUpdate();
 
-        Debug.Log((1 % 4 % 3 % 2 * 2) - 1);
-        Debug.Log((2 % 4 % 3 % 2 * 2) - 1);
-        Debug.Log((3 % 4 % 3 % 2 * 2) - 1);
-        Debug.Log((4 % 4 % 3 % 2 * 2) - 1);
-
     }
 
 
