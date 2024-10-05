@@ -30,10 +30,15 @@ public class GameBase : MonoBehaviour
 
         GameUpdate();
 
+        Debug.Log((1 % 4 % 3 % 2 * 2) - 1);
+        Debug.Log((2 % 4 % 3 % 2 * 2) - 1);
+        Debug.Log((3 % 4 % 3 % 2 * 2) - 1);
+        Debug.Log((4 % 4 % 3 % 2 * 2) - 1);
+
     }
 
 
-    
+
 
 
     private void DistributeCards()
@@ -80,7 +85,7 @@ public class GameBase : MonoBehaviour
 
         if (m != null)
         {
-            SBU.cards = SBU.CopyArray(m);
+            SBU.cards = SBU.CopyArray(SBU.AddArray(SBU.cards, m, false));
         }
         else
         {
@@ -112,7 +117,7 @@ public class GameBase : MonoBehaviour
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
         if (SBU.ContainsArray(SBU.GetPossibleMoves(SBU.turn, SBU.cards), m))
         {
-            SBU.cards = SBU.CopyArray(m);
+            SBU.cards = SBU.CopyArray(SBU.AddArray(SBU.cards, m, false));
         }
         else
         {
