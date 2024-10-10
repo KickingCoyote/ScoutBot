@@ -664,6 +664,15 @@ public static class SBU
     }
 
 
+    public static int[] getMoveIndexes(int[] move, int[] cards)
+    {
+        int[] moveIndexes = new int[15];
+        SetArray(moveIndexes, -10);
+
+        return moveIndexes;
+    }
+
+
     //gets the points of a move
     /// <summary>
     /// Gets the points of a combination of cards (by indexes) by refrencing a premade array

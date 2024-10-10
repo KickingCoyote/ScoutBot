@@ -31,7 +31,7 @@ public static class SBA
 
         //Starts of being infinitely terrible for the current player
         int p = inverter * -2147483647;
-
+        int[] bestMove;
 
         foreach (int[] move in moves)
         {
@@ -42,8 +42,18 @@ public static class SBA
 
             //Each time if the position is better then p set p to eval
             //For the the maximizer it will always choose the highest possible value between eval and p, while the minimizer picks the minimal value
-            if(inverter == 1) { p = Mathf.Max(p, eval); }
-            else { p = Mathf.Min(p, eval); }
+            if(inverter == 1) {
+                if (p < eval) { bestMove = move; }
+
+                p = Mathf.Max(p, eval); 
+            }
+            else { 
+                if (p > eval) { bestMove = move; }
+
+
+                p = Mathf.Min(p, eval); 
+  
+            }
 
             g.UndoMove(move);
         }
