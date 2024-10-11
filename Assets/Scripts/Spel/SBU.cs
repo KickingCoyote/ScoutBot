@@ -673,6 +673,30 @@ public static class SBU
     }
 
 
+    public static int[] MoveIndexesFromMove(int[] cards, int[] move)
+    {
+
+        int[] cardsAfterMove = AddArray(cards, move, false);
+
+        int[] moveIndexes = new int[15];
+        SetArray(moveIndexes, -10);
+
+        int k = 0;
+
+        for (int i = 0; i < 44; i++)
+        {
+            if (getCardOwner(cards[i]) == 0 && getCardOwner(cards[i]) != getCardOwner(cardsAfterMove[i]))
+            {
+                moveIndexes[k] = i;
+                k++;
+            }
+        }
+
+
+        return moveIndexes;
+    }
+
+
     //gets the points of a move
     /// <summary>
     /// Gets the points of a combination of cards (by indexes) by refrencing a premade array
