@@ -33,7 +33,7 @@ public class GameBase : MonoBehaviour
     }
 
 
-    
+
 
 
     private void DistributeCards()
@@ -59,6 +59,11 @@ public class GameBase : MonoBehaviour
 
         UpdateGUI();
 
+        if (SBU.CheckGameOver(new GameState(SBU.cards, SBU.turn, SBU.currentPileHolder)))
+        {
+            GameEnd();
+        }
+
     }
 
 
@@ -75,7 +80,7 @@ public class GameBase : MonoBehaviour
 
         if (m != null)
         {
-            SBU.cards = SBU.CopyArray(m);
+            SBU.cards = SBU.CopyArray(SBU.AddArray(SBU.cards, m, false));
         }
         else
         {
@@ -107,7 +112,7 @@ public class GameBase : MonoBehaviour
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
         if (SBU.ContainsArray(SBU.GetPossibleMoves(SBU.turn, SBU.cards), m))
         {
-            SBU.cards = SBU.CopyArray(m);
+            SBU.cards = SBU.CopyArray(SBU.AddArray(SBU.cards, m, false));
         }
         else
         {
@@ -117,10 +122,6 @@ public class GameBase : MonoBehaviour
 
         SBU.currentPileHolder = SBU.turn;
         GameUpdate();
-
-        //Must run after GameUpdate, otherwise the game will instantly end after a put card move
-        SBU.currentPileHolder = SBU.turn;
-
     }
 
     //ran every input field is deselected
@@ -156,6 +157,11 @@ public class GameBase : MonoBehaviour
 
         infoText.text = "Turn: " + SBU.turn;
 
+    }
+
+    private void GameEnd()
+    {
+        Debug.Log("GAME OVER, PLAYER " + SBU.getWinningPlayer(SBU.cards) + " WON!");
     }
 
 }

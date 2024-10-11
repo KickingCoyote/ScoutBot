@@ -166,7 +166,7 @@ public static class SBU
     /// <param name="cards"></param>
     /// <returns>a 2 dimensional array of all possible moves a player can play</returns>
     //Move Generation for putting down cards
-    public static int[][] GetPossibleMoves(int player, int[] cards)
+    public static List<int[]> GetPossibleMoves(int player, int[] cards)
     {
 
         //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
@@ -239,16 +239,41 @@ public static class SBU
 
 
         //reformat the moves
-        int[][] moves = new int[temp.Count][];
+        List<int[]> moves = new List<int[]>();
 
         for (int i = 0; i < temp.Count; i++)
         {
-            moves[i] = GenerateMove(cards, temp.ElementAt(i), player); ;
+            moves.Add(GenerateMove(cards, temp.ElementAt(i), player));
         }
 
 
         return moves;
     }
+
+
+
+    /// <summary>
+    /// Add two arrays together, if invertB then subtract b from a
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="invertB">if true, does a - b instead</param>
+    /// <returns></returns>
+    public static int[] AddArray(int[] a, int[] b, bool invertB)
+    {
+        int[] s = new int[a.Length];
+
+        int inverter = 1;
+        if (invertB) { inverter = -1;  }
+
+        for (int i = 0; i < a.Length; i++)
+        {
+            s[i] = a[i] + b[i] * inverter;
+        }
+
+        return s;
+    }
+
 
     /// <summary>
     /// Fills an array with a value
@@ -271,6 +296,12 @@ public static class SBU
 
 
     //compare two integer arrays by value 
+    /// <summary>
+    /// Checks if all values in 2 arrays are the same
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public static bool CompareArray(int[] a, int[] b)
     {
         if(a.Length != b.Length) { return false; }
@@ -284,14 +315,19 @@ public static class SBU
         return true;
     }
 
+    /// <summary>
+    /// checks if a list of arrays contains a array
+    /// </summary>
+    /// <param name="a">array of arrays</param>
+    /// <param name="b">array</param>
+    /// <returns></returns>
 
-    //checks if a array of arrays contains a array
-    public static bool ContainsArray(int[][] a, int[] b)
+    public static bool ContainsArray(List<int[]> a, int[] b)
     {
 
-        for (int i = 0; i < a.Length; i++)
+        for (int i = 0; i < a.Count; i++)
         {
-            if (CompareArray(a[i], b))
+            if (CompareArray(a.ElementAt(i), b))
             {
                 return true;
             }
@@ -353,7 +389,7 @@ public static class SBU
             }
         }
 
-        return moveArray;
+        return AddArray(moveArray, cards, true);
     }
 
     /// <summary>
@@ -371,6 +407,41 @@ public static class SBU
         }
         return b;
 
+    }
+
+
+
+    /// <summary>
+    /// Gets all possible draw card moves
+    /// </summary>
+    /// <param name="cards"></param>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    public static List<int[]> getPossibleDrawCardMoves(int[] cards, int player)
+    {
+        List<int[]> moves = new List<int[]>();
+
+        int[] pCards = getPlayerCards(cards, player);
+
+        for (int i = 0; i < pCards.Length; i++)
+        {
+            if (pCards[i - 1] == -10) { break; }
+
+            foreach (bool b1 in new bool[] { true, false })
+            {
+                foreach (bool b2 in new bool[] { true, false })
+                {
+                    int[] move = GenerateDrawCardMove(cards, b1, b2, player, i);
+                    if (move == null) { continue; }
+
+                    moves.Add(move);
+
+                }
+            }
+
+        }
+
+        return moves;
     }
 
 
@@ -405,6 +476,7 @@ public static class SBU
                 if (i == tCards.Length - 1 || tCards[i + 1] == -10)
                 {
                     tCard = tCards[i];
+                    break;
                 }
             }
         }
@@ -442,7 +514,24 @@ public static class SBU
         }
 
 
-        return move;
+        //if the bottom card is taken, shift all cards on the table 1 spot to not leave the bottom spot empty
+        if (!top)
+        {
+            for (int i = 1; i < tCards.Length; i++)
+            {
+                if (tCards[i] == -10)
+                {
+                    break;
+                }
+                move[tCards[i]] -= 16;
+            }
+
+        }
+
+        
+
+
+        return AddArray(move, cards, true);
     }
 
 
@@ -575,6 +664,39 @@ public static class SBU
     }
 
 
+    public static int[] getMoveIndexes(int[] move, int[] cards)
+    {
+        int[] moveIndexes = new int[15];
+        SetArray(moveIndexes, -10);
+
+        return moveIndexes;
+    }
+
+
+    public static int[] MoveIndexesFromMove(int[] cards, int[] move)
+    {
+
+        int[] cardsAfterMove = AddArray(cards, move, false);
+
+        int[] moveIndexes = new int[15];
+        SetArray(moveIndexes, -10);
+
+        int k = 0;
+
+        for (int i = 0; i < 44; i++)
+        {
+            if (getCardOwner(cards[i]) == 0 && getCardOwner(cards[i]) != getCardOwner(cardsAfterMove[i]))
+            {
+                moveIndexes[k] = i;
+                k++;
+            }
+        }
+
+
+        return moveIndexes;
+    }
+
+
     //gets the points of a move
     /// <summary>
     /// Gets the points of a combination of cards (by indexes) by refrencing a premade array
@@ -617,7 +739,11 @@ public static class SBU
     }
 
 
-
+    /// <summary>
+    /// Function that checks if its game over or not
+    /// </summary>
+    /// <param name="g">game state</param>
+    /// <returns>true if game over, otherwise false</returns>
     public static bool CheckGameOver(GameState g)
     {
         if (g.currentPileHolder == g.turn)
@@ -630,6 +756,26 @@ public static class SBU
         }
 
         return false;
+    }
+
+
+    /// <summary>
+    /// Gets which player is in the lead purely on score
+    /// </summary>
+    /// <param name="cards"></param>
+    /// <returns>int for winning player</returns>
+    public static int getWinningPlayer(int[] cards)
+    {
+        int winningPlayer = 0;
+        for (int i = 1; i < 5; i++)
+        {
+            if(SBU.getPlayerScore(cards, i) > SBU.getPlayerScore(cards, winningPlayer))
+            {
+                winningPlayer = i;
+            }
+        }
+
+        return winningPlayer;
     }
     
 
