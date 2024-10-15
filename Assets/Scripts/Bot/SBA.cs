@@ -8,6 +8,8 @@ using UnityEngine;
 public static class SBA
 {
 
+    public static int[] bestMove = new int[44];
+
     public static int DepthSearch(GameState g, int depth)
     {
 
@@ -31,7 +33,7 @@ public static class SBA
 
         //Starts of being infinitely terrible for the current player
         int p = inverter * -2147483647;
-        int[] bestMove;
+        int[] bestMove = new int[44];
 
         foreach (int[] move in moves)
         {
@@ -58,6 +60,7 @@ public static class SBA
             g.UndoMove(move);
         }
 
+        SBA.bestMove = bestMove;
         return p;
     }
 
@@ -90,7 +93,7 @@ public struct GameState
         //}
 
         cards = SBU.CopyArray(m);
-        turn++;
+        turn = turn == 4 ? 1 : (turn + 1);
     }
 
     public void UndoMove(int[] move)
@@ -98,8 +101,10 @@ public struct GameState
         int[] previousPos = SBU.AddArray(cards, move, true);
 
         cards = SBU.CopyArray(previousPos);
-        turn--;
+        turn = turn == 1 ? 4 : (turn - 1);
+
     }
+
 
 
 

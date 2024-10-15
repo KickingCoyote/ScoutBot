@@ -16,22 +16,26 @@ using UnityEngine.SocialPlatforms.Impl;
 /// </summary>
 public static class SBU
 {
+    public static GameState gameState = new GameState(new int[44], 0, 0);
 
+    //gameState.cards
     //All cards are stored in 1 44 length int[], the index represents which card it is and the value has all the needed data about that card 
     //each value is stored such as that when viewed in byte form it looks like XXXX X XXX.
     //the right most 3 digits represents who has the card (0 for middle pile, 1..4 for player 1..4)
     //the middle digit represents if the card is flipped or not, where the LARGEST VALUE is always flipped DOWN if it's 0
     //the left most 4 digit represents the index of where in the players hand (or middle pile) the card is located, if the digits are 1111 that represents the card being a point instead of a card
-    public static int[] cards = new int[44];
-
+    
+    //gameState.turn
     //A variable between 1 and 4 representing which players turn it is
-    public static int turn = 0;
 
+    //gameState.currentPileHolder
     //Keeps track of who the cards in the middle belonged to, for giving points
-    public static int currentPileHolder = 0;
 
     //Array containing the value of each card index, the value is value 1 * 16 + value 2, where value 1 always is the smaller of the two
     public static int[] cardValues = new int[44];
+
+
+
 
     //All possible moves written in the format X X X
     //where the first number is the amount of cards in the move - 1
@@ -679,13 +683,13 @@ public static class SBU
         int[] cardsAfterMove = AddArray(cards, move, false);
 
         int[] moveIndexes = new int[15];
-        SetArray(moveIndexes, -10);
+        moveIndexes = SetArray(moveIndexes, -10);
 
         int k = 0;
 
         for (int i = 0; i < 44; i++)
         {
-            if (getCardOwner(cards[i]) == 0 && getCardOwner(cards[i]) != getCardOwner(cardsAfterMove[i]))
+            if (getCardOwner(cardsAfterMove[i]) == 0 && getCardOwner(cards[i]) != getCardOwner(cardsAfterMove[i]))
             {
                 moveIndexes[k] = i;
                 k++;
@@ -708,7 +712,7 @@ public static class SBU
         int moveLength = 0;
         int moveMinCard = 1000;
         int match;
-        if(move.Length == 1 || getCurrentCardValue(getValueOfCard(cards, move[0])) == getCurrentCardValue(getValueOfCard(cards, move[1]))){
+        if(move.Length == 1 || move[1] == -10 || getCurrentCardValue(getValueOfCard(cards, move[0])) == getCurrentCardValue(getValueOfCard(cards, move[1]))){
             match = 1;
         }
         else { match = 0; }
