@@ -429,7 +429,7 @@ public static class SBU
 
         for (int i = 0; i < pCards.Length; i++)
         {
-            if (pCards[i - 1] == -10) { break; }
+            if (i != 0 && pCards[i - 1] == -10) { break; }
 
             foreach (bool b1 in new bool[] { true, false })
             {
@@ -488,7 +488,7 @@ public static class SBU
         //if no card is picked return null
         if (tCard == -10)
         {
-            Debug.Log("No Card Found");
+            Debug.Log("GenerateDrawCardMove: No Card Found");
             return null;
         }
 

@@ -66,8 +66,18 @@ public class GameBase : MonoBehaviour
 
         if(SBU.gameState.turn == 1)
         {
-            SBA.DepthSearch(SBU.gameState, 3);
-            SBU.gameState.Move(SBA.bestMove);
+            SBA search = new SBA();
+
+            search.DepthSearch(SBU.gameState, 2);
+
+            for (int i = 0; i < SBU.MoveIndexesFromMove(SBU.gameState.cards, search.bestMove).Length; i++)
+            {
+                Debug.Log(SBU.MoveIndexesFromMove(SBU.gameState.cards, search.bestMove)[i]);
+            }
+
+            SBU.gameState.Move(search.bestMove);
+            
+            
         }
 
     }

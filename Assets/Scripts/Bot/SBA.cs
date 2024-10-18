@@ -5,12 +5,12 @@ using UnityEngine;
 /// Scout Bot Algorithm.
 /// Plays out as many positions as possible and uses SBH to evaluate them.
 /// </summary>
-public static class SBA
+public class SBA
 {
 
-    public static int[] bestMove = new int[44];
+    public int[] bestMove = new int[44];
 
-    public static int DepthSearch(GameState g, int depth)
+    public int DepthSearch(GameState g, int depth)
     {
 
         //Paranoid MIN MAX Algorithm 
@@ -24,7 +24,8 @@ public static class SBA
 
 
         List<int[]> moves = SBU.GetPossibleMoves(g.turn, g.cards);
-        moves.AddRange(SBU.getPossibleDrawCardMoves(g.cards, g.turn));
+        //Removed for bug testing
+        //moves.AddRange(SBU.getPossibleDrawCardMoves(g.cards, g.turn));
 
 
         //player 2, 3, 4 will be minimizers and therefore try to reduce the score, hence 2, 3, 4 return -1 while player 1 will be the maximizer and therefore return 1
@@ -60,7 +61,8 @@ public static class SBA
             g.UndoMove(move);
         }
 
-        SBA.bestMove = bestMove;
+        this.bestMove = bestMove;
+        Debug.Log(SBU.MoveIndexesFromMove(g.cards, bestMove)[0]);
         return p;
     }
 

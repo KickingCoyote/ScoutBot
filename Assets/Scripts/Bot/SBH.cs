@@ -34,7 +34,6 @@ public static class SBH
         for (int j = 0; j < possibleMoves.Count; j++)
         {
             currentScore = currentScore + SBU.MoveValue(g.cards, SBU.MoveIndexesFromMove(g.cards, possibleMoves[j]));
-            Debug.Log(currentScore);
         }
         
         return currentScore;
