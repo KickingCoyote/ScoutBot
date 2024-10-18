@@ -30,8 +30,6 @@ public class GameBase : MonoBehaviour
 
         GameUpdate();
 
-        GameState g = new GameState(SBU.cards, SBU.turn, SBU.currentPileHolder);
-        SBH.Evaluate(g);
     }
 
 
