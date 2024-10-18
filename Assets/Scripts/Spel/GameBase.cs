@@ -40,9 +40,9 @@ public class GameBase : MonoBehaviour
     {
         for (int i = 0; i < 44; i++)
         {
-            SBU.cards[i] = i % 4 + 1 + 8 * Random.Range(0, 2) + 16 * (i / 4);
+            SBU.gameState.cards[i] = i % 4 + 1 + 8 * Random.Range(0, 2) + 16 * (i / 4);
         }
-        SBU.cards = SBU.ShuffleCards(SBU.cards);
+        SBU.gameState.cards = SBU.ShuffleCards(SBU.gameState.cards);
 
     }
 
@@ -51,17 +51,23 @@ public class GameBase : MonoBehaviour
     {
 
         //Turn is a number between 1 and 4 dictating whose turn it is
-        if (SBU.turn == 4) { SBU.turn = 1; }
-        else { SBU.turn++; }
+        if (SBU.gameState.turn == 4) { SBU.gameState.turn = 1; }
+        else { SBU.gameState.turn++; }
 
 
-        cards = SBU.cards;
+        cards = SBU.gameState.cards;
 
         UpdateGUI();
 
-        if (SBU.CheckGameOver(new GameState(SBU.cards, SBU.turn, SBU.currentPileHolder)))
+        if (SBU.CheckGameOver(new GameState(SBU.gameState.cards, SBU.gameState.turn, SBU.gameState.currentPileHolder)))
         {
             GameEnd();
+        }
+
+        if(SBU.gameState.turn == 1)
+        {
+            SBA.DepthSearch(SBU.gameState, 3);
+            SBU.gameState.Move(SBA.bestMove);
         }
 
     }
@@ -76,11 +82,11 @@ public class GameBase : MonoBehaviour
 
 
 
-        int[] m = SBU.GenerateDrawCardMove(SBU.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.turn, int.Parse(s[2]));
+        int[] m = SBU.GenerateDrawCardMove(SBU.gameState.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.gameState.turn, int.Parse(s[2]));
 
         if (m != null)
         {
-            SBU.cards = SBU.CopyArray(SBU.AddArray(SBU.cards, m, false));
+            SBU.gameState.cards = SBU.CopyArray(SBU.AddArray(SBU.gameState.cards, m, false));
         }
         else
         {
@@ -102,17 +108,17 @@ public class GameBase : MonoBehaviour
 
         for (int i = 0; i < s.Length; i++)
         {
-            move[i] = SBU.CardFromString(SBU.cards, s[i]);
+            move[i] = SBU.CardFromString(SBU.gameState.cards, s[i]);
         }
 
 
-        int[] m = SBU.GenerateMove(SBU.cards, move, SBU.turn);
+        int[] m = SBU.GenerateMove(SBU.gameState.cards, move, SBU.gameState.turn);
 
 
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
-        if (SBU.ContainsArray(SBU.GetPossibleMoves(SBU.turn, SBU.cards), m))
+        if (SBU.ContainsArray(SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards), m))
         {
-            SBU.cards = SBU.CopyArray(SBU.AddArray(SBU.cards, m, false));
+            SBU.gameState.cards = SBU.CopyArray(SBU.AddArray(SBU.gameState.cards, m, false));
         }
         else
         {
@@ -120,7 +126,7 @@ public class GameBase : MonoBehaviour
             return;
         }
 
-        SBU.currentPileHolder = SBU.turn;
+        SBU.gameState.currentPileHolder = SBU.gameState.turn;
         GameUpdate();
     }
 
@@ -136,17 +142,17 @@ public class GameBase : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             string s;
-            if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.cards, i) + ") : "; }
+            if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.gameState.cards, i) + ") : "; }
             else { s = "Table Pile: "; }
 
-            int[] playerCards = SBU.getPlayerCards(SBU.cards, i);
+            int[] playerCards = SBU.getPlayerCards(SBU.gameState.cards, i);
             for (int j = 0; j < playerCards.Length; j++)
             {
 
                 if (playerCards[j] == -10) { break; }
 
 
-                s += SBU.CardToString(SBU.cards, playerCards[j]);
+                s += SBU.CardToString(SBU.gameState.cards, playerCards[j]);
                 s += " ";
 
             }
@@ -155,13 +161,13 @@ public class GameBase : MonoBehaviour
         }
 
 
-        infoText.text = "Turn: " + SBU.turn;
+        infoText.text = "Turn: " + SBU.gameState.turn;
 
     }
 
     private void GameEnd()
     {
-        Debug.Log("GAME OVER, PLAYER " + SBU.getWinningPlayer(SBU.cards) + " WON!");
+        Debug.Log("GAME OVER, PLAYER " + SBU.getWinningPlayer(SBU.gameState.cards) + " WON!");
     }
 
 }
