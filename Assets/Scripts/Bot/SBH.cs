@@ -25,18 +25,34 @@ public static class SBH
         //int[] value3 = new int[playercards1.Length];
         //int[] value4 = new int[playercards1.Length];
 
-        List<int[]> possibleMoves = SBU.GetPossibleMoves(1, g.cards);
+        List<int[]> possibleMoves1 = SBU.GetPossibleMoves(1, g.cards);
+        List<int[]> possibleMoves2 = SBU.GetPossibleMoves(2, g.cards);
+        List<int[]> possibleMoves3 = SBU.GetPossibleMoves(3, g.cards);
+        List<int[]> possibleMoves4 = SBU.GetPossibleMoves(4, g.cards);
         //int[] moveValues = new int[possibleMoves.Count];
 
         int currentScore = 0;
         int computereScore = 0;
 
-        for (int j = 0; j < possibleMoves.Count; j++)
+        for (int j = 0; j < possibleMoves1.Count; j++)
         {
-            currentScore = currentScore + SBU.MoveValue(g.cards, SBU.MoveIndexesFromMove(g.cards, possibleMoves[j]));
-            Debug.Log(currentScore);
+            currentScore = currentScore + SBU.MoveValue(g.cards, SBU.MoveIndexesFromMove(g.cards, possibleMoves1[j]));
         }
-        
+        for (int k = 0; k < possibleMoves2.Count; k++)
+        {
+            computereScore = computereScore + SBU.MoveValue(g.cards, SBU.MoveIndexesFromMove(g.cards, possibleMoves2[k]));
+        }
+        for (int l = 0; l < possibleMoves3.Count; l++)
+        {
+            computereScore = computereScore + SBU.MoveValue(g.cards, SBU.MoveIndexesFromMove(g.cards, possibleMoves3[l]));
+        }
+        for (int m = 0; m < possibleMoves4.Count; m++)
+        {
+            computereScore = computereScore + SBU.MoveValue(g.cards, SBU.MoveIndexesFromMove(g.cards, possibleMoves4[m]));
+        }
+        computereScore = computereScore / 3;
+        currentScore = currentScore - computereScore;
+
         return currentScore;
     }
     
