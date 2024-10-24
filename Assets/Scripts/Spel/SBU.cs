@@ -118,12 +118,12 @@ public static class SBU
     /// <summary>
     /// Gets where in the player hand the card is located, where 0 is the first (left most) card
     /// </summary>
-    /// <param name="card">card</param>
+    /// <param name="cardValue">card</param>
     /// <returns></returns>
-    public static int getCardHandIndex(int card)
+    public static int getCardHandIndex(int cardValue)
     {
         //Uses same logic as getCurrentCardValue
-        return getCurrentCardValue(card);
+        return getCurrentCardValue(cardValue);
     }
 
     /// <summary>
@@ -272,6 +272,11 @@ public static class SBU
 
         for (int i = 0; i < a.Length; i++)
         {
+            if (a[i] == -10 || b[i] == -10)
+            {
+                continue;
+            }
+
             s[i] = a[i] + b[i] * inverter;
         }
 

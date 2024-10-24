@@ -62,7 +62,18 @@ public class SBA
         }
 
         this.bestMove = bestMove;
-        Debug.Log(SBU.MoveIndexesFromMove(g.cards, bestMove)[0]);
+        for (int i = 0; i < SBU.MoveIndexesFromMove(g.cards, bestMove).Length; i++)
+        {
+            if (SBU.MoveIndexesFromMove(g.cards, bestMove)[i] == -10)
+            {
+                Debug.Log("-10");
+                continue;
+            }
+
+            Debug.Log(SBU.CardToString(g.cards, SBU.MoveIndexesFromMove(g.cards, bestMove)[i]));
+
+        }
+        Debug.Log("/////");
         return p;
     }
 

@@ -57,7 +57,6 @@ public class GameBase : MonoBehaviour
 
         cards = SBU.gameState.cards;
 
-        UpdateGUI();
 
         if (SBU.CheckGameOver(new GameState(SBU.gameState.cards, SBU.gameState.turn, SBU.gameState.currentPileHolder)))
         {
@@ -70,15 +69,14 @@ public class GameBase : MonoBehaviour
 
             search.DepthSearch(SBU.gameState, 2);
 
-            for (int i = 0; i < SBU.MoveIndexesFromMove(SBU.gameState.cards, search.bestMove).Length; i++)
-            {
-                Debug.Log(SBU.MoveIndexesFromMove(SBU.gameState.cards, search.bestMove)[i]);
-            }
+            Debug.Log(SBU.getCardHandIndex(SBU.getValueOfCard(SBU.gameState.cards, search.bestMove[0])));
 
             SBU.gameState.Move(search.bestMove);
             
             
         }
+        UpdateGUI();
+
 
     }
 
