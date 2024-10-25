@@ -241,6 +241,8 @@ public static class SBU
             }
         }
 
+        
+        
 
         //reformat the moves
         List<int[]> moves = new List<int[]>();
@@ -254,7 +256,51 @@ public static class SBU
         return moves;
     }
 
+    /// <summary>
+    /// Gets all legal put card moves
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="cards"></param>
+    /// <returns></returns>
+    public static List<int[]> getAllLegalMoves(int player, int[] cards)
+    {
+        List<int[]> allPossibleMoves = GetPossibleMoves(player, cards);
 
+        List<int[]> allLegalMoves = new List<int[]>(); 
+
+        if (getPlayerCards(cards, 0).getArrayLength() == 0) { return allPossibleMoves; }
+
+        foreach (int[] move in allPossibleMoves)
+        {
+
+            if (MoveValue(cards, MoveIndexesFromMove(cards, move)) > MoveValue(cards, getPlayerCards(cards, 0)))
+            {
+                allLegalMoves.Add(move);
+            }
+
+        }
+
+
+        return allLegalMoves;
+    }
+
+    
+    /// <summary>
+    /// Checks how long an array is when removing the -10s at the end
+    /// </summary>
+    /// <param name="a"></param>
+    /// <returns></returns>
+    public static int getArrayLength(this int[] a)
+    {
+        for (int i = 0; i < a.Length; i++)
+        {
+            if (a[i] == -10)
+            {
+                return i;
+            }
+        }
+        return a.Length;
+    }
 
     /// <summary>
     /// Add two arrays together, if invertB then subtract b from a
@@ -722,10 +768,9 @@ public static class SBU
         }
         else { match = 0; }
 
-
         for (int i = 0; i < move.Length; i++)
         {
-            if (move[i] == -10) { continue; }
+            if (move[i] == -10) { break; }
             moveLength++;
             if (moveMinCard > getCurrentCardValue(getValueOfCard(cards, move[i])))
             {
@@ -733,6 +778,7 @@ public static class SBU
             } 
 
         }
+
 
         int moveValue = (moveLength - 1) * 100 + match * 10 + moveMinCard - 1;
 

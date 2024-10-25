@@ -23,7 +23,17 @@ public class SBA
         }
 
 
-        List<int[]> moves = SBU.GetPossibleMoves(g.turn, g.cards);
+        //TODO: Fix him skipping his turn when having no possible moves
+        //TODO: Fix him maybe acting weirdly on the first move
+        //TODO: moves.Count always being 0 on depth 1
+
+        List<int[]> moves = SBU.getAllLegalMoves(g.turn, g.cards);
+
+        if (moves.Count == 0)
+        {
+            Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth);
+        }
+
         //Removed for bug testing
         //moves.AddRange(SBU.getPossibleDrawCardMoves(g.cards, g.turn));
 
@@ -62,18 +72,7 @@ public class SBA
         }
 
         this.bestMove = bestMove;
-        for (int i = 0; i < SBU.MoveIndexesFromMove(g.cards, bestMove).Length; i++)
-        {
-            if (SBU.MoveIndexesFromMove(g.cards, bestMove)[i] == -10)
-            {
-                Debug.Log("-10");
-                continue;
-            }
-
-            Debug.Log(SBU.CardToString(g.cards, SBU.MoveIndexesFromMove(g.cards, bestMove)[i]));
-
-        }
-        Debug.Log("/////");
+        
         return p;
     }
 

@@ -67,12 +67,9 @@ public class GameBase : MonoBehaviour
         {
             SBA search = new SBA();
 
-            search.DepthSearch(SBU.gameState, 2);
-
-            Debug.Log(SBU.getCardHandIndex(SBU.getValueOfCard(SBU.gameState.cards, search.bestMove[0])));
+            search.DepthSearch(SBU.gameState, 3);
 
             SBU.gameState.Move(search.bestMove);
-            
             
         }
         UpdateGUI();
