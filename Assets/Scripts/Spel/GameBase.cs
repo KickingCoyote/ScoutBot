@@ -91,7 +91,7 @@ public class GameBase : MonoBehaviour
 
         if (m != null)
         {
-            SBU.gameState.cards = SBU.CopyArray(SBU.AddArray(SBU.gameState.cards, m, false));
+            SBU.gameState.cards = SBU.CopyArray(ArrayExtensions.AddArray(SBU.gameState.cards, m, false));
         }
         else
         {
@@ -121,9 +121,9 @@ public class GameBase : MonoBehaviour
 
 
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
-        if (SBU.ContainsArray(SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards), m))
+        if (SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards).ContainsArray(m))
         {
-            SBU.gameState.cards = SBU.CopyArray(SBU.AddArray(SBU.gameState.cards, m, false));
+            SBU.gameState.cards = SBU.CopyArray(ArrayExtensions.AddArray(SBU.gameState.cards, m, false));
         }
         else
         {

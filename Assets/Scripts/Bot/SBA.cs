@@ -10,6 +10,7 @@ public class SBA
 
     public int[] bestMove = new int[44];
 
+
     public int DepthSearch(GameState g, int depth)
     {
 
@@ -25,18 +26,19 @@ public class SBA
 
         //TODO: Fix him skipping his turn when having no possible moves
         //TODO: Fix him maybe acting weirdly on the first move
-        //TODO: moves.Count always being 0 on depth 1
 
         List<int[]> moves = SBU.getAllLegalMoves(g.turn, g.cards);
+
+
+
+        //Removed for bug testing
+        moves.AddRange(SBU.getPossibleDrawCardMoves(g.cards, g.turn));
 
         if (moves.Count == 0)
         {
             Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth);
+
         }
-
-        //Removed for bug testing
-        //moves.AddRange(SBU.getPossibleDrawCardMoves(g.cards, g.turn));
-
 
         //player 2, 3, 4 will be minimizers and therefore try to reduce the score, hence 2, 3, 4 return -1 while player 1 will be the maximizer and therefore return 1
         int inverter = g.turn == 1 ? 1 : -1;
@@ -48,6 +50,7 @@ public class SBA
 
         foreach (int[] move in moves)
         {
+            
             g.Move(move);
 
             //For each move search deeper and see how good the position is
@@ -97,7 +100,7 @@ public struct GameState
 
     public void Move(int[] move)
     {
-        int[] m = SBU.AddArray(cards, move, false);
+        int[] m = ArrayExtensions.AddArray(cards, move, false);
         ////if the table pile got larger or stayed the same size it means someone put down cards and currentPileHolder should change
         //if (SBU.getPlayerCards(cards, 0).Length <= SBU.getPlayerCards(m, 0).Length)
         //{
@@ -110,7 +113,7 @@ public struct GameState
 
     public void UndoMove(int[] move)
     {
-        int[] previousPos = SBU.AddArray(cards, move, true);
+        int[] previousPos = ArrayExtensions.AddArray(cards, move, true);
 
         cards = SBU.CopyArray(previousPos);
         turn = turn == 1 ? 4 : (turn - 1);

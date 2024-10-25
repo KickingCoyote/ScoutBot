@@ -193,8 +193,7 @@ public static class SBU
                 if (pCards[i + j] == -10) { break; }  
                 if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])))
                 {
-                    int[] move = new int[j + 1];
-                    move = SetArray(move, -10);
+                    int[] move = new int[j + 1].SetArray(-10);
                     move[0] = pCards[i];
 
                     for (int k = 1; k < j + 1; k++)
@@ -210,8 +209,7 @@ public static class SBU
                 if (pCards[i + j] == -10) { break; }
                 if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])) - j)
                 {
-                    int[] move = new int[j + 1];
-                    move = SetArray(move, -10);
+                    int[] move = new int[j + 1].SetArray(-10);
                     move[0] = pCards[i];
 
                     for (int k = 1; k < j + 1; k++)
@@ -227,8 +225,7 @@ public static class SBU
                 if (pCards[i + j] == -10) { break; }
                 if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])) + j)
                 {
-                    int[] move = new int[j + 1];
-                    move = SetArray(move, -10);
+                    int[] move = new int[j + 1].SetArray(-10);
                     move[0] = pCards[i];
 
                     for (int k = 1; k < j + 1; k++)
@@ -268,7 +265,7 @@ public static class SBU
 
         List<int[]> allLegalMoves = new List<int[]>(); 
 
-        if (getPlayerCards(cards, 0).getArrayLength() == 0) { return allPossibleMoves; }
+        if (getPlayerCards(cards, 0).ArrayLength() == 0) { return allPossibleMoves; }
 
         foreach (int[] move in allPossibleMoves)
         {
@@ -284,112 +281,10 @@ public static class SBU
         return allLegalMoves;
     }
 
-    
-    /// <summary>
-    /// Checks how long an array is when removing the -10s at the end
-    /// </summary>
-    /// <param name="a"></param>
-    /// <returns></returns>
-    public static int getArrayLength(this int[] a)
-    {
-        for (int i = 0; i < a.Length; i++)
-        {
-            if (a[i] == -10)
-            {
-                return i;
-            }
-        }
-        return a.Length;
-    }
 
-    /// <summary>
-    /// Add two arrays together, if invertB then subtract b from a
-    /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <param name="invertB">if true, does a - b instead</param>
-    /// <returns></returns>
-    public static int[] AddArray(int[] a, int[] b, bool invertB)
-    {
-        int[] s = new int[a.Length];
-
-        int inverter = 1;
-        if (invertB) { inverter = -1;  }
-
-        for (int i = 0; i < a.Length; i++)
-        {
-            if (a[i] == -10 || b[i] == -10)
-            {
-                continue;
-            }
-
-            s[i] = a[i] + b[i] * inverter;
-        }
-
-        return s;
-    }
+   
 
 
-    /// <summary>
-    /// Fills an array with a value
-    /// </summary>
-    /// <param name="array"></param>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    public static int[] SetArray(int[] array, int value)
-    {
-        int[] a = new int[array.Length];
-
-        for (int i = 0; i < a.Length; i++)
-        {
-            a[i] = value;
-        }
-
-        return a;
-    }
-
-
-
-    //compare two integer arrays by value 
-    /// <summary>
-    /// Checks if all values in 2 arrays are the same
-    /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
-    public static bool CompareArray(int[] a, int[] b)
-    {
-        if(a.Length != b.Length) { return false; }
-
-        for (int i = 0; i < a.Length; i++)
-        {
-            if (a[i] != b[i]) { return false; }
-        }
-
-
-        return true;
-    }
-
-    /// <summary>
-    /// checks if a list of arrays contains a array
-    /// </summary>
-    /// <param name="a">array of arrays</param>
-    /// <param name="b">array</param>
-    /// <returns></returns>
-
-    public static bool ContainsArray(List<int[]> a, int[] b)
-    {
-
-        for (int i = 0; i < a.Count; i++)
-        {
-            if (CompareArray(a.ElementAt(i), b))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
 
     /// <summary>
@@ -444,7 +339,7 @@ public static class SBU
             }
         }
 
-        return AddArray(moveArray, cards, true);
+        return ArrayExtensions.AddArray(moveArray, cards, true);
     }
 
     /// <summary>
@@ -467,7 +362,7 @@ public static class SBU
 
 
     /// <summary>
-    /// Gets all possible draw card moves
+    /// Gets all possible draw card moves (All GenerateDrawCardMoves are automatically legal) (This too needs to be very fast)
     /// </summary>
     /// <param name="cards"></param>
     /// <param name="player"></param>
@@ -501,7 +396,7 @@ public static class SBU
 
 
     /// <summary>
-    /// Generates a move for taking a card from the middle pile
+    /// Generates a move for taking a card from the middle pile 
     /// </summary>
     /// <param name="cards"></param>
     /// <param name="top">if its the bottom or top card of the middle pile that is taken</param>
@@ -518,8 +413,7 @@ public static class SBU
 
 
         //if there are no cards on the table or the hand is full return null 
-        if (tCards.Length == 0 || pCards[pCards.Length - 1] != -10) { return null; }
-
+        if (tCards.ArrayLength() == 0 || pCards[pCards.Length - 1] != -10) { return null; }
 
 
 
@@ -586,7 +480,7 @@ public static class SBU
         
 
 
-        return AddArray(move, cards, true);
+        return ArrayExtensions.AddArray(move, cards, true);
     }
 
 
@@ -719,22 +613,21 @@ public static class SBU
     }
 
 
-    public static int[] getMoveIndexes(int[] move, int[] cards)
-    {
-        int[] moveIndexes = new int[15];
-        SetArray(moveIndexes, -10);
+    //public static int[] getMoveIndexes(int[] move, int[] cards)
+    //{
+    //    int[] moveIndexes = new int[15];
+    //    SetArray(moveIndexes, -10);
 
-        return moveIndexes;
-    }
+    //    return moveIndexes;
+    //}
 
 
     public static int[] MoveIndexesFromMove(int[] cards, int[] move)
     {
 
-        int[] cardsAfterMove = AddArray(cards, move, false);
+        int[] cardsAfterMove = ArrayExtensions.AddArray(cards, move, false);
 
-        int[] moveIndexes = new int[15];
-        moveIndexes = SetArray(moveIndexes, -10);
+        int[] moveIndexes = new int[15].SetArray(-10);
 
         int k = 0;
 
