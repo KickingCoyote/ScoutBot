@@ -16,7 +16,7 @@ using UnityEngine.SocialPlatforms.Impl;
 /// </summary>
 public static class SBU
 {
-    public static GameState gameState = new GameState(new int[44], 0, 0);
+    public static GameState gameState = new GameState(new int[44], 1, 0);
 
     //gameState.cards
     //All cards are stored in 1 44 length int[], the index represents which card it is and the value has all the needed data about that card 
@@ -147,16 +147,15 @@ public static class SBU
     /// This function generates all possible moves. THIS METHOD NEEDS TO BE EXTREMELY FAST.
     /// </summary>
     /// <param name="player"></param>
-    /// <param name="cards"></param>
     /// <returns>a 2 dimensional array of all possible moves a player can play</returns>
     //Move Generation for putting down cards
-    public static List<int[]> GetPossibleMoves(int player, int[] cards)
+    public static List<Move> GetPossibleMoves(GameState g, int player)
     {
 
         //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
-        int[] pCards = getPlayerCards(cards, player);
+        int[] pCards = getPlayerCards(g.cards, player);
         
-        //Get all the possible moves
+        //Get all the possible moves in the format of card indexes
         List<int[]> temp = new List<int[]>();
 
         for (int i = 0; i < pCards.Length; i++)
@@ -171,7 +170,7 @@ public static class SBU
             {
 
                 if (pCards[i + j] == -10) { break; }  
-                if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])))
+                if (getCurrentCardValue(getValueOfCard(g.cards, pCards[i])) == getCurrentCardValue(getValueOfCard(g.cards, pCards[i + j])))
                 {
                     int[] move = new int[j + 1].SetArray(-10);
                     move[0] = pCards[i];
@@ -179,7 +178,7 @@ public static class SBU
                     for (int k = 1; k < j + 1; k++)
                     {                        
                         move[k] = pCards[i + k];
-                        temp.Add(CopyArray(move));
+                        temp.Add(move);
                     }
                 }
                 else { break; }
@@ -187,7 +186,7 @@ public static class SBU
             for (int j = 1; j < pCards.Length - 1; j++)
             {
                 if (pCards[i + j] == -10) { break; }
-                if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])) - j)
+                if (getCurrentCardValue(getValueOfCard(g.cards, pCards[i])) == getCurrentCardValue(getValueOfCard(g.cards, pCards[i + j])) - j)
                 {
                     int[] move = new int[j + 1].SetArray(-10);
                     move[0] = pCards[i];
@@ -195,7 +194,7 @@ public static class SBU
                     for (int k = 1; k < j + 1; k++)
                     {
                         move[k] = pCards[i + k];
-                        temp.Add(CopyArray(move));
+                        temp.Add(move);
                     }
                 }
                 else { break; }
@@ -203,7 +202,7 @@ public static class SBU
             for (int j = 1; j < pCards.Length - 1; j++)
             {
                 if (pCards[i + j] == -10) { break; }
-                if (getCurrentCardValue(getValueOfCard(cards, pCards[i])) == getCurrentCardValue(getValueOfCard(cards, pCards[i + j])) + j)
+                if (getCurrentCardValue(getValueOfCard(g.cards, pCards[i])) == getCurrentCardValue(getValueOfCard(g.cards, pCards[i + j])) + j)
                 {
                     int[] move = new int[j + 1].SetArray(-10);
                     move[0] = pCards[i];
@@ -211,7 +210,7 @@ public static class SBU
                     for (int k = 1; k < j + 1; k++)
                     {
                         move[k] = pCards[i + k];
-                        temp.Add(CopyArray(move));
+                        temp.Add(move);
                     }
                 }
                 else { break; }
@@ -222,11 +221,11 @@ public static class SBU
         
 
         //reformat the moves
-        List<int[]> moves = new List<int[]>();
+        List<Move> moves = new List<Move>();
 
         for (int i = 0; i < temp.Count; i++)
         {
-            moves.Add(GenerateMove(cards, temp.ElementAt(i), player));
+            moves.Add(new Move(g, temp.ElementAt(i), player));
         }
 
 
@@ -239,18 +238,18 @@ public static class SBU
     /// <param name="player"></param>
     /// <param name="cards"></param>
     /// <returns></returns>
-    public static List<int[]> getAllLegalMoves(int player, int[] cards)
+    public static List<Move> getAllLegalMoves(GameState g, int player)
     {
-        List<int[]> allPossibleMoves = GetPossibleMoves(player, cards);
+        List<Move> allPossibleMoves = GetPossibleMoves(g, player);
 
-        List<int[]> allLegalMoves = new List<int[]>(); 
+        List<Move> allLegalMoves = new List<Move>(); 
 
-        if (getPlayerCards(cards, 0).ArrayLength() == 0) { return allPossibleMoves; }
+        if (getPlayerCards(g.cards, 0).ArrayLength() == 0) { return allPossibleMoves; }
 
-        foreach (int[] move in allPossibleMoves)
+        foreach (Move move in allPossibleMoves)
         {
 
-            if (MoveValue(cards, MoveIndexesFromMove(cards, move)) > MoveValue(cards, getPlayerCards(cards, 0)))
+            if (MoveValue(g.cards, MoveIndexesFromMove(g.cards, move.cardDif)) > MoveValue(g.cards, getPlayerCards(g.cards, 0)))
             {
                 allLegalMoves.Add(move);
             }
@@ -262,83 +261,6 @@ public static class SBU
     }
 
 
-   
-
-
-
-
-    /// <summary>
-    /// Generates a move array from a set of cards (move) and a GameState used for putting down cards
-    /// </summary>
-    /// <param name="cards">the global cards (GameState)</param>
-    /// <param name="move">the set of card indexes that the move consists of, must be in order, is compatible with -10 values</param>
-    /// <returns>int[44] with values of what a position would be after a move</returns>
-    public static int[] GenerateMove(int[] cards, int[] move, int player)
-    {
-
-        //List of all the players cards by index
-        int[] pCards = getPlayerCards(cards, player);
-
-        //The cards on the table
-        int[] tCards = getPlayerCards(cards, 0);
-
-        int[] moveArray = CopyArray(cards);
-
-        int k = 0;
-        bool foundMove = false;
-
-
-        for (int i = 0; i < tCards.Length; i++)
-        {
-            if (tCards[i] == -10) { break; }
-
-            //Takes all cards currently in the pile and gives them as points to the player
-            //(handIndex = 15 represents it being a point)
-            moveArray[tCards[i]] = 16 * 15 + player;
-        }
-        for (int i = 0; i < pCards.Length; i++)
-        {
-
-
-            if (pCards[i] == -10) { break; }
-
-
-            if (k < move.Length && pCards[i] == move[k])
-            {
-                //Move card to center pile and set its new index in center pile
-                moveArray[move[k]] = 16 * k + 8 * getCardFlip(cards[move[k]]);
-
-                foundMove = true;
-                k++;
-            }
-            else if (foundMove && pCards[i] != -10)
-            {
-                //Reduce index by move.length;
-                moveArray[pCards[i]] = cards[pCards[i]] - 16 * move.Length;
-
-            }
-        }
-
-        return ArrayExtensions.AddArray(moveArray, cards, true);
-    }
-
-    /// <summary>
-    /// Copy a array by value
-    /// </summary>
-    /// <param name="a">Array to be copied</param>
-    /// <returns>Array copied by value</returns>
-    public static int[] CopyArray(int[] a)
-    {
-        int[] b = new int[a.Length];
-        
-        for (int i = 0; i < a.Length; i++)
-        {
-            b[i] = a[i];
-        }
-        return b;
-
-    }
-
 
 
     /// <summary>
@@ -347,9 +269,9 @@ public static class SBU
     /// <param name="cards"></param>
     /// <param name="player"></param>
     /// <returns></returns>
-    public static List<int[]> getPossibleDrawCardMoves(int[] cards, int player)
+    public static List<Move> getPossibleDrawCardMoves(int[] cards, int player)
     {
-        List<int[]> moves = new List<int[]>();
+        List<Move> moves = new List<Move>();
 
         int[] pCards = getPlayerCards(cards, player);
 
@@ -361,8 +283,8 @@ public static class SBU
             {
                 foreach (bool b2 in new bool[] { true, false })
                 {
-                    int[] move = GenerateDrawCardMove(cards, b1, b2, player, i);
-                    if (move == null) { continue; }
+                    Move move = new Move(cards, b1, b2, player, i);
+                    if (move.cardDif == null) { continue; }
 
                     moves.Add(move);
 
@@ -375,93 +297,7 @@ public static class SBU
     }
 
 
-    /// <summary>
-    /// Generates a move for taking a card from the middle pile 
-    /// </summary>
-    /// <param name="cards"></param>
-    /// <param name="top">if its the bottom or top card of the middle pile that is taken</param>
-    /// <param name="flip">whether to change the rotation of the picked up card</param>
-    /// <param name="player">who the card is picked up by</param>
-    /// <param name="handIndex">where in the hand the card is placed</param>
-    /// <returns>int[44] with values that represent the gameState post move</returns>
-    public static int[] GenerateDrawCardMove(int[] cards, bool top, bool flip, int player, int handIndex)
-    {
-        //Gets the cards on the table
-        int[] tCards = getPlayerCards(cards, 0);
-        int tCard = -10;
-        int[] pCards = getPlayerCards(cards, player);
-
-
-        //if there are no cards on the table or the hand is full return null 
-        if (tCards.ArrayLength() == 0 || pCards[pCards.Length - 1] != -10) { return null; }
-
-
-
-        if (!top) { tCard = tCards[0]; }
-        else
-        {
-            for (int i = 0; i < tCards.Length; i++)
-            {
-                if (i == tCards.Length - 1 || tCards[i + 1] == -10)
-                {
-                    tCard = tCards[i];
-                    break;
-                }
-            }
-        }
-
-        //if no card is picked return null
-        if (tCard == -10)
-        {
-            Debug.Log("GenerateDrawCardMove: No Card Found");
-            return null;
-        }
-
-        int[] move = CopyArray(cards);
-
-
-        for (int i = pCards.Length - 1; i >= handIndex; i--)
-        {
-
-            if (pCards[i] != -10)
-            {
-                //Shift all cards after the insertion point by 1 spot (aka 16)
-                move[pCards[i]] += 16;
-            }
-
-        }
-        move[tCard] = 16 * handIndex + 8 * getCardFlip(cards[tCard]) + player;
-
-        //Flip the card incase flip == true
-        if (flip && getCardFlip(cards[tCard]) == 0) 
-        {
-            move[tCard] += 8; 
-        }
-        else if (flip)
-        {
-            move[tCard] -= 8;
-        }
-
-
-        //if the bottom card is taken, shift all cards on the table 1 spot to not leave the bottom spot empty
-        if (!top)
-        {
-            for (int i = 1; i < tCards.Length; i++)
-            {
-                if (tCards[i] == -10)
-                {
-                    break;
-                }
-                move[tCards[i]] -= 16;
-            }
-
-        }
-
-        
-
-
-        return ArrayExtensions.AddArray(move, cards, true);
-    }
+    
 
 
 

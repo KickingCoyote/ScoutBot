@@ -16,13 +16,13 @@ public static class SBH
     public static int Evaluate(GameState g)
     {
 
-        List<int[]> possibleMoves = SBU.GetPossibleMoves(1, g.cards);
+        List<Move> possibleMoves = SBU.GetPossibleMoves(g, 1);
 
         int currentScore = 0;
 
         for (int j = 0; j < possibleMoves.Count; j++)
         {
-            currentScore = currentScore + SBU.MoveValue(g.cards, SBU.MoveIndexesFromMove(g.cards, possibleMoves[j]));
+            currentScore = currentScore + SBU.MoveValue(g.cards, SBU.MoveIndexesFromMove(g.cards, possibleMoves[j].cardDif));
         }
         
         return currentScore;

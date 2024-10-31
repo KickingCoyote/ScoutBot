@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,7 +86,6 @@ public static class ArrayExtensions
 
         for (int i = 0; i < a.Length; i++)
         {
-
             s[i] = a[i] + b[i] * inverter;
         }
 
@@ -102,15 +102,23 @@ public static class ArrayExtensions
     /// <returns></returns>
     public static bool CompareArray(int[] a, int[] b)
     {
-        if (a.Length != b.Length) { return false; }
-
-        for (int i = 0; i < a.Length; i++)
-        {
-            if (a[i] != b[i]) { return false; }
-        }
-
-
-        return true;
+        return Enumerable.SequenceEqual(a, b);
     }
 
+
+
+
+    /// <summary>
+    /// Copy a array by value
+    /// </summary>
+    /// <param name="a">Array to be copied</param>
+    /// <returns>Array copied by value</returns>
+    public static int[] CopyArray(this int[] a)
+    {
+        int[] b = new int[a.Length];
+
+        Array.Copy(a, b, a.Length);
+        return b;
+
+    }
 }

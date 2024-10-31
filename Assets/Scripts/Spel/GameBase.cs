@@ -48,14 +48,8 @@ public class GameBase : MonoBehaviour
 
     private void GameUpdate()
     {
-
-        //Turn is a number between 1 and 4 dictating whose turn it is
-        if (SBU.gameState.turn == 4) { SBU.gameState.turn = 1; }
-        else { SBU.gameState.turn++; }
-
-
+        //for debuging
         cards = SBU.gameState.cards;
-
 
         if (SBU.CheckGameOver(SBU.gameState))
         {
@@ -89,11 +83,11 @@ public class GameBase : MonoBehaviour
 
 
 
-        int[] m = SBU.GenerateDrawCardMove(SBU.gameState.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.gameState.turn, int.Parse(s[2]));
+        Move m = new Move(SBU.gameState.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.gameState.turn, int.Parse(s[2]));
 
         if (m != null)
         {
-            SBU.gameState.cards = SBU.CopyArray(ArrayExtensions.AddArray(SBU.gameState.cards, m, false));
+            SBU.gameState.Move(m);
         }
         else
         {
@@ -119,21 +113,24 @@ public class GameBase : MonoBehaviour
         }
 
 
-        int[] m = SBU.GenerateMove(SBU.gameState.cards, move, SBU.gameState.turn);
+        Move m = new Move(SBU.gameState, move);
 
 
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
-        if (SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards).ContainsArray(m))
-        {
-            SBU.gameState.cards = SBU.CopyArray(ArrayExtensions.AddArray(SBU.gameState.cards, m, false));
-        }
-        else
-        {
-            Debug.Log("Invalid Move, Cannot put down those cards");
-            return;
-        }
+        //THIS DOES NOT WORK DUE TO CONTAIN COMPARING BY REF
+        //if (SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards).Contains(m))
+        //{
+        //  SBU.gameState.cards = SBU.CopyArray(ArrayExtensions.AddArray(SBU.gameState.cards, m.cardDif));
+        //}
+        //else
+        //{
+        //    Debug.Log("Invalid Move, Cannot put down those cards");
+        //    return;
+        //}
 
-        SBU.gameState.currentPileHolder = SBU.gameState.turn;
+
+        SBU.gameState.Move(m);
+
         GameUpdate();
     }
 
