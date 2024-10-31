@@ -102,13 +102,7 @@ public static class SBU
     //Returns the upwards facing value on a card given the card value
     public static int getCurrentCardValue(int cardValue)
     {
-        byte[] b = new byte[1] { BitConverter.GetBytes(cardValue)[0] };
-        BitArray bits = new BitArray(b);
-        bits.RightShift(4);
-
-        bits.CopyTo(b, 0);
-
-        return b[0];
+        return (cardValue - (cardValue % 16)) / 16; 
     }
 
 
@@ -129,20 +123,11 @@ public static class SBU
     /// <summary>
     /// Gets the owner of the card where 0 is the table pile and 1-4 is player 1-4
     /// </summary>
-    /// <param name="card">card</param>
+    /// <param name="cardValue">card</param>
     /// <returns></returns>
-    public static int getCardOwner(int card)
+    public static int getCardOwner(int cardValue)
     {
-
-        byte[] b = new byte[1] { BitConverter.GetBytes(card)[0] };
-        BitArray bits = new BitArray(b);
-        for (int i = 3; i < 8; i++)
-        {
-            bits[i] = false;
-        }
-        bits.CopyTo(b, 0);
-
-        return b[0];
+        return cardValue % 8;
     }
 
 
@@ -151,14 +136,9 @@ public static class SBU
     /// </summary>
     /// <param name="card">card</param>
     /// <returns>0 or 1 for unflipped / flipped cards</returns>
-    public static int getCardFlip(int card)
+    public static int getCardFlip(int cardValue)
     {
-        byte[] b = new byte[1] { BitConverter.GetBytes(card)[0] };
-        BitArray bits = new BitArray(b);
-
-        if (bits[3]) { return 1; }
-        return 0;
-
+        return ((cardValue % 16) - (cardValue % 8)) / 8;
     }
 
 

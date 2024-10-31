@@ -76,7 +76,7 @@ public static class ArrayExtensions
     /// <param name="b"></param>
     /// <param name="invertB">if true, does a - b instead</param>
     /// <returns></returns>
-    public static int[] AddArray(int[] a, int[] b, bool invertB)
+    public static int[] AddArray(int[] a, int[] b, bool invertB = false)
     {
         int[] s = new int[a.Length];
 

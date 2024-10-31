@@ -35,7 +35,6 @@ public class GameBase : MonoBehaviour
 
 
 
-
     private void DistributeCards()
     {
         for (int i = 0; i < 44; i++)
@@ -58,26 +57,29 @@ public class GameBase : MonoBehaviour
         cards = SBU.gameState.cards;
 
 
-        if (SBU.CheckGameOver(new GameState(SBU.gameState.cards, SBU.gameState.turn, SBU.gameState.currentPileHolder)))
+        if (SBU.CheckGameOver(SBU.gameState))
         {
             GameEnd();
         }
 
         if(SBU.gameState.turn == 1)
         {
-            SBA search = new SBA();
-
-            search.DepthSearch(SBU.gameState, 3);
-
-            SBU.gameState.Move(search.bestMove);
-            
+            BotMove();
         }
+
         UpdateGUI();
 
 
     }
 
+    private void BotMove()
+    {
+        SBA search = new SBA(2);
 
+        search.DepthSearch(SBU.gameState, 3);
+
+        SBU.gameState.Move(search.bestMove);
+    }
 
 
     //Activated from buttons ingame

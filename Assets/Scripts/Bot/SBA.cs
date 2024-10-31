@@ -10,6 +10,13 @@ public class SBA
 
     public int[] bestMove = new int[44];
 
+    private float drawMoveTolerance;
+
+    public SBA(float drawMoveTolerance) 
+    {
+        this.drawMoveTolerance = drawMoveTolerance;
+    }
+
 
     public int DepthSearch(GameState g, int depth)
     {
@@ -28,8 +35,6 @@ public class SBA
         //TODO: Fix him maybe acting weirdly on the first move
 
         List<int[]> moves = SBU.getAllLegalMoves(g.turn, g.cards);
-
-
 
         //Removed for bug testing
         moves.AddRange(SBU.getPossibleDrawCardMoves(g.cards, g.turn));
@@ -80,6 +85,17 @@ public class SBA
     }
 
 
+    /// <summary>
+    /// Prunes the amount of moves drastically by removing all obvoulsy terrible draw card moves which massively increases preformance
+    /// </summary>
+    /// <param name="moves">All draw card moves</param>
+    /// <param name="tolerance">Number from 0 to 1 What procent of moves</param>
+    private void PruneDrawMoves(List<int[]> moves, float? tolerance = null)
+    {
+
+    }
+
+
 }
 
 public struct GameState
@@ -89,7 +105,6 @@ public struct GameState
     public int turn;
 
     public int currentPileHolder;
-
     public GameState(int[] cards, int turn, int currentPileHolder)
     {
         this.cards = cards;
@@ -101,11 +116,6 @@ public struct GameState
     public void Move(int[] move)
     {
         int[] m = ArrayExtensions.AddArray(cards, move, false);
-        ////if the table pile got larger or stayed the same size it means someone put down cards and currentPileHolder should change
-        //if (SBU.getPlayerCards(cards, 0).Length <= SBU.getPlayerCards(m, 0).Length)
-        //{
-        //    currentPileHolder = turn;
-        //}
 
         cards = SBU.CopyArray(m);
         turn = turn == 4 ? 1 : (turn + 1);
@@ -120,7 +130,58 @@ public struct GameState
 
     }
 
+}
+
+public class Move
+{
+    public int[] cardDif;
+
+    public int pileHolderDif;
+
+    public bool? isDrawMove;
+
+    public Move(int[] cardDif, int pileHolderDif)
+    {
+        this.cardDif = cardDif;
+        this.pileHolderDif = pileHolderDif;
+        isDrawMove = null;
+    }
+
+    public int getValue(int[] cards)
+    {
+        Debug.Log("NOT YET IMPLEMENTED");
+
+        return -10;
+    }
+
+    public int[] retreiveMoveIndexes(int[] cards)
+    {
+        Debug.Log("NOT YET IMPLEMENTED");
+
+        return new int[0];
+    }
 
 
+    public bool IsDrawMove(int[] cards)
+    {
+
+
+        //Card => Point : Always possitive
+        //Draw Bottom Card => all other table cards will be negative with owner unchanging
+        //Put Card => atleast 1 card will be negative
+        //Draw and Flip Card =>
+
+
+        //if the table pile got larger or stayed the same size it means someone put down cards and currentPileHolder should change
+        if (SBU.getPlayerCards(cards, 0).ArrayLength() <= SBU.getPlayerCards(ArrayExtensions.AddArray(cards, cardDif), 0).ArrayLength())
+        {
+            return false;
+        }
+        return true;
+
+
+
+
+    }
 
 }
