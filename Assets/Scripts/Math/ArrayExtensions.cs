@@ -20,11 +20,7 @@ public static class ArrayExtensions
     {
         int[] a = new int[array.Length];
 
-        for (int i = 0; i < a.Length; i++)
-        {
-            a[i] = value;
-        }
-
+        Array.Fill(a, value);
         return a;
     }
 
@@ -79,6 +75,7 @@ public static class ArrayExtensions
     /// <returns></returns>
     public static int[] AddArray(int[] a, int[] b, bool invertB = false)
     {
+
         int[] s = new int[a.Length];
 
         int inverter = 1;

@@ -79,23 +79,7 @@ public static class SBU
     /// <returns>The bottom value of the cardValue</returns>
     public static int FlipCardValue(int cardValue)
     {
-        //Convert card into bit array
-        byte[] a = new byte[1] { BitConverter.GetBytes(cardValue)[0] };
-        BitArray b = new BitArray(a);
-
-        //Swaps around the bit array
-        for (int i = 0; i < b.Length / 2; i++)
-        {
-            bool temp = b[i];
-            b[i] = b[i + 4];
-            b[i + 4] = temp;
-        }
-
-        //convert back the bit array to a integer
-        b.CopyTo(a, 0);
-
-        return a[0];
-
+        return cardValue % 16 * 16 + ((cardValue - (cardValue % 16)) / 16);
     }
 
 
@@ -166,59 +150,27 @@ public static class SBU
 
             temp.Add(new int[1] {pCards[i]});
 
-            for (int j = 1; j < pCards.Length - 1; j++)
+            for (int h = -1; h < 2; h++)
             {
-
-                if (pCards[i + j] == -10) { break; }  
-                if (getCurrentCardValue(getValueOfCard(g.cards, pCards[i])) == getCurrentCardValue(getValueOfCard(g.cards, pCards[i + j])))
+                for (int j = 1; j < pCards.Length - 1; j++)
                 {
-                    int[] move = new int[j + 1].SetArray(-10);
-                    move[0] = pCards[i];
-
-                    for (int k = 1; k < j + 1; k++)
-                    {                        
-                        move[k] = pCards[i + k];
-                        temp.Add(move);
-                    }
-                }
-                else { break; }
-            }
-            for (int j = 1; j < pCards.Length - 1; j++)
-            {
-                if (pCards[i + j] == -10) { break; }
-                if (getCurrentCardValue(getValueOfCard(g.cards, pCards[i])) == getCurrentCardValue(getValueOfCard(g.cards, pCards[i + j])) - j)
-                {
-                    int[] move = new int[j + 1].SetArray(-10);
-                    move[0] = pCards[i];
-
-                    for (int k = 1; k < j + 1; k++)
+                    if (pCards[i + j] == -10) { break; }
+                    if (getCurrentCardValue(getValueOfCard(g.cards, pCards[i])) == getCurrentCardValue(getValueOfCard(g.cards, pCards[i + j])) + j * h)
                     {
-                        move[k] = pCards[i + k];
-                        temp.Add(move);
-                    }
-                }
-                else { break; }
-            }
-            for (int j = 1; j < pCards.Length - 1; j++)
-            {
-                if (pCards[i + j] == -10) { break; }
-                if (getCurrentCardValue(getValueOfCard(g.cards, pCards[i])) == getCurrentCardValue(getValueOfCard(g.cards, pCards[i + j])) + j)
-                {
-                    int[] move = new int[j + 1].SetArray(-10);
-                    move[0] = pCards[i];
+                        int[] move = new int[j + 1].SetArray(-10);
+                        move[0] = pCards[i];
 
-                    for (int k = 1; k < j + 1; k++)
-                    {
-                        move[k] = pCards[i + k];
-                        temp.Add(move);
+                        for (int k = 1; k < j + 1; k++)
+                        {
+                            move[k] = pCards[i + k];
+                            temp.Add(move);
+                        }
                     }
+                    else { break; }
                 }
-                else { break; }
-            }
+            } 
         }
 
-        
-        
 
         //reformat the moves
         List<Move> moves = new List<Move>();
@@ -241,7 +193,6 @@ public static class SBU
     public static List<Move> getAllLegalMoves(GameState g, int player)
     {
         List<Move> allPossibleMoves = GetPossibleMoves(g, player);
-
         List<Move> allLegalMoves = new List<Move>(); 
 
         if (getPlayerCards(g.cards, 0).ArrayLength() == 0) { return allPossibleMoves; }
@@ -255,7 +206,6 @@ public static class SBU
             }
 
         }
-
 
         return allLegalMoves;
     }
@@ -271,7 +221,11 @@ public static class SBU
     /// <returns></returns>
     public static List<Move> getPossibleDrawCardMoves(int[] cards, int player)
     {
+        int tCardsLength = getPlayerCards(cards, 0).ArrayLength();
         List<Move> moves = new List<Move>();
+
+        if (tCardsLength == 0) return moves;
+
 
         int[] pCards = getPlayerCards(cards, player);
 
@@ -289,6 +243,7 @@ public static class SBU
                     moves.Add(move);
 
                 }
+                if (tCardsLength == 1) { break; }
             }
 
         }
@@ -310,8 +265,7 @@ public static class SBU
     /// <returns>A 15 long array of card indexes where emtpy values are -10</returns>
     public static int[] getPlayerCards(int[] cards, int player)
     {
-        int[] pCards = new int[15];
-        for (int i = 0; i < 15; i++) { pCards[i] = -10; }
+        int[] pCards = new int[15].SetArray(-10);
 
         for (int i = 0; i < cards.Length; i++)
         {
@@ -442,7 +396,6 @@ public static class SBU
     {
 
         int[] cardsAfterMove = ArrayExtensions.AddArray(cards, move, false);
-
         int[] moveIndexes = new int[15].SetArray(-10);
 
         int k = 0;
@@ -485,21 +438,12 @@ public static class SBU
             {
                 moveMinCard = getCurrentCardValue(getValueOfCard(cards, move[i]));
             } 
-
         }
 
 
         int moveValue = (moveLength - 1) * 100 + match * 10 + moveMinCard - 1;
 
-        for (int i = 0; i < moveValues.Length; i++)
-        {
-            if (moveValues[i] == moveValue)
-            {
-                return i + 1;
-            }
-        }
-
-        return -10;
+        return Math.Max(-1, Array.BinarySearch(moveValues, moveValue));
     }
 
 

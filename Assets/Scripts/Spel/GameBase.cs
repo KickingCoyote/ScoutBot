@@ -70,8 +70,8 @@ public class GameBase : MonoBehaviour
     {
         SBA search = new SBA(2);
 
-        search.DepthSearch(SBU.gameState, 3);
-
+        search.DepthSearch(SBU.gameState, 4);
+        Debug.Log("Searched Positions: " + search.searchedPositions);
         SBU.gameState.Move(search.bestMove);
     }
 

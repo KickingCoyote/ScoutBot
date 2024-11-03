@@ -12,6 +12,8 @@ public class SBA
 
     private float drawMoveTolerance;
 
+    public int searchedPositions = 0;
+
     public SBA(float drawMoveTolerance) 
     {
         this.drawMoveTolerance = drawMoveTolerance;
@@ -27,6 +29,7 @@ public class SBA
         //When at the wanted depth return the evalutation of the position
         if (depth == 0)
         {
+            searchedPositions++;
             return SBH.Evaluate(g);
         }
 
@@ -169,7 +172,7 @@ public class Move
         bool foundMove = false;
         for (int i = 0; i < tCards.Length; i++)
         {
-            if (tCards[i] == -10) { break; }
+            if (tCards[i] < 0) { break; }
 
             //Takes all cards currently in the pile and gives them as points to the player
             //(handIndex = 15 represents it being a point)
@@ -177,7 +180,7 @@ public class Move
         }
         for (int i = 0; i < pCards.Length; i++)
         {
-            if (pCards[i] == -10) { break; }
+            if (pCards[i] < 0) { break; }
 
             if (k < move.Length && pCards[i] == move[k])
             {
