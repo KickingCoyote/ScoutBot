@@ -128,159 +128,6 @@ public static class SBU
 
 
     /// <summary>
-    /// This function generates all possible moves. THIS METHOD NEEDS TO BE EXTREMELY FAST.
-    /// </summary>
-    /// <param name="player"></param>
-    /// <returns>a 2 dimensional array of all possible moves a player can play</returns>
-    //Move Generation for putting down cards
-    public static List<Move> GetPossibleMoves(GameState g, int player)
-    {
-
-        //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
-        int[] pCards = getPlayerCards(g.cards, player);
-        
-        //Get all the possible moves in the format of card indexes
-        List<int[]> temp = new List<int[]>();
-
-        for (int i = 0; i < pCards.Length; i++)
-        {
-
-            if (pCards[i] == -10) { break; }
-
-
-            temp.Add(new int[1] {pCards[i]});
-
-            for (int h = -1; h < 2; h++)
-            {
-                for (int j = 1; j < pCards.Length - 1; j++)
-                {
-                    if (pCards[i + j] == -10) { break; }
-                    if (getCurrentCardValue(getValueOfCard(g.cards, pCards[i])) == getCurrentCardValue(getValueOfCard(g.cards, pCards[i + j])) + j * h)
-                    {
-                        int[] move = new int[j + 1].SetArray(-10);
-                        move[0] = pCards[i];
-
-                        for (int k = 1; k < j + 1; k++)
-                        {
-                            move[k] = pCards[i + k];
-                            temp.Add(move);
-                        }
-                    }
-                    else { break; }
-                }
-            } 
-        }
-
-
-        //reformat the moves
-        List<Move> moves = new List<Move>();
-
-        for (int i = 0; i < temp.Count; i++)
-        {
-            moves.Add(new Move(g, temp.ElementAt(i), player));
-        }
-
-
-        return moves;
-    }
-
-    /// <summary>
-    /// Gets all legal put card moves
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="cards"></param>
-    /// <returns></returns>
-    public static List<Move> getAllLegalMoves(GameState g, int player)
-    {
-        List<Move> allPossibleMoves = GetPossibleMoves(g, player);
-        List<Move> allLegalMoves = new List<Move>(); 
-
-        if (getPlayerCards(g.cards, 0).ArrayLength() == 0) { return allPossibleMoves; }
-
-        foreach (Move move in allPossibleMoves)
-        {
-
-            if (MoveValue(g.cards, MoveIndexesFromMove(g.cards, move.cardDif)) > MoveValue(g.cards, getPlayerCards(g.cards, 0)))
-            {
-                allLegalMoves.Add(move);
-            }
-
-        }
-
-        return allLegalMoves;
-    }
-
-
-
-
-    /// <summary>
-    /// Gets all possible draw card moves (All GenerateDrawCardMoves are automatically legal) (This too needs to be very fast)
-    /// </summary>
-    /// <param name="cards"></param>
-    /// <param name="player"></param>
-    /// <returns></returns>
-    public static List<Move> getPossibleDrawCardMoves(int[] cards, int player)
-    {
-        int tCardsLength = getPlayerCards(cards, 0).ArrayLength();
-        List<Move> moves = new List<Move>();
-
-        if (tCardsLength == 0) return moves;
-
-
-        int[] pCards = getPlayerCards(cards, player);
-
-        for (int i = 0; i < pCards.Length; i++)
-        {
-            if (i != 0 && pCards[i - 1] == -10) { break; }
-
-            foreach (bool b1 in new bool[] { true, false })
-            {
-                foreach (bool b2 in new bool[] { true, false })
-                {
-                    Move move = new Move(cards, b1, b2, player, i);
-                    if (move.cardDif == null) { continue; }
-
-                    moves.Add(move);
-
-                }
-                if (tCardsLength == 1) { break; }
-            }
-
-        }
-
-        return moves;
-    }
-
-
-    
-
-
-
-
-    /// <summary>
-    /// Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
-    /// </summary>
-    /// <param name="cards"></param>
-    /// <param name="player"></param>
-    /// <returns>A 15 long array of card indexes where emtpy values are -10</returns>
-    public static int[] getPlayerCards(int[] cards, int player)
-    {
-        int[] pCards = new int[15].SetArray(-10);
-
-        for (int i = 0; i < cards.Length; i++)
-        {
-            //HandIndex 15 represents the card being a point and not actually in the hand
-            if (getCardOwner(cards[i]) == player && getCardHandIndex(cards[i]) != 15)
-            {
-                pCards[getCardHandIndex(cards[i])] = i;
-            }
-
-        }
-
-        return pCards;
-    }
-
-    /// <summary>
     /// Creates all the card values that determine what card index relates to what card. This is ran once on start
     /// </summary>
     public static void CreateCardValues()
@@ -383,69 +230,6 @@ public static class SBU
     }
 
 
-    //public static int[] getMoveIndexes(int[] move, int[] cards)
-    //{
-    //    int[] moveIndexes = new int[15];
-    //    SetArray(moveIndexes, -10);
-
-    //    return moveIndexes;
-    //}
-
-
-    public static int[] MoveIndexesFromMove(int[] cards, int[] move)
-    {
-
-        int[] cardsAfterMove = ArrayExtensions.AddArray(cards, move, false);
-        int[] moveIndexes = new int[15].SetArray(-10);
-
-        int k = 0;
-
-        for (int i = 0; i < 44; i++)
-        {
-            if (getCardOwner(cardsAfterMove[i]) == 0 && getCardOwner(cards[i]) != getCardOwner(cardsAfterMove[i]))
-            {
-                moveIndexes[k] = i;
-                k++;
-            }
-        }
-
-
-        return moveIndexes;
-    }
-
-
-    //gets the points of a move
-    /// <summary>
-    /// Gets the points of a combination of cards (by indexes) by refrencing a premade array
-    /// </summary>
-    /// <param name="move">the set of card indexes to be evaluated</param>
-    /// <returns>a int between 0 132 that is the value of that set of cards</returns>
-    public static int MoveValue(int[] cards, int[] move)
-    {
-        int moveLength = 0;
-        int moveMinCard = 1000;
-        int match;
-        if(move.Length == 1 || move[1] == -10 || getCurrentCardValue(getValueOfCard(cards, move[0])) == getCurrentCardValue(getValueOfCard(cards, move[1]))){
-            match = 1;
-        }
-        else { match = 0; }
-
-        for (int i = 0; i < move.Length; i++)
-        {
-            if (move[i] == -10) { break; }
-            moveLength++;
-            if (moveMinCard > getCurrentCardValue(getValueOfCard(cards, move[i])))
-            {
-                moveMinCard = getCurrentCardValue(getValueOfCard(cards, move[i]));
-            } 
-        }
-
-
-        int moveValue = (moveLength - 1) * 100 + match * 10 + moveMinCard - 1;
-
-        return Math.Max(-1, Array.BinarySearch(moveValues, moveValue));
-    }
-
 
     /// <summary>
     /// Function that checks if its game over or not
@@ -458,7 +242,7 @@ public static class SBU
         {
             return true;
         }
-        if(getPlayerCards(g.cards, g.turn)[0] == -10)
+        if(GameState.getPlayerCards(g.cards, g.turn)[0] == -10)
         {
             return true;
         }
@@ -477,7 +261,7 @@ public static class SBU
         int winningPlayer = 0;
         for (int i = 1; i < 5; i++)
         {
-            if(SBU.getPlayerScore(cards, i) > SBU.getPlayerScore(cards, winningPlayer))
+            if(getPlayerScore(cards, i) > getPlayerScore(cards, winningPlayer))
             {
                 winningPlayer = i;
             }

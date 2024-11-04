@@ -78,8 +78,7 @@ public static class ArrayExtensions
 
         int[] s = new int[a.Length];
 
-        int inverter = 1;
-        if (invertB) { inverter = -1; }
+        int inverter = invertB ? -1 : 1;
 
         for (int i = 0; i < a.Length; i++)
         {

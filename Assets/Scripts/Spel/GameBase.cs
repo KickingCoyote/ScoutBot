@@ -70,7 +70,7 @@ public class GameBase : MonoBehaviour
     {
         SBA search = new SBA(2);
 
-        search.DepthSearch(SBU.gameState, 4);
+        search.DepthSearch(SBU.gameState, 3);
         Debug.Log("Searched Positions: " + search.searchedPositions);
         SBU.gameState.Move(search.bestMove);
     }
@@ -149,7 +149,7 @@ public class GameBase : MonoBehaviour
             if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.gameState.cards, i) + ") : "; }
             else { s = "Table Pile: "; }
 
-            int[] playerCards = SBU.getPlayerCards(SBU.gameState.cards, i);
+            int[] playerCards = GameState.getPlayerCards(SBU.gameState.cards, i);
             for (int j = 0; j < playerCards.Length; j++)
             {
 
