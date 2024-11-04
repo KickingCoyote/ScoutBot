@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -13,7 +14,7 @@ public class GameBase : MonoBehaviour
 
     private string inputString;
 
-
+    [SerializeField] Settings settings;
 
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
@@ -39,7 +40,7 @@ public class GameBase : MonoBehaviour
     {
         for (int i = 0; i < 44; i++)
         {
-            SBU.gameState.cards[i] = i % 4 + 1 + 8 * Random.Range(0, 2) + 16 * (i / 4);
+            SBU.gameState.cards[i] = i % 4 + 1 + 8 * UnityEngine.Random.Range(0, 2) + 16 * (i / 4);
         }
         SBU.gameState.cards = SBU.ShuffleCards(SBU.gameState.cards);
 
@@ -68,10 +69,16 @@ public class GameBase : MonoBehaviour
 
     private void BotMove()
     {
-        SBA search = new SBA(2);
+        SBA search = new SBA(
+            settings.DrawMoveTolerance
+        );
 
-        search.DepthSearch(SBU.gameState, 3);
-        Debug.Log("Searched Positions: " + search.searchedPositions);
+        SBTimer timer = new SBTimer();
+        timer.StartTimer();
+        search.DepthSearch(SBU.gameState, settings.SearchDepth);
+        
+
+        Debug.Log("Searched Positions: " + search.searchedPositions + " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s");
         SBU.gameState.Move(search.bestMove);
     }
 

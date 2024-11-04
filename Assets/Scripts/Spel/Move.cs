@@ -231,7 +231,7 @@ public class Move
             {
                 for (int j = 1; j < pCards.Length - 1; j++)
                 {
-                    if (pCards[i + j] == -10) { break; }
+                    if (i + j >= pCards.Length || pCards[i + j] == -10) { break; }
                     if (SBU.getCurrentCardValue(SBU.getValueOfCard(g.cards, pCards[i])) == SBU.getCurrentCardValue(SBU.getValueOfCard(g.cards, pCards[i + j])) + j * h)
                     {
                         int[] move = new int[j + 1].SetArray(-10);
@@ -246,12 +246,6 @@ public class Move
                     else { break; }
                 }
             }
-        }
-
-
-        foreach (int[] i in temp)
-        {
-            
         }
 
         //reformat the moves

@@ -98,6 +98,9 @@ public class SBA
 
 }
 
+
+
+
 public struct GameState
 {
     public int[] cards;
@@ -108,6 +111,11 @@ public struct GameState
 
     private int[][] playerCards;
 
+    /// <summary>
+    /// When checking player cards for the first time store them in playerCards and on cosecutive checks retreive the data from the variable
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns></returns>
     public int[] getPlayerCards(int player) { return playerCards[player] = playerCards[player] == null ? getPlayerCards(cards, player) : playerCards[player]; }
 
     public GameState(int[] cards, int turn, int currentPileHolder)
@@ -123,8 +131,11 @@ public struct GameState
     {
         cards = ArrayExtensions.AddArray(cards, move.cardDif);
         currentPileHolder += move.pileHolderDif;
-        playerCards = new int[][] { null, null, null, null, null };
 
+        //Reset the playerCards data for the current player and middle pile
+        playerCards[0] = null; playerCards[turn] = null;
+
+        //Increment the turn by 1, if 4 set to 1
         turn = turn == 4 ? 1 : (turn + 1);
     }
 
