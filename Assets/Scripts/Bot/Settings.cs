@@ -13,4 +13,9 @@ public class Settings : MonoBehaviour
     /// A float from 0 to 1 determining how worse draw moves are ordered in move ordering 
     /// </summary>
     public float DrawMoveTolerance = 1;
+
+    /// <summary>
+    /// The seed for how the cards are distributed on game start, if left empty all cards are distributed randomly.
+    /// </summary>
+    public int GameSeed = 0;
 }

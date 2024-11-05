@@ -57,9 +57,11 @@ public static class SBU
     /// </summary>
     /// <param name="cards">The cards to be shuffled</param>
     /// <returns>The shuffled cards</returns>
-    public static int[] ShuffleCards(int[] cards)
+    public static int[] ShuffleCards(int[] cards, int seed)
     {
         int n = cards.Length;
+        if (seed != 0) { UnityEngine.Random.InitState((int)seed); }
+
         while (n > 1)
         {
             n--;
@@ -191,21 +193,6 @@ public static class SBU
     }
 
 
-    public static int getPlayerScore(int[] cards, int player)
-    {
-        int score = 0;
-
-        for(int i = 0; i < cards.Length; i++)
-        {
-            //If the card hand index is equal to 15 the card is counted as a point instead of a card
-            if (getCardOwner(cards[i]) == player && getCardHandIndex(cards[i]) == 15)
-            {
-                score++;
-            }
-        }
-        return score;
-    }
-
     /// <summary>
     /// Gets the card in x:y string format
     /// </summary>
@@ -229,47 +216,6 @@ public static class SBU
         return getCardFromValue(cards, int.Parse(str[0]) * 16 + int.Parse(str[1]));
     }
 
-
-
-    /// <summary>
-    /// Function that checks if its game over or not
-    /// </summary>
-    /// <param name="g">game state</param>
-    /// <returns>true if game over, otherwise false</returns>
-    public static bool CheckGameOver(GameState g)
-    {
-        if (g.currentPileHolder == g.turn)
-        {
-            return true;
-        }
-        if(GameState.getPlayerCards(g.cards, g.turn)[0] == -10)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-
-    /// <summary>
-    /// Gets which player is in the lead purely on score
-    /// </summary>
-    /// <param name="cards"></param>
-    /// <returns>int for winning player</returns>
-    public static int getWinningPlayer(int[] cards)
-    {
-        int winningPlayer = 0;
-        for (int i = 1; i < 5; i++)
-        {
-            if(getPlayerScore(cards, i) > getPlayerScore(cards, winningPlayer))
-            {
-                winningPlayer = i;
-            }
-        }
-
-        return winningPlayer;
-    }
-    
 
 
 }

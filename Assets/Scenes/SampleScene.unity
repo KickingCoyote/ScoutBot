@@ -800,7 +800,6 @@ MonoBehaviour:
   - {fileID: 630941454}
   - {fileID: 684138110}
   infoText: {fileID: 2064769862}
-  cards: 
 --- !u!1 &630941452
 GameObject:
   m_ObjectHideFlags: 0
@@ -1287,6 +1286,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SearchDepth: 4
   DrawMoveTolerance: 1
+  GameSeed: 4
 --- !u!4 &746588247
 Transform:
   m_ObjectHideFlags: 0
