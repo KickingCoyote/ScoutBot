@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -13,7 +14,7 @@ public class GameBase : MonoBehaviour
 
     private string inputString;
 
-
+    [SerializeField] Settings settings;
 
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
@@ -35,12 +36,11 @@ public class GameBase : MonoBehaviour
 
 
 
-
     private void DistributeCards()
     {
         for (int i = 0; i < 44; i++)
         {
-            SBU.gameState.cards[i] = i % 4 + 1 + 8 * Random.Range(0, 2) + 16 * (i / 4);
+            SBU.gameState.cards[i] = i % 4 + 1 + 8 * UnityEngine.Random.Range(0, 2) + 16 * (i / 4);
         }
         SBU.gameState.cards = SBU.ShuffleCards(SBU.gameState.cards);
 
@@ -49,30 +49,38 @@ public class GameBase : MonoBehaviour
 
     private void GameUpdate()
     {
-
-        //Turn is a number between 1 and 4 dictating whose turn it is
-        if (SBU.gameState.turn == 4) { SBU.gameState.turn = 1; }
-        else { SBU.gameState.turn++; }
-
-
+        //for debuging
         cards = SBU.gameState.cards;
 
-        UpdateGUI();
-
-        if (SBU.CheckGameOver(new GameState(SBU.gameState.cards, SBU.gameState.turn, SBU.gameState.currentPileHolder)))
+        if (SBU.CheckGameOver(SBU.gameState))
         {
             GameEnd();
         }
 
         if(SBU.gameState.turn == 1)
         {
-            SBA.DepthSearch(SBU.gameState, 3);
-            SBU.gameState.Move(SBA.bestMove);
+            BotMove();
         }
+
+        UpdateGUI();
+
 
     }
 
+    private void BotMove()
+    {
+        SBA search = new SBA(
+            settings.DrawMoveTolerance
+        );
 
+        SBTimer timer = new SBTimer();
+        timer.StartTimer();
+        search.DepthSearch(SBU.gameState, settings.SearchDepth);
+        
+
+        Debug.Log("Searched Positions: " + search.searchedPositions + " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s");
+        SBU.gameState.Move(search.bestMove);
+    }
 
 
     //Activated from buttons ingame
@@ -82,11 +90,11 @@ public class GameBase : MonoBehaviour
 
 
 
-        int[] m = SBU.GenerateDrawCardMove(SBU.gameState.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.gameState.turn, int.Parse(s[2]));
+        Move m = new Move(SBU.gameState.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.gameState.turn, int.Parse(s[2]));
 
         if (m != null)
         {
-            SBU.gameState.cards = SBU.CopyArray(SBU.AddArray(SBU.gameState.cards, m, false));
+            SBU.gameState.Move(m);
         }
         else
         {
@@ -112,21 +120,24 @@ public class GameBase : MonoBehaviour
         }
 
 
-        int[] m = SBU.GenerateMove(SBU.gameState.cards, move, SBU.gameState.turn);
+        Move m = new Move(SBU.gameState, move);
 
 
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
-        if (SBU.ContainsArray(SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards), m))
-        {
-            SBU.gameState.cards = SBU.CopyArray(SBU.AddArray(SBU.gameState.cards, m, false));
-        }
-        else
-        {
-            Debug.Log("Invalid Move, Cannot put down those cards");
-            return;
-        }
+        //THIS DOES NOT WORK DUE TO CONTAIN COMPARING BY REF
+        //if (SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards).Contains(m))
+        //{
+        //  SBU.gameState.cards = SBU.CopyArray(ArrayExtensions.AddArray(SBU.gameState.cards, m.cardDif));
+        //}
+        //else
+        //{
+        //    Debug.Log("Invalid Move, Cannot put down those cards");
+        //    return;
+        //}
 
-        SBU.gameState.currentPileHolder = SBU.gameState.turn;
+
+        SBU.gameState.Move(m);
+
         GameUpdate();
     }
 
@@ -145,7 +156,7 @@ public class GameBase : MonoBehaviour
             if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.gameState.cards, i) + ") : "; }
             else { s = "Table Pile: "; }
 
-            int[] playerCards = SBU.getPlayerCards(SBU.gameState.cards, i);
+            int[] playerCards = GameState.getPlayerCards(SBU.gameState.cards, i);
             for (int j = 0; j < playerCards.Length; j++)
             {
 
