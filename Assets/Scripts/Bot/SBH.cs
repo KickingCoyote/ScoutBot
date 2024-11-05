@@ -20,12 +20,23 @@ public static class SBH
 
         int currentScore = 0;
 
+        int computerScore = 0;
+        for(int i = 2; i < 5; i++)
+        {
+            List<Move> possibleComputerMoves = Move.GetPossibleMoves(g, i);
+
+            for (int j = 0; j < possibleComputerMoves.Count; j++)
+            {
+                computerScore += possibleComputerMoves[j].getValue(g.cards);
+            }
+        }
+
         for (int j = 0; j < possibleMoves.Count; j++)
         {
-            currentScore = currentScore + possibleMoves[j].getValue(g.cards);
+            currentScore += possibleMoves[j].getValue(g.cards);
         }
         
-        return currentScore;
+        return currentScore - (computerScore / 3);
     }
     
 
