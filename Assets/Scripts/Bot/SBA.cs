@@ -133,7 +133,7 @@ public struct GameState
         currentPileHolder += move.pileHolderDif;
 
         //Reset the playerCards data for the current player and middle pile
-        playerCards[0] = null; playerCards[turn] = null;
+        playerCards = new int[][] { null, null, null, null, null };
 
         //Increment the turn by 1, if 4 set to 1
         turn = turn == 4 ? 1 : (turn + 1);
