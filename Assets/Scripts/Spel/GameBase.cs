@@ -26,6 +26,8 @@ public class GameBase : MonoBehaviour
     private int round;
     private bool gameOver;
 
+    private SBTimer gameTimer;
+
     void Start()
     {
         gameOver = false;
@@ -39,6 +41,10 @@ public class GameBase : MonoBehaviour
         DistributeCards();
 
         round = 0;
+
+        gameTimer = new SBTimer();
+        gameTimer.StartTimer();
+
         GameUpdate();
 
     }
@@ -74,7 +80,7 @@ public class GameBase : MonoBehaviour
 
     }
 
-    public void BotMove()
+    public void BotMove(bool logSearch = true)
     {
         SBA search = new SBA(
             SBU.gameState,
@@ -85,9 +91,16 @@ public class GameBase : MonoBehaviour
         SBTimer timer = new SBTimer();
         timer.StartTimer();
         search.DepthSearch(settings.SearchDepth, -2147483647, 2147483647);
-        
 
-        Debug.Log("Searched Positions: " + search.searchedPositions + " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s");
+
+        if (logSearch) { 
+            Debug.Log(
+            "Searched Positions: " + search.searchedPositions + 
+            " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + 
+            "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s"
+            ); 
+        }
+
         SBU.gameState.Move(search.bestMove);
         moveHistory.Add(search.bestMove);
 
@@ -112,7 +125,7 @@ public class GameBase : MonoBehaviour
         if (gameOver) { Start(); }
         while (!gameOver)
         {
-            BotMove();
+            BotMove(false);
         }
     }
 
@@ -213,7 +226,7 @@ public class GameBase : MonoBehaviour
     {
         gameOver = true;
         UpdateGUI();
-        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!");
+        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + MathF.Round(gameTimer.Timer(), 3));
     }
 
 }
