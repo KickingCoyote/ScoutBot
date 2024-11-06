@@ -37,10 +37,11 @@ public class SBA
         int p =  inverter * -2147483647;
 
 
-        //Checks if it is game over, if the current player is winning return infinity otherwise -infinity as there is nothing better/worse than winning/losing the game
+        //Checks if it is game over, if the current player is winning return (-- = +) infinity otherwise -infinity as there is nothing better/worse than winning/losing the game
         if (g.isGameOver())
         {
-            return g.getWinningPlayer() == maximizer ? -p : p;
+            searchedPositions++;
+            return g.getWinningPlayer() == maximizer ? 2147483647 : -2147483647;
         }
 
 
@@ -52,12 +53,12 @@ public class SBA
         }
 
 
-        //TODO: Fix him skipping his turn when having no possible moves
         List<Move> moves = Move.GetPossibleMoves(g, g.turn);
         
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
-        
 
+        //Current move ordering decreases NPS by 25% and doubles amount of searched positions.
+        //MoveOrdering(moves);
 
         if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); }
 
@@ -74,7 +75,7 @@ public class SBA
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
 
-                if (eval > p) { bestMove = move; }
+                if (eval >= p) { bestMove = move; }
                 p = Math.Max(p, eval);
 
                 g.UndoMove(move);
@@ -94,7 +95,7 @@ public class SBA
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
 
-                if (eval < p) { bestMove = move; }
+                if (eval <= p) { bestMove = move; }
                 p = Math.Min(p, eval);
 
                 g.UndoMove(move);
@@ -105,21 +106,28 @@ public class SBA
             }
         }
 
-
         this.bestMove = bestMove;
         
         return p;
     }
 
 
-    /// <summary>
-    /// Prunes the amount of moves drastically by removing all obvoulsy terrible draw card moves which massively increases preformance
-    /// </summary>
-    /// <param name="moves">All draw card moves</param>
-    /// <param name="tolerance">Number from 0 to 1 What procent of moves</param>
-    private void PruneDrawMoves(List<Move> moves, float? tolerance = null)
+    private void MoveOrdering(List<Move> moves)
     {
+        
+        foreach(Move move in moves)
+        {
+            if (!move.isDrawMove)
+            {
+                move.scoreEstimate = 100;
+            }
+            else
+            {
+                //if the neighbouring cards are not ladder / match asume its bad
+            }
+        }
 
+        moves.Sort();
     }
 
 

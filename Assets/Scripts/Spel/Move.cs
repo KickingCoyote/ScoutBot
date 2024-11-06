@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Move
+public class Move : IComparable<Move>
 {
 
 
@@ -13,6 +13,9 @@ public class Move
     public int pileHolderDif;
 
     public bool isDrawMove;
+
+    public int scoreEstimate;
+
 
     public Move() { }
     public Move(int[] cardDif, int pileHolderDif, bool isDrawMove)
@@ -217,7 +220,6 @@ public class Move
         int[] pCards = g.getPlayerCards(player);
 
         int tCardsValue = getValue(g.cards, GameState.getPlayerCards(g.cards, 0));
-
         //Get all the possible moves in the format of card indexes
         List<int[]> temp = new List<int[]>();
 
@@ -227,7 +229,7 @@ public class Move
             if (pCards[i] == -10) { break; }
 
 
-            temp.Add(new int[1] { pCards[i] });
+            if (!onlyLegalMoves || getValue(g.cards, new int[1] { pCards[i] }) > tCardsValue) { temp.Add(new int[1] { pCards[i] }); }
 
             for (int h = -1; h < 2; h++)
             {
@@ -301,6 +303,8 @@ public class Move
         return moves;
     }
 
-
-
+    public int CompareTo(Move other)
+    {
+        return this.scoreEstimate.CompareTo(other.scoreEstimate);
+    }
 }

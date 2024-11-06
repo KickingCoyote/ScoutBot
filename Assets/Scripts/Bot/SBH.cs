@@ -16,22 +16,25 @@ public static class SBH
     public static int Evaluate(GameState g, int maximizer)
     {
 
-        int currentScore = 0;
+        return 3 * g.getPlayerPoints(maximizer) - g.getPlayerPoints((maximizer % 4) + 1) - g.getPlayerPoints(((maximizer + 1) % 4) + 1) - g.getPlayerPoints(((maximizer + 2) % 4) + 1);
 
 
-        for (int i = 1; i < 5; i++)
-        {
-            int inverter = maximizer == i ? 10 : -3;
+        //int currentScore = 0;
 
-            List<Move> possibleComputerMoves = Move.GetPossibleMoves(g, i);
 
-            for (int j = 0; j < possibleComputerMoves.Count; j++)
-            {
-                currentScore += inverter * possibleComputerMoves[j].getValue(g.cards);
-            }
-        }
+        //for (int i = 1; i < 5; i++)
+        //{
+        //    int inverter = maximizer == i ? 3 : -1;
 
-        return currentScore;
+        //    List<Move> possibleComputerMoves = Move.GetPossibleMoves(g, i);
+
+        //    for (int j = 0; j < possibleComputerMoves.Count; j++)
+        //    {
+        //        currentScore += inverter * possibleComputerMoves[j].getValue(g.cards);
+        //    }
+        //}
+
+        //return currentScore;
     }
     
 

@@ -55,20 +55,15 @@ public class GameBase : MonoBehaviour
             return;
         }
 
-        if(SBU.gameState.turn == 1)
-        {
-            BotMove();
-        }
-
         UpdateGUI();
 
     }
 
-    private void BotMove()
+    public void BotMove()
     {
         SBA search = new SBA(
             SBU.gameState,
-            1,
+            SBU.gameState.turn,
             settings.DrawMoveTolerance
         );
 
@@ -79,6 +74,8 @@ public class GameBase : MonoBehaviour
 
         Debug.Log("Searched Positions: " + search.searchedPositions + " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s");
         SBU.gameState.Move(search.bestMove);
+
+        GameUpdate();
     }
 
 
