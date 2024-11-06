@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -20,14 +21,24 @@ public class GameBase : MonoBehaviour
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
     [SerializeField] TextMeshProUGUI infoText;
 
+    private List<Move> moveHistory;
+
+    private int round;
+    private bool gameOver;
+
     void Start()
     {
+        gameOver = false;
+        moveHistory = new List<Move>();
+
+        SBU.gameState = new GameState(new int[44], 1, 0);
 
         //Maps all card indexes (0 - 44) to their actual values
         SBU.CreateCardValues();
 
         DistributeCards();
 
+        round = 0;
         GameUpdate();
 
     }
@@ -37,23 +48,27 @@ public class GameBase : MonoBehaviour
 
     private void DistributeCards()
     {
+        if (settings.GameSeed != 0) { UnityEngine.Random.InitState((int)settings.GameSeed); }
+
         for (int i = 0; i < 44; i++)
         {
             SBU.gameState.cards[i] = i % 4 + 1 + 8 * UnityEngine.Random.Range(0, 2) + 16 * (i / 4);
         }
-        SBU.gameState.cards = SBU.ShuffleCards(SBU.gameState.cards, settings.GameSeed);
+        SBU.gameState.cards = SBU.ShuffleCards(SBU.gameState.cards);
 
     }
 
 
     private void GameUpdate()
     {
-
+        
         if (SBU.gameState.isGameOver())
         {
             GameEnd();
             return;
         }
+
+        if (SBU.gameState.turn == 1) { round++; }
 
         UpdateGUI();
 
@@ -64,7 +79,7 @@ public class GameBase : MonoBehaviour
         SBA search = new SBA(
             SBU.gameState,
             SBU.gameState.turn,
-            settings.DrawMoveTolerance
+            settings.FearBias
         );
 
         SBTimer timer = new SBTimer();
@@ -74,10 +89,32 @@ public class GameBase : MonoBehaviour
 
         Debug.Log("Searched Positions: " + search.searchedPositions + " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s");
         SBU.gameState.Move(search.bestMove);
+        moveHistory.Add(search.bestMove);
 
         GameUpdate();
     }
 
+
+    public void UndoMove()
+    {
+        if (moveHistory.Count == 0) { Debug.Log("No more to moves to undo"); return; }
+
+        gameOver = false;
+
+        SBU.gameState.UndoMove(moveHistory.Last());
+        moveHistory.Remove(moveHistory.Last());
+
+        GameUpdate();
+    }
+
+    public void SimulateGame()
+    {
+        if (gameOver) { Start(); }
+        while (!gameOver)
+        {
+            BotMove();
+        }
+    }
 
     //Activated from buttons ingame
     public void TakeCard()
@@ -87,10 +124,10 @@ public class GameBase : MonoBehaviour
 
 
         Move m = new Move(SBU.gameState.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.gameState.turn, int.Parse(s[2]));
-
         if (m != null)
         {
             SBU.gameState.Move(m);
+            moveHistory.Add(m);
         }
         else
         {
@@ -118,7 +155,6 @@ public class GameBase : MonoBehaviour
 
         Move m = new Move(SBU.gameState, move);
 
-
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
         //THIS DOES NOT WORK DUE TO CONTAIN COMPARING BY REF
         //if (SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards).Contains(m))
@@ -133,6 +169,7 @@ public class GameBase : MonoBehaviour
 
 
         SBU.gameState.Move(m);
+        moveHistory.Add(m);
 
         GameUpdate();
     }
@@ -168,12 +205,13 @@ public class GameBase : MonoBehaviour
         }
 
 
-        infoText.text = "Turn: " + SBU.gameState.turn;
+        infoText.text = "Turn: " + SBU.gameState.turn + "   |   Round: " + round;
 
     }
 
     private void GameEnd()
     {
+        gameOver = true;
         UpdateGUI();
         Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!");
     }

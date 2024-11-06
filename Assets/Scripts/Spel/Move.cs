@@ -16,6 +16,10 @@ public class Move : IComparable<Move>
 
     public int scoreEstimate;
 
+    ///// <summary>
+    ///// The cards used in the move, incase of draw move the drawn move
+    ///// </summary>
+    //public int[] cards; 
 
     public Move() { }
     public Move(int[] cardDif, int pileHolderDif, bool isDrawMove)

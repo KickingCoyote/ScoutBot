@@ -16,7 +16,7 @@ using UnityEngine.SocialPlatforms.Impl;
 /// </summary>
 public static class SBU
 {
-    public static GameState gameState = new GameState(new int[44], 1, 0);
+    public static GameState gameState;
 
     //gameState.cards
     //All cards are stored in 1 44 length int[], the index represents which card it is and the value has all the needed data about that card 
@@ -57,10 +57,9 @@ public static class SBU
     /// </summary>
     /// <param name="cards">The cards to be shuffled</param>
     /// <returns>The shuffled cards</returns>
-    public static int[] ShuffleCards(int[] cards, int seed)
+    public static int[] ShuffleCards(int[] cards)
     {
         int n = cards.Length;
-        if (seed != 0) { UnityEngine.Random.InitState((int)seed); }
 
         while (n > 1)
         {

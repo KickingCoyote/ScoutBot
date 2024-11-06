@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -16,25 +17,19 @@ public static class SBH
     public static int Evaluate(GameState g, int maximizer)
     {
 
-        return 3 * g.getPlayerPoints(maximizer) - g.getPlayerPoints((maximizer % 4) + 1) - g.getPlayerPoints(((maximizer + 1) % 4) + 1) - g.getPlayerPoints(((maximizer + 2) % 4) + 1);
+        int currentScore = 0;
 
+        
+        for (int i = 1; i < 5; i++)
+        {
+            if (i == maximizer) { continue; }
 
-        //int currentScore = 0;
+            int weight = 1;
 
-
-        //for (int i = 1; i < 5; i++)
-        //{
-        //    int inverter = maximizer == i ? 3 : -1;
-
-        //    List<Move> possibleComputerMoves = Move.GetPossibleMoves(g, i);
-
-        //    for (int j = 0; j < possibleComputerMoves.Count; j++)
-        //    {
-        //        currentScore += inverter * possibleComputerMoves[j].getValue(g.cards);
-        //    }
-        //}
-
-        //return currentScore;
+            currentScore -= weight * g.getPlayerPoints(i);
+        }
+        
+        return currentScore + 3 * g.getPlayerPoints(maximizer);
     }
     
 

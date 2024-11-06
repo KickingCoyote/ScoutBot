@@ -11,7 +11,7 @@ public class SBA
 
     public Move bestMove;
 
-    private float drawMoveTolerance;
+    private float fearBias;
 
     public int searchedPositions = 0;
 
@@ -19,10 +19,10 @@ public class SBA
 
     private int maximizer;
 
-    public SBA(GameState g, int maximizer, float drawMoveTolerance) 
+    public SBA(GameState g, int maximizer, float fearBias) 
     {
         this.g = g;
-        this.drawMoveTolerance = drawMoveTolerance;
+        this.fearBias = fearBias;
         this.maximizer = maximizer;
     }
 
@@ -146,7 +146,7 @@ public struct GameState
 
     private int[][] playerCards;
 
-    private int[] playerPoints;
+    public int[] playerPoints;
 
     /// <summary>
     /// When checking player cards for the first time store them in playerCards and on cosecutive checks retreive the data from the variable
@@ -187,6 +187,7 @@ public struct GameState
     {
         cards = ArrayExtensions.AddArray(cards, move.cardDif, true);
         currentPileHolder -= move.pileHolderDif;
+        playerCards = new int[][] { null, null, null, null, null };
 
         turn = turn == 1 ? 4 : (turn - 1);
 

@@ -10,9 +10,9 @@ public class Settings : MonoBehaviour
     public int SearchDepth = 1;
 
     /// <summary>
-    /// A float from 0 to 1 determining how worse draw moves are ordered in move ordering 
+    /// A float that determines how it should alocate extra threat weight to the oponents depending on how well they are doing, 1 means no extra weight, higher number means more
     /// </summary>
-    public float DrawMoveTolerance = 1;
+    public float FearBias = 1;
 
     /// <summary>
     /// The seed for how the cards are distributed on game start, if left empty all cards are distributed randomly.
