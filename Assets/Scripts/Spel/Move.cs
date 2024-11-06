@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Move
+public class Move : IComparable<Move>
 {
 
 
@@ -13,6 +13,9 @@ public class Move
     public int pileHolderDif;
 
     public bool isDrawMove;
+
+    public int scoreEstimate;
+
 
     public Move() { }
     public Move(int[] cardDif, int pileHolderDif, bool isDrawMove)
@@ -210,12 +213,13 @@ public class Move
     /// <param name="player"></param>
     /// <returns>a 2 dimensional array of all possible moves a player can play</returns>
     //Move Generation for putting down cards
-    public static List<Move> GetPossibleMoves(GameState g, int player)
+    public static List<Move> GetPossibleMoves(GameState g, int player, bool onlyLegalMoves = true)
     {
 
         //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
         int[] pCards = g.getPlayerCards(player);
 
+        int tCardsValue = getValue(g.cards, GameState.getPlayerCards(g.cards, 0));
         //Get all the possible moves in the format of card indexes
         List<int[]> temp = new List<int[]>();
 
@@ -225,7 +229,7 @@ public class Move
             if (pCards[i] == -10) { break; }
 
 
-            temp.Add(new int[1] { pCards[i] });
+            if (!onlyLegalMoves || getValue(g.cards, new int[1] { pCards[i] }) > tCardsValue) { temp.Add(new int[1] { pCards[i] }); }
 
             for (int h = -1; h < 2; h++)
             {
@@ -240,7 +244,8 @@ public class Move
                         for (int k = 1; k < j + 1; k++)
                         {
                             move[k] = pCards[i + k];
-                            temp.Add(move);
+                            //If onlyLegalMoves = true check if the moveValue is higher than table pile
+                            if (!onlyLegalMoves || getValue(g.cards, move) > tCardsValue) { temp.Add(move); }
                         }
                     }
                     else { break; }
@@ -258,27 +263,6 @@ public class Move
 
         return moves;
     }
-
-    /// <summary>
-    /// Gets all legal put card moves
-    /// </summary>
-    /// <param name="player"></param>
-    /// <returns></returns>
-    public static List<Move> getAllLegalMoves(GameState g, int player)
-    {
-        List<Move> allPossibleMoves = GetPossibleMoves(g, player);
-        List<Move> allLegalMoves = new List<Move>();
-
-        if (g.getPlayerCards(0).ArrayLength() == 0) { return allPossibleMoves; }
-
-        foreach (Move move in allPossibleMoves)
-        {
-            if (move.getValue(g.cards) > getValue(g.cards, GameState.getPlayerCards(g.cards, 0))) { allLegalMoves.Add(move); }
-        }
-
-        return allLegalMoves;
-    }
-
 
 
 
@@ -319,6 +303,8 @@ public class Move
         return moves;
     }
 
-
-
+    public int CompareTo(Move other)
+    {
+        return this.scoreEstimate.CompareTo(other.scoreEstimate);
+    }
 }

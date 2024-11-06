@@ -1,5 +1,6 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 /// <summary>
 /// Scout Bot Algorithm.
@@ -14,69 +15,95 @@ public class SBA
 
     public int searchedPositions = 0;
 
-    public SBA(float drawMoveTolerance) 
+    private GameState g;
+
+    private int maximizer;
+
+    public SBA(GameState g, int maximizer, float drawMoveTolerance) 
     {
+        this.g = g;
         this.drawMoveTolerance = drawMoveTolerance;
+        this.maximizer = maximizer;
     }
 
-
-    public int DepthSearch(GameState g, int depth)
+    //Paranoid MIN MAX Algorithm 
+    public int DepthSearch(int depth, int alpha, int beta)
     {
 
-        //Paranoid MIN MAX Algorithm 
+        int inverter = g.turn == maximizer ? 1 : -1;
+
+
+        //Starts of being infinitely terrible for the current player
+        int p =  inverter * -2147483647;
+
+
+        //Checks if it is game over, if the current player is winning return (-- = +) infinity otherwise -infinity as there is nothing better/worse than winning/losing the game
+        if (g.isGameOver())
+        {
+            searchedPositions++;
+            return g.getWinningPlayer() == maximizer ? 2147483647 : -2147483647;
+        }
 
 
         //When at the wanted depth return the evalutation of the position
         if (depth == 0)
         {
             searchedPositions++;
-            return SBH.Evaluate(g);
+            return SBH.Evaluate(g, maximizer);
         }
 
 
-        //TODO: Fix him skipping his turn when having no possible moves
-        List<Move> moves = Move.getAllLegalMoves(g, g.turn);
+        List<Move> moves = Move.GetPossibleMoves(g, g.turn);
         
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
-        
 
+        //Current move ordering decreases NPS by 25% and doubles amount of searched positions.
+        //MoveOrdering(moves);
 
-        if (moves.Count == 0)
-        {
-            Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth);
+        if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); }
 
-        }
-
-        //player 2, 3, 4 will be minimizers and therefore try to reduce the score, hence 2, 3, 4 return -1 while player 1 will be the maximizer and therefore return 1
-        int inverter = g.turn == 1 ? 1 : -1;
-
-
-        //Starts of being infinitely terrible for the current player
-        int p = inverter * -2147483647;
         Move bestMove = new Move();
 
-        foreach (Move move in moves)
+        if (g.turn == maximizer)
         {
-            
-            g.Move(move);
+            foreach (Move move in moves)
+            {
 
-            //For each move search deeper and see how good the position is
-            int eval = DepthSearch(g, depth - 1);
+                g.Move(move);
 
-            //Each time if the position is better then p set p to eval
-            //For the the maximizer it will always choose the highest possible value between eval and p, while the minimizer picks the minimal value
-            if(inverter == 1) {
-                if (p < eval) { bestMove = move; }
+                //For each move search deeper and see how good the position is
+                int eval = DepthSearch(depth - 1, alpha, beta);
 
-                p = Mathf.Max(p, eval); 
+
+                if (eval >= p) { bestMove = move; }
+                p = Math.Max(p, eval);
+
+                g.UndoMove(move);
+
+                alpha = Math.Max(alpha, p);
+                if (beta <= alpha) { break; }
             }
-            else { 
-                if (p > eval) { bestMove = move; }
-                p = Mathf.Min(p, eval); 
-  
-            }
+        }
+        else
+        {
+            foreach (Move move in moves)
+            {
 
-            g.UndoMove(move);
+                g.Move(move);
+
+                //For each move search deeper and see how good the position is
+                int eval = DepthSearch(depth - 1, alpha, beta);
+
+
+                if (eval <= p) { bestMove = move; }
+                p = Math.Min(p, eval);
+
+                g.UndoMove(move);
+
+                beta = Math.Min(beta, p);
+                if (beta <= alpha) { break; }
+
+            }
         }
 
         this.bestMove = bestMove;
@@ -85,14 +112,22 @@ public class SBA
     }
 
 
-    /// <summary>
-    /// Prunes the amount of moves drastically by removing all obvoulsy terrible draw card moves which massively increases preformance
-    /// </summary>
-    /// <param name="moves">All draw card moves</param>
-    /// <param name="tolerance">Number from 0 to 1 What procent of moves</param>
-    private void PruneDrawMoves(List<Move> moves, float? tolerance = null)
+    private void MoveOrdering(List<Move> moves)
     {
+        
+        foreach(Move move in moves)
+        {
+            if (!move.isDrawMove)
+            {
+                move.scoreEstimate = 100;
+            }
+            else
+            {
+                //if the neighbouring cards are not ladder / match asume its bad
+            }
+        }
 
+        moves.Sort();
     }
 
 
@@ -111,6 +146,8 @@ public struct GameState
 
     private int[][] playerCards;
 
+    private int[] playerPoints;
+
     /// <summary>
     /// When checking player cards for the first time store them in playerCards and on cosecutive checks retreive the data from the variable
     /// </summary>
@@ -118,17 +155,23 @@ public struct GameState
     /// <returns></returns>
     public int[] getPlayerCards(int player) { return playerCards[player] = playerCards[player] == null ? getPlayerCards(cards, player) : playerCards[player]; }
 
+    public int getPlayerPoints(int player) { return playerPoints[player - 1]; }
+
     public GameState(int[] cards, int turn, int currentPileHolder)
     {
         this.cards = cards;
         this.turn = turn;
         this.currentPileHolder = currentPileHolder;
         playerCards = new int[][] { null, null, null, null, null};
+        playerPoints = new int[4];
     }
 
 
     public void Move(Move move)
     {
+        if (!move.isDrawMove) { playerPoints[turn - 1] += getPlayerCards(cards, 0).ArrayLength(); }
+        else {  playerPoints[currentPileHolder - 1]++; }
+
         cards = ArrayExtensions.AddArray(cards, move.cardDif);
         currentPileHolder += move.pileHolderDif;
 
@@ -143,9 +186,12 @@ public struct GameState
 
     {
         cards = ArrayExtensions.AddArray(cards, move.cardDif, true);
-        currentPileHolder -= currentPileHolder;
+        currentPileHolder -= move.pileHolderDif;
 
         turn = turn == 1 ? 4 : (turn - 1);
+
+        if (!move.isDrawMove) { playerPoints[turn - 1] -= getPlayerCards(cards, 0).ArrayLength(); }
+        else { playerPoints[currentPileHolder - 1]--; }
 
     }
 
@@ -171,6 +217,31 @@ public struct GameState
         }
 
         return pCards;
+    }
+
+    public int getWinningPlayer()
+    {
+        return Array.IndexOf(playerPoints, Enumerable.Max(playerPoints)) + 1;
+    }
+
+
+
+    /// <summary>
+    /// Function that checks if it is game over or not
+    /// </summary>
+    public bool isGameOver()
+    {
+        if (currentPileHolder == turn)
+        {
+            return true;
+        }
+        //check previous player due to game over being check post turn incrementing
+        if (getPlayerCards(turn == 1 ? 4 : (turn - 1)).ArrayLength() == 0)
+        {
+            return true;
+        }
+
+        return false;
     }
 
 }

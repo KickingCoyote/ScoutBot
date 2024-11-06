@@ -13,30 +13,28 @@ public static class SBH
 {
 
     //Takes in the state of the game and calculates its value
-    public static int Evaluate(GameState g)
+    public static int Evaluate(GameState g, int maximizer)
     {
 
-        List<Move> possibleMoves = Move.getAllLegalMoves(g, 1);
+        return 3 * g.getPlayerPoints(maximizer) - g.getPlayerPoints((maximizer % 4) + 1) - g.getPlayerPoints(((maximizer + 1) % 4) + 1) - g.getPlayerPoints(((maximizer + 2) % 4) + 1);
 
-        int currentScore = 0;
 
-        int computerScore = 0;
-        for (int i = 2; i < 5; i++)
-        {
-            List<Move> possibleComputerMoves = Move.getAllLegalMoves(g, i);
+        //int currentScore = 0;
 
-            for (int j = 0; j < possibleComputerMoves.Count; j++)
-            {
-                computerScore += possibleComputerMoves[j].getValue(g.cards);
-            }
-        }
 
-        for (int j = 0; j < possibleMoves.Count; j++)
-        {
-            currentScore = currentScore + possibleMoves[j].getValue(g.cards);
-        }
+        //for (int i = 1; i < 5; i++)
+        //{
+        //    int inverter = maximizer == i ? 3 : -1;
 
-        return currentScore - (computerScore / 3);
+        //    List<Move> possibleComputerMoves = Move.GetPossibleMoves(g, i);
+
+        //    for (int j = 0; j < possibleComputerMoves.Count; j++)
+        //    {
+        //        currentScore += inverter * possibleComputerMoves[j].getValue(g.cards);
+        //    }
+        //}
+
+        //return currentScore;
     }
     
 

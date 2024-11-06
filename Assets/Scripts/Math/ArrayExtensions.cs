@@ -34,10 +34,7 @@ public static class ArrayExtensions
     {
         for (int i = 0; i < a.Length; i++)
         {
-            if (a[i] == -10)
-            {
-                return i;
-            }
+            if (a[i] < 0) { return i; }
         }
         return a.Length;
     }
@@ -117,4 +114,5 @@ public static class ArrayExtensions
         return b;
 
     }
+
 }

@@ -19,7 +19,6 @@ public class GameBase : MonoBehaviour
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
     [SerializeField] TextMeshProUGUI infoText;
-    [SerializeField] int[] cards;
 
     void Start()
     {
@@ -42,44 +41,41 @@ public class GameBase : MonoBehaviour
         {
             SBU.gameState.cards[i] = i % 4 + 1 + 8 * UnityEngine.Random.Range(0, 2) + 16 * (i / 4);
         }
-        SBU.gameState.cards = SBU.ShuffleCards(SBU.gameState.cards);
+        SBU.gameState.cards = SBU.ShuffleCards(SBU.gameState.cards, settings.GameSeed);
 
     }
 
 
     private void GameUpdate()
     {
-        //for debuging
-        cards = SBU.gameState.cards;
 
-        if (SBU.CheckGameOver(SBU.gameState))
+        if (SBU.gameState.isGameOver())
         {
             GameEnd();
-        }
-
-        if(SBU.gameState.turn == 1)
-        {
-            BotMove();
+            return;
         }
 
         UpdateGUI();
 
-
     }
 
-    private void BotMove()
+    public void BotMove()
     {
         SBA search = new SBA(
+            SBU.gameState,
+            SBU.gameState.turn,
             settings.DrawMoveTolerance
         );
 
         SBTimer timer = new SBTimer();
         timer.StartTimer();
-        search.DepthSearch(SBU.gameState, settings.SearchDepth);
+        search.DepthSearch(settings.SearchDepth, -2147483647, 2147483647);
         
 
         Debug.Log("Searched Positions: " + search.searchedPositions + " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s");
         SBU.gameState.Move(search.bestMove);
+
+        GameUpdate();
     }
 
 
@@ -153,7 +149,7 @@ public class GameBase : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             string s;
-            if (i > 0) { s = "Player " + i + " (" + SBU.getPlayerScore(SBU.gameState.cards, i) + ") : "; }
+            if (i > 0) { s = "Player " + i + " (" + SBU.gameState.getPlayerPoints(i) + ") : "; }
             else { s = "Table Pile: "; }
 
             int[] playerCards = GameState.getPlayerCards(SBU.gameState.cards, i);
@@ -178,7 +174,8 @@ public class GameBase : MonoBehaviour
 
     private void GameEnd()
     {
-        Debug.Log("GAME OVER, PLAYER " + SBU.getWinningPlayer(SBU.gameState.cards) + " WON!");
+        UpdateGUI();
+        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!");
     }
 
 }
