@@ -1551,9 +1551,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28439ccb5853ee54392bcf2529892960, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SearchDepth: 6
+  SearchDepth: 4
   FearBias: 1
-  GameSeed: 0
+  GameSeed: 3
 --- !u!4 &746588247
 Transform:
   m_ObjectHideFlags: 0
