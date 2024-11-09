@@ -19,6 +19,8 @@ public class GameBase : MonoBehaviour
 
     [SerializeField] Settings settings;
 
+    private GUIManager guiManager;
+
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
     [SerializeField] TextMeshProUGUI infoText;
@@ -37,14 +39,17 @@ public class GameBase : MonoBehaviour
         moveHistory = new List<Move>();
         moveHistoryPointer = moveHistory.Count - 1;
 
+
         SBU.gameState = new GameState(new int[44], 1, 0);
 
         //Maps all card indexes (0 - 44) to their actual values
         SBU.CreateCardValues();
 
-        DistributeCards();
+        DistributeCards(settings);
 
         round = 0;
+
+        guiManager = GetComponent<GUIManager>();
 
         gameTimer = new SBTimer();
         gameTimer.StartTimer();
@@ -56,7 +61,7 @@ public class GameBase : MonoBehaviour
 
 
 
-    private void DistributeCards()
+    public static void DistributeCards(Settings settings)
     {
         if (settings.GameSeed != 0) { UnityEngine.Random.InitState((int)settings.GameSeed); }
 
@@ -212,23 +217,14 @@ public class GameBase : MonoBehaviour
 
     private void UpdateGUI()
     {
+        guiManager.DeleteCards();
+        guiManager.CreateCards();
+
         for (int i = 0; i < 5; i++)
         {
             string s;
-            if (i > 0) { s = "Player " + i + " (" + SBU.gameState.getPlayerPoints(i) + ") : "; }
+            if (i > 0) { s = "Player " + i + " (" + SBU.gameState.getPlayerPoints(i) + ")"; }
             else { s = "Table Pile: "; }
-
-            int[] playerCards = GameState.getPlayerCards(SBU.gameState.cards, i);
-            for (int j = 0; j < playerCards.Length; j++)
-            {
-
-                if (playerCards[j] == -10) { break; }
-
-
-                s += SBU.CardToString(SBU.gameState.cards, playerCards[j]);
-                s += " ";
-
-            }
 
             pText[i].text = s;
         }

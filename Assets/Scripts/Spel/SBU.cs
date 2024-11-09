@@ -99,10 +99,10 @@ public static class SBU
     /// </summary>
     /// <param name="cardValue">card</param>
     /// <returns></returns>
-    public static int getCardHandIndex(int cardValue)
+    public static int getCardHandIndex(int card)
     {
         //Uses same logic as getCurrentCardValue
-        return getCurrentCardValue(cardValue);
+        return getCurrentCardValue(card);
     }
 
     /// <summary>
@@ -110,9 +110,9 @@ public static class SBU
     /// </summary>
     /// <param name="cardValue">card</param>
     /// <returns></returns>
-    public static int getCardOwner(int cardValue)
+    public static int getCardOwner(int card)
     {
-        return cardValue % 8;
+        return card % 8;
     }
 
 
@@ -121,9 +121,9 @@ public static class SBU
     /// </summary>
     /// <param name="card">card</param>
     /// <returns>0 or 1 for unflipped / flipped cards</returns>
-    public static int getCardFlip(int cardValue)
+    public static int getCardFlip(int card)
     {
-        return ((cardValue % 16) - (cardValue % 8)) / 8;
+        return ((card % 16) - (card % 8)) / 8;
     }
 
 

@@ -21,9 +21,9 @@ public class CardBehavior : MonoBehaviour
     private Color unselectedColor = new Color(255, 255, 255);
     [SerializeField] private Color selectedColor;
 
-    [SerializeField] bool selected = false;
-    [SerializeField] int upperDigit;
-    [SerializeField] int lowerDigit;
+    public bool selected = false;
+    public int upperDigit;
+    public int lowerDigit;
 
     [SerializeField] Image upperImage;
     [SerializeField] Image lowerImage;
@@ -33,6 +33,12 @@ public class CardBehavior : MonoBehaviour
     [SerializeField] TextMeshProUGUI lowerText;
 
 
+    GUIManager manager;
+
+    public void Awake()
+    {
+       manager  = GameObject.Find("GameManager").GetComponent<GUIManager>();
+    }
 
     // Update is called once per frame
     void Update()
@@ -46,7 +52,13 @@ public class CardBehavior : MonoBehaviour
         upperImage.color = upperColor;
         lowerImage.color = lowerColor;
 
-        //upperText.text = upperDigit.ToString();
+        upperText.text = upperDigit.ToString();
         lowerText.text = lowerDigit.ToString();
+    }
+
+    public void Select()
+    {
+        selected = !selected;
+        manager.selectCard(this.gameObject);
     }
 }
