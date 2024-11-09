@@ -162,6 +162,7 @@ public class GameBase : MonoBehaviour
         {
             SBU.gameState.Move(m);
             moveHistory.Add(m);
+            moveHistoryPointer += 1;
         }
         else
         {
@@ -174,20 +175,10 @@ public class GameBase : MonoBehaviour
 
     public void PutCard()
     {
-
-        string[] s = inputString.Split(' ');
-
-
-        //the inputed cards (indexes)
-        int[] move = new int[s.Length];
-
-        for (int i = 0; i < s.Length; i++)
-        {
-            move[i] = SBU.CardFromString(SBU.gameState.cards, s[i]);
-        }
+        guiManager.selectedCards.Sort((a, b) => SBU.getValueOfCard(SBU.gameState.cards, a).CompareTo(SBU.getValueOfCard(SBU.gameState.cards, b)));
 
 
-        Move m = new Move(SBU.gameState, move);
+        Move m = new Move(SBU.gameState, guiManager.selectedCards.ToArray());
 
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
         //THIS DOES NOT WORK DUE TO CONTAIN COMPARING BY REF
@@ -204,6 +195,7 @@ public class GameBase : MonoBehaviour
 
         SBU.gameState.Move(m);
         moveHistory.Add(m);
+        moveHistoryPointer += 1;
 
         GameUpdate();
     }
@@ -225,6 +217,7 @@ public class GameBase : MonoBehaviour
             string s;
             if (i > 0) { s = "Player " + i + " (" + SBU.gameState.getPlayerPoints(i) + ")"; }
             else { s = "Table Pile: "; }
+
 
             pText[i].text = s;
         }

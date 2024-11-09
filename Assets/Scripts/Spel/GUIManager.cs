@@ -10,6 +10,7 @@ public class GUIManager : MonoBehaviour
 
     List<GameObject>[] cardObjects = new List<GameObject>[5];
 
+    public List<int> selectedCards = new List<int>();
 
     [SerializeField] GameObject cardPrefab;
     [SerializeField] GameObject parentObject;
@@ -32,6 +33,10 @@ public class GUIManager : MonoBehaviour
         for (int i = 0; i < cards.Length; i++)
         {
             int owner = SBU.getCardOwner(SBU.gameState.cards[i]);
+            if (SBU.getCardHandIndex(SBU.gameState.cards[i]) == 15)
+            {
+                continue;
+            }
             Transform parent = parentObject.transform.GetChild(owner);
             GameObject card = Instantiate(cardPrefab, 
                 parent.position, 
@@ -80,7 +85,16 @@ public class GUIManager : MonoBehaviour
         int shift = 50;
         int inverter = -1;
 
-        if (card.GetComponent<CardBehavior>().selected) { inverter = 1; }
+        if (card.GetComponent<CardBehavior>().selected) 
+        { 
+            inverter = 1;
+            selectedCards.Add(int.Parse(card.name));
+
+        }
+        else
+        {
+            selectedCards.Remove(int.Parse(card.name));
+        }
         card.transform.localScale = new Vector3(card.transform.localScale.x + (inverter * 0.16f), card.transform.localScale.y + (inverter * 0.16f), 1);
         int k = 0;
         foreach (GameObject obj in cardObjects[cardOwner])
@@ -105,6 +119,7 @@ public class GUIManager : MonoBehaviour
             k++;
         }
 
+
     }
 
     public void DeleteCards()
@@ -117,6 +132,7 @@ public class GUIManager : MonoBehaviour
                 hand.RemoveAt(0);
             }
         }
+        selectedCards.Clear();
     }
 
 
