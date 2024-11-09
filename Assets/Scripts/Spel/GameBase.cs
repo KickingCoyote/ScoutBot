@@ -1,8 +1,10 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -22,6 +24,7 @@ public class GameBase : MonoBehaviour
     [SerializeField] TextMeshProUGUI infoText;
 
     private List<Move> moveHistory;
+    private int moveHistoryPointer;
 
     private int round;
     private bool gameOver;
@@ -32,6 +35,7 @@ public class GameBase : MonoBehaviour
     {
         gameOver = false;
         moveHistory = new List<Move>();
+        moveHistoryPointer = moveHistory.Count - 1;
 
         SBU.gameState = new GameState(new int[44], 1, 0);
 
@@ -102,7 +106,11 @@ public class GameBase : MonoBehaviour
         }
 
         SBU.gameState.Move(search.bestMove);
+
+        //Store moves
+        if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
         moveHistory.Add(search.bestMove);
+        moveHistoryPointer += 1;
 
         GameUpdate();
     }
@@ -110,14 +118,22 @@ public class GameBase : MonoBehaviour
 
     public void UndoMove()
     {
-        if (moveHistory.Count == 0) { Debug.Log("No more to moves to undo"); return; }
+        if (moveHistoryPointer < 0) { Debug.Log("No more to moves to undo"); return; }
 
         gameOver = false;
 
-        SBU.gameState.UndoMove(moveHistory.Last());
-        moveHistory.Remove(moveHistory.Last());
+        SBU.gameState.UndoMove(moveHistory[moveHistoryPointer]);
+        moveHistoryPointer -= 1;
+
 
         GameUpdate();
+    }
+
+    public void RedoMove()
+    {
+        if (moveHistoryPointer + 1 >= moveHistory.Count) { Debug.Log("No more moves to undo"); return; }
+        moveHistoryPointer += 1;
+        SBU.gameState.Move(moveHistory[moveHistoryPointer]);
     }
 
     public void SimulateGame()
