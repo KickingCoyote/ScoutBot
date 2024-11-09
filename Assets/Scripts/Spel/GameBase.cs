@@ -1,8 +1,10 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -17,11 +19,14 @@ public class GameBase : MonoBehaviour
 
     [SerializeField] Settings settings;
 
+    private GUIManager guiManager;
+
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
     [SerializeField] TextMeshProUGUI infoText;
 
     private List<Move> moveHistory;
+    private int moveHistoryPointer;
 
     private int round;
     private bool gameOver;
@@ -32,15 +37,19 @@ public class GameBase : MonoBehaviour
     {
         gameOver = false;
         moveHistory = new List<Move>();
+        moveHistoryPointer = moveHistory.Count - 1;
+
 
         SBU.gameState = new GameState(new int[44], 1, 0);
 
         //Maps all card indexes (0 - 44) to their actual values
         SBU.CreateCardValues();
 
-        DistributeCards();
+        DistributeCards(settings);
 
         round = 0;
+
+        guiManager = GetComponent<GUIManager>();
 
         gameTimer = new SBTimer();
         gameTimer.StartTimer();
@@ -52,7 +61,7 @@ public class GameBase : MonoBehaviour
 
 
 
-    private void DistributeCards()
+    public static void DistributeCards(Settings settings)
     {
         if (settings.GameSeed != 0) { UnityEngine.Random.InitState((int)settings.GameSeed); }
 
@@ -102,7 +111,11 @@ public class GameBase : MonoBehaviour
         }
 
         SBU.gameState.Move(search.bestMove);
+
+        //Store moves
+        if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
         moveHistory.Add(search.bestMove);
+        moveHistoryPointer += 1;
 
         GameUpdate();
     }
@@ -110,14 +123,22 @@ public class GameBase : MonoBehaviour
 
     public void UndoMove()
     {
-        if (moveHistory.Count == 0) { Debug.Log("No more to moves to undo"); return; }
+        if (moveHistoryPointer < 0) { Debug.Log("No more to moves to undo"); return; }
 
         gameOver = false;
 
-        SBU.gameState.UndoMove(moveHistory.Last());
-        moveHistory.Remove(moveHistory.Last());
+        SBU.gameState.UndoMove(moveHistory[moveHistoryPointer]);
+        moveHistoryPointer -= 1;
+
 
         GameUpdate();
+    }
+
+    public void RedoMove()
+    {
+        if (moveHistoryPointer + 1 >= moveHistory.Count) { Debug.Log("No more moves to undo"); return; }
+        moveHistoryPointer += 1;
+        SBU.gameState.Move(moveHistory[moveHistoryPointer]);
     }
 
     public void SimulateGame()
@@ -141,6 +162,7 @@ public class GameBase : MonoBehaviour
         {
             SBU.gameState.Move(m);
             moveHistory.Add(m);
+            moveHistoryPointer += 1;
         }
         else
         {
@@ -153,20 +175,10 @@ public class GameBase : MonoBehaviour
 
     public void PutCard()
     {
-
-        string[] s = inputString.Split(' ');
-
-
-        //the inputed cards (indexes)
-        int[] move = new int[s.Length];
-
-        for (int i = 0; i < s.Length; i++)
-        {
-            move[i] = SBU.CardFromString(SBU.gameState.cards, s[i]);
-        }
+        guiManager.selectedCards.Sort((a, b) => SBU.getValueOfCard(SBU.gameState.cards, a).CompareTo(SBU.getValueOfCard(SBU.gameState.cards, b)));
 
 
-        Move m = new Move(SBU.gameState, move);
+        Move m = new Move(SBU.gameState, guiManager.selectedCards.ToArray());
 
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
         //THIS DOES NOT WORK DUE TO CONTAIN COMPARING BY REF
@@ -183,6 +195,7 @@ public class GameBase : MonoBehaviour
 
         SBU.gameState.Move(m);
         moveHistory.Add(m);
+        moveHistoryPointer += 1;
 
         GameUpdate();
     }
@@ -196,23 +209,15 @@ public class GameBase : MonoBehaviour
 
     private void UpdateGUI()
     {
+        guiManager.DeleteCards();
+        guiManager.CreateCards();
+
         for (int i = 0; i < 5; i++)
         {
             string s;
-            if (i > 0) { s = "Player " + i + " (" + SBU.gameState.getPlayerPoints(i) + ") : "; }
+            if (i > 0) { s = "Player " + i + " (" + SBU.gameState.getPlayerPoints(i) + ")"; }
             else { s = "Table Pile: "; }
 
-            int[] playerCards = GameState.getPlayerCards(SBU.gameState.cards, i);
-            for (int j = 0; j < playerCards.Length; j++)
-            {
-
-                if (playerCards[j] == -10) { break; }
-
-
-                s += SBU.CardToString(SBU.gameState.cards, playerCards[j]);
-                s += " ";
-
-            }
 
             pText[i].text = s;
         }

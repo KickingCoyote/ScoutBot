@@ -37,11 +37,12 @@ public class SBA
         int p =  inverter * -2147483647;
 
 
-        //Checks if it is game over, if the current player is winning return (-- = +) infinity otherwise -infinity as there is nothing better/worse than winning/losing the game
+        //Checks if it is game over, if the maximizer is winning return infinity otherwise -infinity as there is nothing better/worse than winning/losing the game
+        //Its technically infinity -1 cause losing is still better than not finding a move and casting an error
         if (g.isGameOver())
         {
             searchedPositions++;
-            return g.getWinningPlayer() == maximizer ? 2147483647 : -2147483647;
+            return g.getWinningPlayer() == maximizer ? 2147483646 : -2147483646;
         }
 
 
@@ -60,7 +61,7 @@ public class SBA
         //Current move ordering decreases NPS by 25% and doubles amount of searched positions.
         //MoveOrdering(moves);
 
-        if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); }
+        if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); return 0; }
 
         Move bestMove = new Move();
 
@@ -74,8 +75,8 @@ public class SBA
                 //For each move search deeper and see how good the position is
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
-
-                if (eval >= p) { bestMove = move; }
+                // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
+                if (eval > p) { bestMove = move; }
                 p = Math.Max(p, eval);
 
                 g.UndoMove(move);
@@ -84,18 +85,16 @@ public class SBA
                 if (beta <= alpha) { break; }
             }
         }
-        else
+        else //The same thing but for minimizer so some > become < and Max() becomes Min() 
         {
             foreach (Move move in moves)
             {
 
                 g.Move(move);
 
-                //For each move search deeper and see how good the position is
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
-
-                if (eval <= p) { bestMove = move; }
+                if (eval < p) { bestMove = move; }
                 p = Math.Min(p, eval);
 
                 g.UndoMove(move);
