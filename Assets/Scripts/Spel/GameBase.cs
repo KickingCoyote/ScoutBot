@@ -175,10 +175,10 @@ public class GameBase : MonoBehaviour
 
     public void PutCard()
     {
-        guiManager.selectedCards.Sort((a, b) => SBU.getValueOfCard(SBU.gameState.cards, a).CompareTo(SBU.getValueOfCard(SBU.gameState.cards, b)));
+        guiManager.selectedCardIndexes.Sort((a, b) => SBU.getValueOfCard(SBU.gameState.cards, a).CompareTo(SBU.getValueOfCard(SBU.gameState.cards, b)));
 
 
-        Move m = new Move(SBU.gameState, guiManager.selectedCards.ToArray());
+        Move m = new Move(SBU.gameState, guiManager.selectedCardIndexes.ToArray());
 
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
         //THIS DOES NOT WORK DUE TO CONTAIN COMPARING BY REF
