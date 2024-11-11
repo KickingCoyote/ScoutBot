@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
 
@@ -16,6 +18,7 @@ public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
     void Awake()
     {
+        
         selectedCardsObj = transform.parent.parent.GetChild(5);
         manager = GameObject.Find("GameManager").GetComponent<GUIManager>();
         gameBase = GameObject.Find("GameManager").GetComponent<GameBase>();
@@ -23,6 +26,7 @@ public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         isDragged = false;
         isFlipped = false;
         previousHandIndex = -1;
+       
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -43,8 +47,8 @@ public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         {
             card.transform.SetParent(selectedCardsObj);
 
-            card.GetComponent<CardBehavior>().SetRayCastTarget(false);
         }
+        manager.SetRaycastTransparencyForAll(false);
     }
 
 
@@ -53,6 +57,11 @@ public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         if (!transform.GetComponent<CardBehavior>().selected) { return; }
 
         selectedCardsObj.position = Input.mousePosition;
+
+        Vector2 mousePos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent.parent.GetComponent<RectTransform>(), Input.mousePosition, Camera.main, out mousePos);
+        gameBase.infoText.text = mousePos.ToString();
+
     }
 
 
@@ -65,27 +74,46 @@ public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         int i = 0;
 
         bool cancel = true;
-        Transform hoveredCard = null;
-        if (eventData.pointerCurrentRaycast.gameObject != null && eventData.pointerCurrentRaycast.gameObject.transform.parent.CompareTag("Card"))
+
+
+        //the play hand which was hoverd over when the cards where released
+        Transform playerHand = null;
+        if (eventData.pointerCurrentRaycast.gameObject != null && eventData.pointerCurrentRaycast.gameObject.transform.CompareTag("CardBackground"))
         {
+
             cancel = false;
+
             //the card we are hovering over
-            hoveredCard = eventData.pointerCurrentRaycast.gameObject.transform.parent;
-        }
+            playerHand = eventData.pointerCurrentRaycast.gameObject.transform;
 
-        foreach (GameObject card in manager.selectedCards)
-        {
-            if (!cancel)
+            //Take card move
+            if (previousParent.GetSiblingIndex() == 0 && playerHand.GetSiblingIndex() == SBU.gameState.turn)
             {
-                card.transform.SetParent(hoveredCard.parent);
+                gameBase.TakeCard(
+                    SBU.gameState.getPlayerCards(0)[0] != int.Parse(transform.name),
+                    isFlipped,
+                    0
+                );
 
-                card.transform.SetSiblingIndex(hoveredCard.GetSiblingIndex() + i + 1);
-
+            }
+            //Put card move
+            else if (playerHand.GetSiblingIndex() == 0)
+            {
+                gameBase.PutCard();
             }
             else
             {
-                card.transform.SetParent(previousParent);
+                cancel = true;
+            }
+        }
 
+
+        if (cancel)
+        {
+            foreach (GameObject card in manager.selectedCards)
+            {
+
+                card.transform.SetParent(previousParent);
                 card.transform.SetSiblingIndex(previousHandIndex + i);
 
                 if (isFlipped)
@@ -93,29 +121,16 @@ public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
                     FlipCard(transform);
                 }
 
+                card.GetComponent<CardBehavior>().selected = false;
+
+                manager.ScaleCard(card, -0.16f);
+
+                i++;
             }
-
-            card.GetComponent<CardBehavior>().SetRayCastTarget(true);
-
-            card.GetComponent<CardBehavior>().selected = false;
-            manager.ScaleCard(card, -0.16f);
-
-            i++;
+            manager.SetRaycastTransparencyForAll(true);
         }
-        if (!cancel)
-        {
-            //Take card move
-            if (previousParent.GetSiblingIndex() == 0)
-            {
 
-            }
-            //Put card move
-            else
-            {
-                gameBase.PutCard();
-            }
-        }
-        
+      
         manager.selectedCards.Clear();
 
     }

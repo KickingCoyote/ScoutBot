@@ -18,6 +18,7 @@ public class GUIManager : MonoBehaviour
 
     [SerializeField] GameObject cardPrefab;
     [SerializeField] GameObject parentObject;
+    public GameObject canvas;
 
     void Awake()
     {
@@ -134,6 +135,13 @@ public class GUIManager : MonoBehaviour
         selectedCards.Clear();
     }
 
+    public void SetRaycastTransparencyForAll(bool b)
+    {
+        foreach (List<GameObject> hand in cardObjects)
+        {
+            hand.ForEach(a => a.GetComponent<CardBehavior>().SetRayCastTarget(b));
+        }
+    }
 
     private int handIndex(GameObject obj)
     {

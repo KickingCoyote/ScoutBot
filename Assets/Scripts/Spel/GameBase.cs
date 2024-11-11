@@ -15,15 +15,13 @@ using UnityEngine;
 public class GameBase : MonoBehaviour
 {
 
-    private string inputString;
-
     [SerializeField] Settings settings;
 
     private GUIManager guiManager;
 
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
-    [SerializeField] TextMeshProUGUI infoText;
+    public TextMeshProUGUI infoText;
 
     private List<Move> moveHistory;
     private int moveHistoryPointer;
@@ -151,13 +149,10 @@ public class GameBase : MonoBehaviour
     }
 
     //Activated from buttons ingame
-    public void TakeCard()
+    public void TakeCard(bool top, bool flipped, int handindex)
     {
-        string[] s = inputString.Split(' ');
 
-
-
-        Move m = new Move(SBU.gameState.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.gameState.turn, int.Parse(s[2]));
+        Move m = new Move(SBU.gameState.cards, top, flipped, SBU.gameState.turn, handindex);
         if (m != null)
         {
             SBU.gameState.Move(m);
@@ -175,8 +170,7 @@ public class GameBase : MonoBehaviour
 
     public void PutCard()
     {
-        guiManager.selectedCardIndexes.Sort((a, b) => SBU.getValueOfCard(SBU.gameState.cards, a).CompareTo(SBU.getValueOfCard(SBU.gameState.cards, b)));
-
+        guiManager.selectedCardIndexes.Sort((a, b) => GameObject.Find(a.ToString()).transform.GetSiblingIndex().CompareTo(GameObject.Find(b.ToString()).transform.GetSiblingIndex()));
 
         Move m = new Move(SBU.gameState, guiManager.selectedCardIndexes.ToArray());
 
@@ -197,13 +191,9 @@ public class GameBase : MonoBehaviour
         moveHistory.Add(m);
         moveHistoryPointer += 1;
 
+        
         GameUpdate();
-    }
 
-    //ran every input field is deselected
-    public void UpdateString(string s)
-    {
-        inputString = s;
     }
 
 
