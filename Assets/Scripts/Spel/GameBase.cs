@@ -231,7 +231,10 @@ public class GameBase : MonoBehaviour
     {
         gameOver = true;
         UpdateGUI();
+
         Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + MathF.Round(gameTimer.Timer(), 3));
+
+        Statistics.StoreData(new int[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed);
     }
 
 }
