@@ -45,7 +45,7 @@ public class Move : IComparable<Move>
         //The cards on the table
         int[] tCards = g.getPlayerCards(0);
 
-        int[] moveArray = g.cards.CopyArray();
+        cardDif = new int[g.cards.Length];
 
 
         int k = 0;
@@ -56,7 +56,7 @@ public class Move : IComparable<Move>
 
             //Takes all cards currently in the pile and gives them as points to the player
             //(handIndex = 15 represents it being a point)
-            moveArray[tCards[i]] = 16 * 15 + (int)player;
+            cardDif[tCards[i]] = 16 * 15 + (int)player - g.cards[tCards[i]];
         }
         for (int i = 0; i < pCards.Length; i++)
         {
@@ -65,15 +65,14 @@ public class Move : IComparable<Move>
             if (k < move.Length && pCards[i] == move[k])
             {
                 //Move card to center pile and set its new index in center pile
-                moveArray[move[k]] = 16 * k + 8 * SBU.getCardFlip(g.cards[move[k]]);
+                cardDif[move[k]] = 16 * k + 8 * SBU.getCardFlip(g.cards[move[k]]) - g.cards[move[k]];
                 foundMove = true;
                 k++;
             }
             //Reduce index by move.length;
-            else if (foundMove) { moveArray[pCards[i]] -= 16 * move.Length; }
+            else if (foundMove) { cardDif[pCards[i]] = -16 * move.Length; }
         }
 
-        cardDif = ArrayExtensions.AddArray(moveArray, g.cards, true);
         pileHolderDif = (int)player - g.currentPileHolder;
         isDrawMove = false;
     }
@@ -103,28 +102,29 @@ public class Move : IComparable<Move>
         {
             for (int i = 0; i < tCards.Length; i++)
             {
-                if (i == tCards.Length - 1 || tCards[i + 1] == -10)
-                {
-                    tCard = tCards[i];
-                    break;
-                }
+                if (tCards[i + 1] != -10 && i != tCards.Length - 1) { continue; }
+                
+                tCard = tCards[i];
+                break;
             }
         }
 
-        int[] move = cards.CopyArray();
+
+
+        cardDif = new int[cards.Length];
 
         for (int i = pCards.Length - 1; i >= handIndex; i--)
         {
             //Shift all cards after the insertion point by 1 spot (aka 16)
-            if (pCards[i] != -10) { move[pCards[i]] += 16; }
+            if (pCards[i] != -10) { cardDif[pCards[i]] = 16; }
         }
 
-        move[tCard] = 16 * handIndex + 8 * SBU.getCardFlip(cards[tCard]) + player;
+        cardDif[tCard] = (16 * handIndex + 8 * SBU.getCardFlip(cards[tCard]) + player) - cards[tCard];
 
         //Flip the card incase flip == true
-        if (flip && SBU.getCardFlip(cards[tCard]) == 0) { move[tCard] += 8; }
+        if (flip && SBU.getCardFlip(cards[tCard]) == 0) { cardDif[tCard] += 8; }
 
-        else if (flip) { move[tCard] -= 8; }
+        else if (flip) { cardDif[tCard] -= 8; }
 
 
         //if the bottom card is taken, shift all cards on the table 1 spot to not leave the bottom spot empty
@@ -133,11 +133,10 @@ public class Move : IComparable<Move>
             for (int i = 1; i < tCards.Length; i++)
             {
                 if (tCards[i] == -10) { break; }
-                move[tCards[i]] -= 16;
+                cardDif[tCards[i]] = -16;
             }
         }
 
-        cardDif = ArrayExtensions.AddArray(move, cards, true);
         pileHolderDif = 0;
         isDrawMove = true;
     }
@@ -276,10 +275,8 @@ public class Move : IComparable<Move>
 
         int[] pCards = GameState.getPlayerCards(cards, player);
 
-        for (int i = 0; i < pCards.Length; i++)
+        for (int i = 0; i < pCards.Length && (i == 0 || pCards[i - 1] != -10); i++)
         {
-            if (i != 0 && pCards[i - 1] == -10) { break; }
-
             foreach (bool b1 in new bool[] { true, false })
             {
                 foreach (bool b2 in new bool[] { true, false })
