@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 /// <summary>
 /// Scout Bot Algorithm.
@@ -143,7 +144,7 @@ public struct GameState
 
     public int currentPileHolder;
 
-    private int[][] playerCards;
+    private List<int>[] playerCards;
 
     public int[] playerPoints;
 
@@ -152,7 +153,7 @@ public struct GameState
     /// </summary>
     /// <param name="player"></param>
     /// <returns></returns>
-    public int[] getPlayerCards(int player) { return playerCards[player] = playerCards[player] == null ? getPlayerCards(cards, player) : playerCards[player]; }
+    public List<int> getPlayerCards(int player) { return playerCards[player] = playerCards[player] == null ? getPlayerCards(cards, player) : playerCards[player]; }
 
     public int getPlayerPoints(int player) { return playerPoints[player - 1]; }
 
@@ -161,21 +162,21 @@ public struct GameState
         this.cards = cards;
         this.turn = turn;
         this.currentPileHolder = currentPileHolder;
-        playerCards = new int[][] { null, null, null, null, null};
+        playerCards = new List<int>[] { null, null, null, null, null};
         playerPoints = new int[4];
     }
 
 
     public void Move(Move move)
     {
-        if (!move.isDrawMove) { playerPoints[turn - 1] += getPlayerCards(cards, 0).ArrayLength(); }
+        if (!move.isDrawMove) { playerPoints[turn - 1] += getPlayerCards(cards, 0).Count(); }
         else {  playerPoints[currentPileHolder - 1]++; }
 
         cards = ArrayExtensions.AddArray(cards, move.cardDif);
         currentPileHolder += move.pileHolderDif;
 
         //Reset the playerCards data for the current player and middle pile
-        playerCards = new int[][] { null, null, null, null, null };
+        playerCards = new List<int>[] { null, null, null, null, null };
 
         //Increment the turn by 1, if 4 set to 1
         turn = turn == 4 ? 1 : (turn + 1);
@@ -186,11 +187,11 @@ public struct GameState
     {
         cards = ArrayExtensions.AddArray(cards, move.cardDif, true);
         currentPileHolder -= move.pileHolderDif;
-        playerCards = new int[][] { null, null, null, null, null };
+        playerCards = new List<int>[] { null, null, null, null, null };
 
         turn = turn == 1 ? 4 : (turn - 1);
 
-        if (!move.isDrawMove) { playerPoints[turn - 1] -= getPlayerCards(cards, 0).ArrayLength(); }
+        if (!move.isDrawMove) { playerPoints[turn - 1] -= getPlayerCards(cards, 0).Count(); }
         else { playerPoints[currentPileHolder - 1]--; }
 
     }
@@ -202,10 +203,11 @@ public struct GameState
     /// <param name="cards"></param>
     /// <param name="player"></param>
     /// <returns>A 15 long array of card indexes where emtpy values are -10</returns>
-    public static int[] getPlayerCards(int[] cards, int player)
+    public static List<int> getPlayerCards(int[] cards, int player)
     {
         int[] pCards = new int[15].SetArray(-10);
-
+        
+        
         for (int i = 0; i < cards.Length; i++)
         {
             //HandIndex 15 represents the card being a point and not actually in the hand
@@ -216,7 +218,14 @@ public struct GameState
 
         }
 
-        return pCards;
+        List<int> result = new List<int>();
+        foreach (int cardIndex in pCards)
+        {
+            if (cardIndex == -10) { break; }
+            result.Add(cardIndex);
+        }
+
+        return result;
     }
 
     public int getWinningPlayer()
@@ -236,7 +245,7 @@ public struct GameState
             return true;
         }
         //check previous player due to game over being check post turn incrementing
-        if (getPlayerCards(turn == 1 ? 4 : (turn - 1)).ArrayLength() == 0)
+        if (getPlayerCards(turn == 1 ? 4 : (turn - 1)).Count() == 0)
         {
             return true;
         }
