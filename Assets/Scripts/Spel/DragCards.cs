@@ -58,10 +58,6 @@ public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
         selectedCardsObj.position = Input.mousePosition;
 
-        Vector2 mousePos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent.parent.GetComponent<RectTransform>(), Input.mousePosition, Camera.main, out mousePos);
-        gameBase.infoText.text = mousePos.ToString();
-
     }
 
 

@@ -47,7 +47,6 @@ public class Move : IComparable<Move>
 
         int[] moveArray = g.cards.CopyArray();
 
-        
 
         int k = 0;
         bool foundMove = false;
@@ -93,15 +92,14 @@ public class Move : IComparable<Move>
     {
         //Gets the cards on the table
         int[] tCards = GameState.getPlayerCards(cards, 0);
-        int tCard = -10;
         int[] pCards = GameState.getPlayerCards(cards, player);
 
         //if there are no cards on the table or the hand is full return 
         if (tCards.ArrayLength() == 0 || pCards[pCards.Length - 1] != -10) { return; }
 
+        int tCard = tCards[0];
 
-        if (!top) { tCard = tCards[0]; }
-        else
+        if (top)
         {
             for (int i = 0; i < tCards.Length; i++)
             {
@@ -113,11 +111,7 @@ public class Move : IComparable<Move>
             }
         }
 
-        //if no card is picked return
-        if (tCard == -10) { Debug.Log("GenerateDrawCardMove: No Card Found"); return; }
-
         int[] move = cards.CopyArray();
-
 
         for (int i = pCards.Length - 1; i >= handIndex; i--)
         {
@@ -160,25 +154,23 @@ public class Move : IComparable<Move>
 
         return getValue(cards, moveIndexes);
     }
+
     public static int getValue(int[] cards, int[] moveIndexes)
     {
         int moveLength = 0;
         int moveMinCard = 1000;
-        int match;
-        if (moveIndexes.Length == 1 || moveIndexes[1] == -10 || SBU.getCurrentCardValue(SBU.getValueOfCard(cards, moveIndexes[0])) == SBU.getCurrentCardValue(SBU.getValueOfCard(cards, moveIndexes[1])))
+        int match = 0;
+        if (moveIndexes.Length == 1 || moveIndexes[1] == -10 || SBU.getCurrentCardValue(cards, moveIndexes[0]) == SBU.getCurrentCardValue(cards, moveIndexes[1]))
         {
             match = 1;
         }
-        else { match = 0; }
 
         for (int i = 0; i < moveIndexes.Length; i++)
         {
             if (moveIndexes[i] == -10) { break; }
             moveLength++;
-            if (moveMinCard > SBU.getCurrentCardValue(SBU.getValueOfCard(cards, moveIndexes[i])))
-            {
-                moveMinCard = SBU.getCurrentCardValue(SBU.getValueOfCard(cards, moveIndexes[i]));
-            }
+
+            moveMinCard = Mathf.Min(moveMinCard, SBU.getCurrentCardValue(cards, moveIndexes[i]));
         }
 
 
@@ -225,34 +217,32 @@ public class Move : IComparable<Move>
 
         int tCardsValue = getValue(g.cards, GameState.getPlayerCards(g.cards, 0));
         //Get all the possible moves in the format of card indexes
-        List<int[]> temp = new List<int[]>();
+        List<int[]> moveIndexList = new List<int[]>();
 
         for (int i = 0; i < pCards.Length; i++)
         {
 
             if (pCards[i] == -10) { break; }
 
-
-            if (!onlyLegalMoves || getValue(g.cards, new int[1] { pCards[i] }) > tCardsValue) { temp.Add(new int[1] { pCards[i] }); }
+            if (!onlyLegalMoves || getValue(g.cards, new int[1] { pCards[i] }) > tCardsValue) { moveIndexList.Add(new int[1] { pCards[i] }); }
 
             for (int h = -1; h < 2; h++)
             {
                 for (int j = 1; j < pCards.Length - 1; j++)
                 {
                     if (i + j >= pCards.Length || pCards[i + j] == -10) { break; }
-                    if (SBU.getCurrentCardValue(SBU.getValueOfCard(g.cards, pCards[i])) == SBU.getCurrentCardValue(SBU.getValueOfCard(g.cards, pCards[i + j])) + j * h)
-                    {
-                        int[] move = new int[j + 1].SetArray(-10);
-                        move[0] = pCards[i];
 
-                        for (int k = 1; k < j + 1; k++)
-                        {
-                            move[k] = pCards[i + k];
-                            //If onlyLegalMoves = true check if the moveValue is higher than table pile
-                            if (!onlyLegalMoves || getValue(g.cards, move) > tCardsValue) { temp.Add(move); }
-                        }
+                    if (SBU.getCurrentCardValue(g.cards, pCards[i]) != SBU.getCurrentCardValue(g.cards, pCards[i + j]) + j * h){ break; }
+
+                    int[] move = new int[j + 1].SetArray(-10);
+                    move[0] = pCards[i];
+
+                    for (int k = 1; k < j + 1; k++)
+                    {
+                        move[k] = pCards[i + k];
+                        //If onlyLegalMoves = true check if the moveValue is higher than table pile
+                        if (!onlyLegalMoves || getValue(g.cards, move) > tCardsValue) { moveIndexList.Add(move); }
                     }
-                    else { break; }
                 }
             }
         }
@@ -260,9 +250,9 @@ public class Move : IComparable<Move>
         //reformat the moves
         List<Move> moves = new List<Move>();
 
-        for (int i = 0; i < temp.Count; i++)
+        for (int i = 0; i < moveIndexList.Count; i++)
         {
-            moves.Add(new Move(g, temp.ElementAt(i), player));
+            moves.Add(new Move(g, moveIndexList[i], player));
         }
 
         return moves;

@@ -31,6 +31,9 @@ public static class SBU
     //gameState.currentPileHolder
     //Keeps track of who the cards in the middle belonged to, for giving points
 
+
+
+
     //Array containing the value of each card index, the value is value 1 * 16 + value 2, where value 1 always is the smaller of the two
     public static int[] cardValues = new int[44];
 
@@ -84,6 +87,10 @@ public static class SBU
     }
 
 
+    public static int getCurrentCardValue(int[] cards, int cardIndex)
+    {
+        return getCurrentCardValue(GetCardValue(cards, cardIndex));
+    }
     //Returns the upwards facing value on a card given the card value
     public static int getCurrentCardValue(int cardValue)
     {
@@ -161,7 +168,7 @@ public static class SBU
     {
         for (int i = 0; i < 44; i++)
         {
-            if (getValueOfCard(cards, i) == value)
+            if (GetCardValue(cards, i) == value)
             {
                 return i;
             }
@@ -178,7 +185,7 @@ public static class SBU
     /// <param name="cards"></param>
     /// <param name="cardIndex">Index of card</param>
     /// <returns></returns>
-    public static int getValueOfCard(int[] cards, int cardIndex)
+    public static int GetCardValue(int[] cards, int cardIndex)
     {
 
         if (getCardFlip(cards[cardIndex]) == 0)
@@ -199,7 +206,7 @@ public static class SBU
     /// <returns>string in format [value 1]:[value 2] </returns>
     public static string CardToString(int[] cards, int cardIndex)
     {
-        int value = getValueOfCard(cards, cardIndex);
+        int value = GetCardValue(cards, cardIndex);
         return getCurrentCardValue(value) + ":" + (value - (16 * getCurrentCardValue(value)));
     }
 

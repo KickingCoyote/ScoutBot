@@ -50,8 +50,8 @@ public class GUIManager : MonoBehaviour
             card.name = i.ToString();
 
             CardBehavior cardBehavior = card.GetComponent<CardBehavior>();
-            cardBehavior.upperDigit = SBU.getCurrentCardValue(SBU.getValueOfCard(cards, i));
-            cardBehavior.lowerDigit = SBU.getValueOfCard(cards, i) - (16 * SBU.getCurrentCardValue(SBU.getValueOfCard(cards, i)));
+            cardBehavior.upperDigit = SBU.getCurrentCardValue(SBU.GetCardValue(cards, i));
+            cardBehavior.lowerDigit = SBU.GetCardValue(cards, i) - (16 * SBU.getCurrentCardValue(SBU.GetCardValue(cards, i)));
 
             cardObjects[owner].Add(card);
 
