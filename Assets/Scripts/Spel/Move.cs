@@ -40,24 +40,28 @@ public class Move : IComparable<Move>
         if (player == null) { player = g.turn; }
 
         //List of all the players cards by index
-        List<int> pCards = g.getPlayerCards((int)player);
+        int[] pCards = g.getPlayerCards((int)player);
 
         //The cards on the table
-        List<int> tCards = g.getPlayerCards(0);
+        int[] tCards = g.getPlayerCards(0);
 
         int[] moveArray = g.cards.CopyArray();
 
 
         int k = 0;
         bool foundMove = false;
-        for (int i = 0; i < tCards.Count; i++)
+        for (int i = 0; i < tCards.Length; i++)
         {
+            if (tCards[i] < 0) { break; }
+
             //Takes all cards currently in the pile and gives them as points to the player
             //(handIndex = 15 represents it being a point)
             moveArray[tCards[i]] = 16 * 15 + (int)player;
         }
-        for (int i = 0; i < pCards.Count; i++)
+        for (int i = 0; i < pCards.Length; i++)
         {
+            if (pCards[i] == -10) { break; }
+
             if (k < move.Length && pCards[i] == move[k])
             {
                 //Move card to center pile and set its new index in center pile
@@ -87,25 +91,32 @@ public class Move : IComparable<Move>
     public Move(int[] cards, bool top, bool flip, int player, int handIndex)
     {
         //Gets the cards on the table
-        List<int> tCards = GameState.getPlayerCards(cards, 0);
-        List<int> pCards = GameState.getPlayerCards(cards, player);
+        int[] tCards = GameState.getPlayerCards(cards, 0);
+        int[] pCards = GameState.getPlayerCards(cards, player);
 
         //if there are no cards on the table or the hand is full return 
-        if (tCards.Count() == 0) { return; }
+        if (tCards.ArrayLength() == 0 || pCards[pCards.Length - 1] != -10) { return; }
 
         int tCard = tCards[0];
 
         if (top)
         {
-            tCard = tCards.Last();
+            for (int i = 0; i < tCards.Length; i++)
+            {
+                if (i == tCards.Length - 1 || tCards[i + 1] == -10)
+                {
+                    tCard = tCards[i];
+                    break;
+                }
+            }
         }
 
         int[] move = cards.CopyArray();
 
-        for (int i = pCards.Count - 1; i >= handIndex; i--)
+        for (int i = pCards.Length - 1; i >= handIndex; i--)
         {
             //Shift all cards after the insertion point by 1 spot (aka 16)
-            move[pCards[i]] += 16;
+            if (pCards[i] != -10) { move[pCards[i]] += 16; }
         }
 
         move[tCard] = 16 * handIndex + 8 * SBU.getCardFlip(cards[tCard]) + player;
@@ -119,8 +130,9 @@ public class Move : IComparable<Move>
         //if the bottom card is taken, shift all cards on the table 1 spot to not leave the bottom spot empty
         if (!top)
         {
-            for (int i = 1; i < tCards.Count; i++)
+            for (int i = 1; i < tCards.Length; i++)
             {
+                if (tCards[i] == -10) { break; }
                 move[tCards[i]] -= 16;
             }
         }
@@ -148,7 +160,7 @@ public class Move : IComparable<Move>
         int moveLength = 0;
         int moveMinCard = 1000;
         int match = 0;
-        if (moveIndexes.Length <= 2 || SBU.getCurrentCardValue(cards, moveIndexes[0]) == SBU.getCurrentCardValue(cards, moveIndexes[1]))
+        if (moveIndexes.Length == 1 || moveIndexes[1] == -10 || SBU.getCurrentCardValue(cards, moveIndexes[0]) == SBU.getCurrentCardValue(cards, moveIndexes[1]))
         {
             match = 1;
         }
@@ -201,22 +213,24 @@ public class Move : IComparable<Move>
     {
 
         //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
-        List<int> pCards = g.getPlayerCards(player);
+        int[] pCards = g.getPlayerCards(player);
 
-        int tCardsValue = getValue(g.cards, GameState.getPlayerCards(g.cards, 0).ToArray());
+        int tCardsValue = getValue(g.cards, GameState.getPlayerCards(g.cards, 0));
         //Get all the possible moves in the format of card indexes
         List<int[]> moveIndexList = new List<int[]>();
 
-        for (int i = 0; i < pCards.Count; i++)
+        for (int i = 0; i < pCards.Length; i++)
         {
+
+            if (pCards[i] == -10) { break; }
 
             if (!onlyLegalMoves || getValue(g.cards, new int[1] { pCards[i] }) > tCardsValue) { moveIndexList.Add(new int[1] { pCards[i] }); }
 
             for (int h = -1; h < 2; h++)
             {
-                for (int j = 1; j < pCards.Count - 1; j++)
+                for (int j = 1; j < pCards.Length - 1; j++)
                 {
-                    if (i + j >= pCards.Count) { break; }
+                    if (i + j >= pCards.Length || pCards[i + j] == -10) { break; }
 
                     if (SBU.getCurrentCardValue(g.cards, pCards[i]) != SBU.getCurrentCardValue(g.cards, pCards[i + j]) + j * h){ break; }
 
@@ -254,15 +268,15 @@ public class Move : IComparable<Move>
     /// <returns></returns>
     public static List<Move> getPossibleDrawCardMoves(int[] cards, int player)
     {
-        int tCardsLength = GameState.getPlayerCards(cards, 0).Count();
+        int tCardsLength = GameState.getPlayerCards(cards, 0).ArrayLength();
         List<Move> moves = new List<Move>();
 
         if (tCardsLength == 0) return moves;
 
 
-        List<int> pCards = GameState.getPlayerCards(cards, player);
+        int[] pCards = GameState.getPlayerCards(cards, player);
 
-        for (int i = 0; i < pCards.Count; i++)
+        for (int i = 0; i < pCards.Length; i++)
         {
             if (i != 0 && pCards[i - 1] == -10) { break; }
 

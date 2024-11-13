@@ -115,6 +115,8 @@ public static class SBU
     /// <summary>
     /// Gets the owner of the card where 0 is the table pile and 1-4 is player 1-4
     /// </summary>
+    /// <param name="cardValue">card</param>
+    /// <returns></returns>
     public static int getCardOwner(int card)
     {
         return card % 8;
