@@ -16,12 +16,10 @@ public static class ArrayExtensions
     /// <param name="array"></param>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static int[] SetArray(this int[] array, int value)
+    public static T[] SetArray<T>(this T[] array, T value)
     {
-        int[] a = new int[array.Length];
-
-        Array.Fill(a, value);
-        return a;
+        Array.Fill(array, value);
+        return array;
     }
 
 
@@ -61,6 +59,17 @@ public static class ArrayExtensions
         return false;
     }
 
+
+
+    public static void SumArrayWithHashMap(this int[] array, Dictionary<int, int> hashMap, bool invert = false)
+    {
+        int inverter = invert ? -1 : 1;
+
+        foreach (KeyValuePair<int, int> kvp in hashMap)
+        {
+            array[kvp.Key] += inverter * kvp.Value;
+        }
+    }
 
 
     /// <summary>
@@ -106,9 +115,9 @@ public static class ArrayExtensions
     /// </summary>
     /// <param name="a">Array to be copied</param>
     /// <returns>Array copied by value</returns>
-    public static int[] CopyArray(this int[] a)
+    public static T[] CopyArray<T>(this T[] a)
     {
-        int[] b = new int[a.Length];
+        T[] b = new T[a.Length];
 
         Array.Copy(a, b, a.Length);
         return b;
