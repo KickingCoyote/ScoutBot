@@ -8,7 +8,7 @@ public class Move : IComparable<Move>
 {
 
 
-    public Dictionary<int, int> cardDif;
+    public int[] cardDif;
 
     public int pileHolderDif;
 
@@ -22,7 +22,7 @@ public class Move : IComparable<Move>
     //public int[] cards; 
 
     public Move() { }
-    public Move(Dictionary<int, int> cardDif, int pileHolderDif, bool isDrawMove)
+    public Move(int[] cardDif, int pileHolderDif, bool isDrawMove)
     {
         this.cardDif = cardDif;
         this.pileHolderDif = pileHolderDif;
@@ -45,7 +45,8 @@ public class Move : IComparable<Move>
         //The cards on the table
         int[] tCards = g.getPlayerCards(0);
 
-        cardDif = new Dictionary<int, int>();
+        cardDif = new int[g.cards.Length];
+
 
         int k = 0;
         bool foundMove = false;
@@ -110,7 +111,7 @@ public class Move : IComparable<Move>
 
 
 
-        cardDif = new Dictionary<int, int>();
+        cardDif = new int[cards.Length];
 
         for (int i = pCards.Length - 1; i >= handIndex; i--)
         {
@@ -181,8 +182,7 @@ public class Move : IComparable<Move>
 
     public int[] retreiveMoveIndexes(int[] cards)
     {
-        int[] cardsAfterMove = cards.CopyArray();
-        cardsAfterMove.SumArrayWithHashMap(cardDif);
+        int[] cardsAfterMove = ArrayExtensions.AddArray(cards, cardDif, false);
         int[] moveIndexes = new int[15].SetArray(-10);
 
         int k = 0;
