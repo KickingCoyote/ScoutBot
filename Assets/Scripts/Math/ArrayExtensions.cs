@@ -64,7 +64,6 @@ public static class ArrayExtensions
     public static void SumArrayWithHashMap(this int[] array, Dictionary<int, int> hashMap, bool invert = false)
     {
         int inverter = invert ? -1 : 1;
-
         foreach (KeyValuePair<int, int> kvp in hashMap)
         {
             array[kvp.Key] += inverter * kvp.Value;
