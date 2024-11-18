@@ -102,7 +102,7 @@ public static class ArrayExtensions
     /// <param name="a"></param>
     /// <param name="b"></param>
     /// <returns></returns>
-    public static bool CompareArray(int[] a, int[] b)
+    public static bool CompareArray<T>(T[] a, T[] b)
     {
         return Enumerable.SequenceEqual(a, b);
     }

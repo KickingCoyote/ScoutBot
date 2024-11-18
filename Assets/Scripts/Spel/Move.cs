@@ -214,16 +214,16 @@ public class Move : IComparable<Move>
         //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
         int[] pCards = g.getPlayerCards(player);
 
-        int tCardsValue = getValue(g.cards, GameState.getPlayerCards(g.cards, 0));
+        int tCardsValue = getValue(g.cards, g.getPlayerCards(0));
         //Get all the possible moves in the format of card indexes
         List<int[]> moveIndexList = new List<int[]>();
 
-        for (int i = 0; i < pCards.Length; i++)
+        for (int i = 0; i < pCards.Length && pCards[i] != -10; i++)
         {
 
-            if (pCards[i] == -10) { break; }
-
             if (!onlyLegalMoves || getValue(g.cards, new int[1] { pCards[i] }) > tCardsValue) { moveIndexList.Add(new int[1] { pCards[i] }); }
+
+            int currentCardValue = SBU.getCurrentCardValue(g.cards, pCards[i]);
 
             for (int h = -1; h < 2; h++)
             {
@@ -231,7 +231,7 @@ public class Move : IComparable<Move>
                 {
                     if (i + j >= pCards.Length || pCards[i + j] == -10) { break; }
 
-                    if (SBU.getCurrentCardValue(g.cards, pCards[i]) != SBU.getCurrentCardValue(g.cards, pCards[i + j]) + j * h){ break; }
+                    if (currentCardValue != SBU.getCurrentCardValue(g.cards, pCards[i + j]) + j * h){ break; }
 
                     int[] move = new int[j + 1].SetArray(-10);
                     move[0] = pCards[i];
@@ -256,8 +256,6 @@ public class Move : IComparable<Move>
 
         return moves;
     }
-
-
 
     /// <summary>
     /// Gets all possible draw card moves (All GenerateDrawCardMoves are automatically legal) (This too needs to be very fast)

@@ -192,10 +192,8 @@ public static class SBU
         {
             return cardValues[cardIndex];
         }
-        else
-        {
-            return FlipCardValue(cardValues[cardIndex]);
-        }
+        return FlipCardValue(cardValues[cardIndex]);
+        
     }
 
 

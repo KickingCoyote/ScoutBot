@@ -59,7 +59,7 @@ public class SBA
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
 
         //Current move ordering decreases NPS by 25% and doubles amount of searched positions.
-        //MoveOrdering(moves);
+        MoveOrdering(g, moves);
 
         if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); return 0; }
 
@@ -70,7 +70,7 @@ public class SBA
             foreach (Move move in moves)
             {
 
-                g.Move(move);
+                g.DoMove(move);
 
                 //For each move search deeper and see how good the position is
                 int eval = DepthSearch(depth - 1, alpha, beta);
@@ -90,7 +90,7 @@ public class SBA
             foreach (Move move in moves)
             {
 
-                g.Move(move);
+                g.DoMove(move);
 
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
@@ -111,22 +111,26 @@ public class SBA
     }
 
 
-    private void MoveOrdering(List<Move> moves)
+    private void MoveOrdering(GameState g, List<Move> moves)
     {
-        
-        foreach(Move move in moves)
-        {
-            if (!move.isDrawMove)
-            {
-                move.scoreEstimate = 100;
-            }
-            else
-            {
-                //if the neighbouring cards are not ladder / match asume its bad
-            }
-        }
 
-        moves.Sort();
+        //foreach (Move move in moves)
+        //{
+        //    //if (!move.isDrawMove)
+        //    //{
+        //    //    move.scoreEstimate = 100;
+        //    //}
+        //    //else
+        //    //{
+        //    //    //if the neighbouring cards are not ladder / match asume its bad
+        //    //}
+        //    g.DoMove(move);
+        //    move.scoreEstimate = -g.EstimatePossibleMoveScore(g.turn);
+        //    g.UndoMove(move);
+        //}
+
+
+        //moves.Sort();
     }
 
 
@@ -166,7 +170,7 @@ public struct GameState
     }
 
 
-    public void Move(Move move)
+    public void DoMove(Move move)
     {
         if (!move.isDrawMove) { playerPoints[turn - 1] += getPlayerCards(cards, 0).ArrayLength(); }
         else {  playerPoints[currentPileHolder - 1]++; }
@@ -242,6 +246,37 @@ public struct GameState
         }
 
         return false;
+    }
+
+
+    public int EstimatePossibleMoveScore(int player)
+    {
+        //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
+        int[] pCards = getPlayerCards(player);
+
+        int tCardsValue = Move.getValue(cards, getPlayerCards(0));
+
+        //Get a estimate score for a hand based on how many moves can be done and the length of those moves, this value has no relation to other values
+        int score = 0;
+
+        for (int i = 0; i < pCards.Length && pCards[i] != -10; i++)
+        {
+            int currentCardValue = SBU.getCurrentCardValue(cards, pCards[i]);
+            score++;
+
+            for (int h = -1; h < 2; h++)
+            {
+                for (int j = 1; j < pCards.Length - 1; j++)
+                {
+                    if (i + j >= pCards.Length || pCards[i + j] == -10) { break; }
+
+                    if (currentCardValue != SBU.getCurrentCardValue(cards, pCards[i + j]) + j * h) { break; }
+
+                    score += j;
+                }
+            }
+        }
+        return score;
     }
 
 }

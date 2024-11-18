@@ -19,17 +19,17 @@ public static class SBH
 
         int currentScore = 0;
 
-        
         for (int i = 1; i < 5; i++)
         {
             if (i == maximizer) { continue; }
 
-            int weight = 1;
+            int weight = 100;
 
             currentScore -= weight * g.getPlayerPoints(i);
         }
-        
-        return currentScore + 3 * g.getPlayerPoints(maximizer);
+
+
+        return currentScore + 300 * g.getPlayerPoints(maximizer);
     }
     
 

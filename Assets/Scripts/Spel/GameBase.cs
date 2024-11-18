@@ -74,7 +74,7 @@ public class GameBase : MonoBehaviour
 
     private void GameUpdate()
     {
-        
+
         if (SBU.gameState.isGameOver())
         {
             GameEnd();
@@ -108,7 +108,7 @@ public class GameBase : MonoBehaviour
             ); 
         }
 
-        SBU.gameState.Move(search.bestMove);
+        SBU.gameState.DoMove(search.bestMove);
 
         //Store moves
         if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
@@ -136,7 +136,7 @@ public class GameBase : MonoBehaviour
     {
         if (moveHistoryPointer + 1 >= moveHistory.Count) { Debug.Log("No more moves to undo"); return; }
         moveHistoryPointer += 1;
-        SBU.gameState.Move(moveHistory[moveHistoryPointer]);
+        SBU.gameState.DoMove(moveHistory[moveHistoryPointer]);
     }
 
     public void SimulateGame()
@@ -155,7 +155,7 @@ public class GameBase : MonoBehaviour
         Move m = new Move(SBU.gameState.cards, top, flipped, SBU.gameState.turn, handindex);
         if (m != null)
         {
-            SBU.gameState.Move(m);
+            SBU.gameState.DoMove(m);
             moveHistory.Add(m);
             moveHistoryPointer += 1;
         }
@@ -187,7 +187,7 @@ public class GameBase : MonoBehaviour
         //}
 
 
-        SBU.gameState.Move(m);
+        SBU.gameState.DoMove(m);
         moveHistory.Add(m);
         moveHistoryPointer += 1;
 
