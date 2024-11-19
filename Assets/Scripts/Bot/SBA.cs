@@ -19,9 +19,12 @@ public class SBA
 
     private int maximizer;
 
-    public SBA(GameState g, int maximizer, float fearBias) 
+    private int depth;
+
+    public SBA(GameState g, int depth, int maximizer, float fearBias) 
     {
         this.g = g;
+        this.depth = depth;
         this.fearBias = fearBias;
         this.maximizer = maximizer;
     }
@@ -59,7 +62,7 @@ public class SBA
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
 
         //Current move ordering decreases NPS by 25% and doubles amount of searched positions.
-        MoveOrdering(g, moves);
+        //MoveOrdering(g, moves);
 
         if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); return 0; }
 
@@ -74,6 +77,11 @@ public class SBA
 
                 //For each move search deeper and see how good the position is
                 int eval = DepthSearch(depth - 1, alpha, beta);
+
+                //if (depth == this.depth - 1)
+                //{
+                //    eval += g.EstimatePossibleMoveScore(g.turn) / 10;
+                //}
 
                 // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
                 if (eval > p) { bestMove = move; }
@@ -93,6 +101,11 @@ public class SBA
                 g.DoMove(move);
 
                 int eval = DepthSearch(depth - 1, alpha, beta);
+
+                //if (depth == this.depth - 1)
+                //{
+                //    eval -= g.EstimatePossibleMoveScore(g.turn) / 10;
+                //}
 
                 if (eval < p) { bestMove = move; }
                 p = Math.Min(p, eval);
@@ -114,23 +127,27 @@ public class SBA
     private void MoveOrdering(GameState g, List<Move> moves)
     {
 
-        //foreach (Move move in moves)
-        //{
-        //    //if (!move.isDrawMove)
-        //    //{
-        //    //    move.scoreEstimate = 100;
-        //    //}
-        //    //else
-        //    //{
-        //    //    //if the neighbouring cards are not ladder / match asume its bad
-        //    //}
-        //    g.DoMove(move);
-        //    move.scoreEstimate = -g.EstimatePossibleMoveScore(g.turn);
-        //    g.UndoMove(move);
-        //}
+        foreach (Move move in moves)
+        {
+            //if (!move.isDrawMove)
+            //{
+            //    move.scoreEstimate = 100;
+            //}
+            //else
+            //{
+            //    //if the neighbouring cards are not ladder / match asume its bad
+            //}
+            if (move.isDrawMove)
+            {
+                g.DoMove(move);
+                move.scoreEstimate = -g.EstimatePossibleMoveScore(g.turn);
+                g.UndoMove(move);
+            }
+
+        }
 
 
-        //moves.Sort();
+        moves.Sort();
     }
 
 
@@ -208,6 +225,7 @@ public struct GameState
     /// <returns>A 15 long array of card indexes where emtpy values are -10</returns>
     public static int[] getPlayerCards(int[] cards, int player)
     {
+
         int[] pCards = new int[15].SetArray(-10);
 
         for (int i = 0; i < cards.Length; i++)
@@ -262,7 +280,7 @@ public struct GameState
         for (int i = 0; i < pCards.Length && pCards[i] != -10; i++)
         {
             int currentCardValue = SBU.getCurrentCardValue(cards, pCards[i]);
-            score++;
+            score += 100;
 
             for (int h = -1; h < 2; h++)
             {
@@ -272,7 +290,7 @@ public struct GameState
 
                     if (currentCardValue != SBU.getCurrentCardValue(cards, pCards[i + j]) + j * h) { break; }
 
-                    score += j;
+                    score += 100 * (j + 1) + (h == 0 ? 1 : 0);
                 }
             }
         }

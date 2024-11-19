@@ -204,6 +204,7 @@ public static class SBU
     /// <returns>string in format [value 1]:[value 2] </returns>
     public static string CardToString(int[] cards, int cardIndex)
     {
+
         int value = GetCardValue(cards, cardIndex);
         return getCurrentCardValue(value) + ":" + (value - (16 * getCurrentCardValue(value)));
     }

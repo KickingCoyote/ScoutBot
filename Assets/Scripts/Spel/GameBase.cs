@@ -91,6 +91,7 @@ public class GameBase : MonoBehaviour
     {
         SBA search = new SBA(
             SBU.gameState,
+            settings.SearchDepth,
             SBU.gameState.turn,
             settings.FearBias
         );

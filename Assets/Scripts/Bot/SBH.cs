@@ -28,7 +28,6 @@ public static class SBH
             currentScore -= weight * g.getPlayerPoints(i);
         }
 
-
         return currentScore + 300 * g.getPlayerPoints(maximizer);
     }
     
