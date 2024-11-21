@@ -18,4 +18,7 @@ public class Settings : MonoBehaviour
     /// The seed for how the cards are distributed on game start, if left empty all cards are distributed randomly.
     /// </summary>
     public int GameSeed = 0;
+
+
+    public int handQualityPriority = 1;
 }

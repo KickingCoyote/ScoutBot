@@ -24,9 +24,12 @@ public static class SBH
             if (i == maximizer) { continue; }
 
             int weight = 100;
-
+            
             currentScore -= weight * g.getPlayerPoints(i);
+            currentScore -= g.EstimatePossibleMoveScore(i) / 10;
         }
+
+        currentScore += g.EstimatePossibleMoveScore(maximizer) / 10;
 
         return currentScore + 300 * g.getPlayerPoints(maximizer);
     }

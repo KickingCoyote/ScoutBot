@@ -93,7 +93,8 @@ public class GameBase : MonoBehaviour
             SBU.gameState,
             settings.SearchDepth,
             SBU.gameState.turn,
-            settings.FearBias
+            settings.FearBias,
+            settings.handQualityPriority
         );
 
         SBTimer timer = new SBTimer();
@@ -221,6 +222,9 @@ public class GameBase : MonoBehaviour
     private void GameEnd()
     {
         gameOver = true;
+
+
+
         UpdateGUI();
         Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + MathF.Round(gameTimer.Timer(), 3));
     }
