@@ -16,6 +16,8 @@ public class Move : IComparable<Move>
 
     public int scoreEstimate;
 
+    public int moveLength;
+
     ///// <summary>
     ///// The cards used in the move, incase of draw move the drawn move
     ///// </summary>
@@ -27,6 +29,7 @@ public class Move : IComparable<Move>
         this.cardDif = cardDif;
         this.pileHolderDif = pileHolderDif;
         this.isDrawMove = isDrawMove;
+        moveLength = 1;
     }
 
     /// <summary>
@@ -74,6 +77,7 @@ public class Move : IComparable<Move>
         }
 
         pileHolderDif = (int)player - g.currentPileHolder;
+        moveLength = move.ArrayLength();
         isDrawMove = false;
     }
 
@@ -139,6 +143,7 @@ public class Move : IComparable<Move>
 
         pileHolderDif = 0;
         isDrawMove = true;
+        moveLength = 1;
     }
 
 
@@ -294,6 +299,6 @@ public class Move : IComparable<Move>
 
     public int CompareTo(Move other)
     {
-        return this.scoreEstimate.CompareTo(other.scoreEstimate);
+        return other.scoreEstimate.CompareTo(scoreEstimate);
     }
 }

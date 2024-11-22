@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 /// <summary>
 /// Scout Bot Algorithm.
@@ -59,8 +60,10 @@ public class SBA
         
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
 
-        //Current move ordering decreases NPS by 25% and doubles amount of searched positions.
-        //MoveOrdering(g, moves);
+        //Due to alpha beta pruning working better when the good moves are searched first we estimate how good a move is and then sort them based on that
+        //22/11/2024: NPS: approx same, Positions Searched: halved.
+        MoveOrdering(g, moves);
+
 
         if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); return 0; }
 
@@ -119,25 +122,12 @@ public class SBA
 
         foreach (Move move in moves)
         {
-            //if (!move.isDrawMove)
-            //{
-            //    move.scoreEstimate = 100;
-            //}
-            //else
-            //{
-            //    //if the neighbouring cards are not ladder / match asume its bad
-            //}
-            if (move.isDrawMove)
-            {
-                g.DoMove(move);
-                move.scoreEstimate = -g.EstimatePossibleMoveScore(g.turn);
-                g.UndoMove(move);
-            }
-
+            if (!move.isDrawMove) { move.scoreEstimate = move.moveLength; }
+            else { move.scoreEstimate = 0; }
         }
 
-
         moves.Sort();
+
     }
 
 
