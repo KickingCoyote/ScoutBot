@@ -19,6 +19,4 @@ public class Settings : MonoBehaviour
     /// </summary>
     public int GameSeed = 0;
 
-
-    public int handQualityPriority = 1;
 }

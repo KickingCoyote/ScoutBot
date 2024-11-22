@@ -93,8 +93,7 @@ public class GameBase : MonoBehaviour
             SBU.gameState,
             settings.SearchDepth,
             SBU.gameState.turn,
-            settings.FearBias,
-            settings.handQualityPriority
+            settings.FearBias
         );
 
         SBTimer timer = new SBTimer();

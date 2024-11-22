@@ -21,26 +21,21 @@ public class SBA
 
     private int depth;
 
-    private int handQualityPriority;
 
-    public SBA(GameState g, int depth, int maximizer, float fearBias, int handQualityPriority) 
+    public SBA(GameState g, int depth, int maximizer, float fearBias) 
     {
         this.g = g;
         this.depth = depth;
         this.fearBias = fearBias;
         this.maximizer = maximizer;
-        this.handQualityPriority = handQualityPriority;
     }
 
     //Paranoid MIN MAX Algorithm 
     public int DepthSearch(int depth, int alpha, int beta)
     {
 
-        int inverter = g.turn == maximizer ? 1 : -1;
-
-
         //Starts of being infinitely terrible for the current player
-        int p =  inverter * -2147483647;
+        int p = (g.turn == maximizer ? 1 : -1) * -2147483647;
 
 
         //Checks if it is game over, if the maximizer is winning return infinity otherwise -infinity as there is nothing better/worse than winning/losing the game
@@ -48,7 +43,7 @@ public class SBA
         if (g.isGameOver())
         {
             searchedPositions++;
-            return g.getWinningPlayer() == maximizer ? 2147483646 : -2147483646;
+            return g.getWinningPlayer() == g.turn ? 2147483646 : -2147483646;
         }
 
 
@@ -81,10 +76,6 @@ public class SBA
                 //For each move search deeper and see how good the position is
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
-                //if (depth == this.depth - 1)
-                //{
-                //    eval += g.EstimatePossibleMoveScore(g.turn) / 10;
-                //}
 
                 // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
                 if (eval > p) { bestMove = move; }
@@ -96,7 +87,7 @@ public class SBA
                 if (beta <= alpha) { break; }
             }
         }
-        else //The same thing but for minimizer so some > become < and Max() becomes Min() 
+        else //The same thing but for minimizers so some > become < and Max() becomes Min() 
         {
             foreach (Move move in moves)
             {
@@ -105,10 +96,6 @@ public class SBA
 
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
-                //if (depth == this.depth - 1)
-                //{
-                //    eval -= g.EstimatePossibleMoveScore(g.turn) / 10;
-                //}
 
                 if (eval < p) { bestMove = move; }
                 p = Math.Min(p, eval);
@@ -122,7 +109,7 @@ public class SBA
         }
 
         this.bestMove = bestMove;
-        
+
         return p;
     }
 
@@ -289,7 +276,7 @@ public struct GameState
         for (int i = 0; i < pCards.Length && pCards[i] != -10; i++)
         {
             int currentCardValue = SBU.getCurrentCardValue(cards, pCards[i]);
-            score += 100;
+            score += 10;
 
             for (int h = -1; h < 2; h++)
             {
@@ -299,7 +286,7 @@ public struct GameState
 
                     if (currentCardValue != SBU.getCurrentCardValue(cards, pCards[i + j]) + j * h) { break; }
 
-                    score += 100 * (j + 1) + (h == 0 ? 1 : 0);
+                    score += 10 * (j + 1) + (h == 0 ? 1 : 0);
                 }
             }
         }

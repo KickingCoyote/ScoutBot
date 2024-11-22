@@ -29,7 +29,7 @@ public static class SBH
             currentScore -= g.EstimatePossibleMoveScore(i) / 10;
         }
 
-        currentScore += g.EstimatePossibleMoveScore(maximizer) / 10;
+        currentScore += g.EstimatePossibleMoveScore(maximizer);
 
         return currentScore + 300 * g.getPlayerPoints(maximizer);
     }
