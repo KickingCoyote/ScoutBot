@@ -62,8 +62,8 @@ public class Move : IComparable<Move>
             if (tCards[i] < 0) { break; }
 
             //Takes all cards currently in the pile and gives them as points to the player
-            //(handIndex = 15 represents it being a point)
-            cardDif[tCards[i]] = 16 * 15 + (int)player - g.cards[tCards[i]];
+            //(240 = 16 * 15: handIndex = 15 represents it being a point)
+            cardDif[tCards[i]] = 240 + (int)player - g.cards[tCards[i]];
         }
         for (int i = 0; i < pCards.Length; i++)
         {
@@ -72,7 +72,7 @@ public class Move : IComparable<Move>
             if (k < move.Length && pCards[i] == move[k])
             {
                 //Move card to center pile and set its new index in center pile
-                cardDif[move[k]] = 16 * k + 8 * SBU.getCardFlip(g.cards[move[k]]) - g.cards[move[k]];
+                cardDif[move[k]] = (k << 4) + (g.cards[move[k]] & 8) - g.cards[move[k]];
                 foundMove = true;
                 k++;
             }
@@ -130,7 +130,7 @@ public class Move : IComparable<Move>
             if (pCards[i] != -10) { cardDif[pCards[i]] = 16; }
         }
 
-        cardDif[tCard] = (16 * handIndex + 8 * SBU.getCardFlip(cards[tCard]) + player) - cards[tCard];
+        cardDif[tCard] = (16 * handIndex + (cards[tCard] & 8) + player) - cards[tCard];
 
         //Flip the card incase flip == true
         if (flip && SBU.getCardFlip(cards[tCard]) == 0) { cardDif[tCard] += 8; }

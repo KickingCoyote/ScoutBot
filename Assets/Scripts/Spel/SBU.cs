@@ -94,7 +94,7 @@ public static class SBU
     /// <returns>The bottom value of the cardValue</returns>
     public static int FlipCardValue(int cardValue)
     {
-        return cardValue % 16 * 16 + ((cardValue - (cardValue % 16)) / 16);
+        return ((cardValue & 0x0F) << 4) | ((cardValue & 0xF0) >> 4);
     }
 
 
@@ -105,7 +105,7 @@ public static class SBU
     //Returns the upwards facing value on a card given the card value
     public static int getCurrentCardValue(int cardValue)
     {
-        return (cardValue - (cardValue % 16)) / 16; 
+        return cardValue >> 4;
     }
 
 
@@ -118,8 +118,7 @@ public static class SBU
     /// <returns></returns>
     public static int getCardHandIndex(int card)
     {
-        //Uses same logic as getCurrentCardValue
-        return getCurrentCardValue(card);
+        return card >> 4;
     }
 
     /// <summary>
@@ -128,7 +127,7 @@ public static class SBU
     /// <returns></returns>
     public static int getCardOwner(int card)
     {
-        return card % 8;
+        return card & 7;
     }
 
 
@@ -139,7 +138,7 @@ public static class SBU
     /// <returns>0 or 1 for unflipped / flipped cards</returns>
     public static int getCardFlip(int card)
     {
-        return ((card % 16) - (card % 8)) / 8;
+        return (card >> 3) & 1;
     }
 
 
