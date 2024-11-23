@@ -12,7 +12,7 @@ using UnityEngine.SocialPlatforms.Impl;
 
 
 /// <summary>
-/// Scout Bot Utilities, All functions required to run the base game
+/// Scout Bot Utilities, functions required to parse and use the game data
 /// </summary>
 public static class SBU
 {
@@ -31,6 +31,17 @@ public static class SBU
     //gameState.currentPileHolder
     //Keeps track of who the cards in the middle belonged to, for giving points
 
+
+
+    /* Dictionary:
+     * 
+     *  Card index: the index to a card in the gameState.cards array
+     *  Card: the value correlated with a card index, stored at gameState.cards[cardIndex]
+     *  Card Value: the value of card stored at cardValues[cardIndex], exclusively acquired through GetCardValue()
+     *  Draw move / take card move: a move where a player picks up a card from the middle pile
+     *  Put card move: a move where a player places cards in the middle pile
+     *  
+     */
 
 
 
@@ -104,7 +115,6 @@ public static class SBU
     /// <summary>
     /// Gets where in the player hand the card is located, where 0 is the first (left most) card
     /// </summary>
-    /// <param name="cardValue">card</param>
     /// <returns></returns>
     public static int getCardHandIndex(int card)
     {
@@ -115,7 +125,6 @@ public static class SBU
     /// <summary>
     /// Gets the owner of the card where 0 is the table pile and 1-4 is player 1-4
     /// </summary>
-    /// <param name="cardValue">card</param>
     /// <returns></returns>
     public static int getCardOwner(int card)
     {
@@ -156,6 +165,13 @@ public static class SBU
         }
     }
 
+
+
+    public static int RandomInt()
+    {
+        System.Random r = new System.Random();
+        return r.Next(0, 2147483647);
+    }
 
     
     /// <summary>

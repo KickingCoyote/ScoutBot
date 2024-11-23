@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +7,6 @@ using UnityEngine;
 
 public class Move : IComparable<Move>
 {
-
 
     public int[] cardDif;
 
@@ -17,6 +17,7 @@ public class Move : IComparable<Move>
     public int scoreEstimate;
 
     public int moveLength;
+    public int moveMin;
 
     ///// <summary>
     ///// The cards used in the move, incase of draw move the drawn move
@@ -29,7 +30,10 @@ public class Move : IComparable<Move>
         this.cardDif = cardDif;
         this.pileHolderDif = pileHolderDif;
         this.isDrawMove = isDrawMove;
-        moveLength = 1;
+        moveLength = 0;
+        moveMin = 0;
+
+
     }
 
     /// <summary>
@@ -78,7 +82,10 @@ public class Move : IComparable<Move>
 
         pileHolderDif = (int)player - g.currentPileHolder;
         moveLength = move.ArrayLength();
+        moveMin = move[0];
         isDrawMove = false;
+
+
     }
 
 
@@ -144,10 +151,23 @@ public class Move : IComparable<Move>
         pileHolderDif = 0;
         isDrawMove = true;
         moveLength = 1;
+        moveMin = 0;
     }
 
 
+    public bool CompareMoves(Move move)
+    {
+        if (move.pileHolderDif != pileHolderDif) { return false; }
 
+        for (int i = 0; i < move.cardDif.Length; i++)
+        {
+            if (move.cardDif[i] != this.cardDif[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /// <summary>
     /// Gets the points of a combination of cards (by indexes) by refrencing a premade array
@@ -223,33 +243,31 @@ public class Move : IComparable<Move>
         //Get all the possible moves in the format of card indexes
         List<int[]> moveIndexList = new List<int[]>();
 
-        for (int i = 0; i < pCards.Length && pCards[i] != -10; i++)
+        for (int startCard = 0; startCard < pCards.Length && pCards[startCard] != -10; startCard++)
         {
 
-            if (!onlyLegalMoves || getValue(g.cards, new int[1] { pCards[i] }) > tCardsValue) { moveIndexList.Add(new int[1] { pCards[i] }); }
+            if (!onlyLegalMoves || getValue(g.cards, new int[1] { pCards[startCard] }) > tCardsValue) { moveIndexList.Add(new int[1] { pCards[startCard] }); }
 
-            int currentCardValue = SBU.getCurrentCardValue(g.cards, pCards[i]);
+            int currentCardValue = SBU.getCurrentCardValue(g.cards, pCards[startCard]);
 
             for (int h = -1; h < 2; h++)
             {
-                for (int j = 1; j < pCards.Length - 1; j++)
+                for (int n = 1; startCard + n < pCards.Length - 1; n++)
                 {
-                    if (i + j >= pCards.Length || pCards[i + j] == -10) { break; }
+                    if (pCards[startCard + n] == -10) { break; }
 
-                    if (currentCardValue != SBU.getCurrentCardValue(g.cards, pCards[i + j]) + j * h){ break; }
+                    if (currentCardValue != SBU.getCurrentCardValue(g.cards, pCards[startCard + n]) + n * h){ break; }
 
-                    int[] move = new int[j + 1].SetArray(-10);
-                    move[0] = pCards[i];
+                    int[] move = new int[n + 1];
 
-                    for (int k = 1; k < j + 1; k++)
-                    {
-                        move[k] = pCards[i + k];
-                        //If onlyLegalMoves = true check if the moveValue is higher than table pile
-                        if (!onlyLegalMoves || getValue(g.cards, move) > tCardsValue) { moveIndexList.Add(move); }
-                    }
+                    Array.Copy(pCards, startCard, move, 0, n + 1);
+                    if (!onlyLegalMoves || getValue(g.cards, move) > tCardsValue) { moveIndexList.Add(move); }
+
                 }
             }
         }
+
+
 
         //reformat the moves
         List<Move> moves = new List<Move>();
@@ -297,6 +315,12 @@ public class Move : IComparable<Move>
         return moves;
     }
 
+
+    /// <summary>
+    /// Sorts moves based on scoreEstimation which is generated in Move Ordering, higher scores is put earlier in the list.
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
     public int CompareTo(Move other)
     {
         return other.scoreEstimate.CompareTo(scoreEstimate);

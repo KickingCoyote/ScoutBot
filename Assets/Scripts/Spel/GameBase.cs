@@ -98,7 +98,7 @@ public class GameBase : MonoBehaviour
 
         SBTimer timer = new SBTimer();
         timer.StartTimer();
-        search.DepthSearch(settings.SearchDepth, -2147483647, 2147483647);
+        search.StartSearch();
 
 
         if (logSearch) { 
