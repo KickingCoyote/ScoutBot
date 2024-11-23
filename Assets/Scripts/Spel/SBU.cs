@@ -166,13 +166,6 @@ public static class SBU
     }
 
 
-
-    public static int RandomInt()
-    {
-        System.Random r = new System.Random();
-        return r.Next(0, 2147483647);
-    }
-
     
     /// <summary>
     /// Gets the card index from a value
