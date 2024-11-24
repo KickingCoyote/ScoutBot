@@ -20,7 +20,7 @@ public class Move : IComparable<Move>
     public int moveMin;
 
     ///// <summary>
-    ///// The cards used in the move, incase of draw move the drawn move
+    ///// The cards used in the move, incase of draw move the drawn card
     ///// </summary>
     //public int[] cards; 
 
@@ -228,7 +228,7 @@ public class Move : IComparable<Move>
 
 
     /// <summary>
-    /// This function generates all possible moves. THIS METHOD NEEDS TO BE EXTREMELY FAST.
+    /// This function generates all possible moves.
     /// </summary>
     /// <param name="player"></param>
     /// <returns>a 2 dimensional array of all possible moves a player can play</returns>

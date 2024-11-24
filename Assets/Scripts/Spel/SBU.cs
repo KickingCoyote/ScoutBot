@@ -1,14 +1,8 @@
-using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Scripting.APIUpdating;
-using UnityEngine.SocialPlatforms.Impl;
 
 
 /// <summary>
@@ -18,13 +12,16 @@ public static class SBU
 {
     public static GameState gameState;
 
+    public static int round;
+
+
     //gameState.cards
     //All cards are stored in 1 44 length int[], the index represents which card it is and the value has all the needed data about that card 
     //each value is stored such as that when viewed in byte form it looks like XXXX X XXX.
     //the right most 3 digits represents who has the card (0 for middle pile, 1..4 for player 1..4)
     //the middle digit represents if the card is flipped or not, where the LARGEST VALUE is always flipped DOWN if it's 0
     //the left most 4 digit represents the index of where in the players hand (or middle pile) the card is located, if the digits are 1111 that represents the card being a point instead of a card
-    
+
     //gameState.turn
     //A variable between 1 and 4 representing which players turn it is
 

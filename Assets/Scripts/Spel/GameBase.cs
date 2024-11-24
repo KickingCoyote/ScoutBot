@@ -26,7 +26,6 @@ public class GameBase : MonoBehaviour
     private List<Move> moveHistory;
     private int moveHistoryPointer;
 
-    private int round;
     private bool gameOver;
 
     private SBTimer gameTimer;
@@ -37,6 +36,7 @@ public class GameBase : MonoBehaviour
         moveHistory = new List<Move>();
         moveHistoryPointer = moveHistory.Count - 1;
 
+        TranspositionTable.GenerateZobristHashKey();
 
         SBU.gameState = new GameState(new int[44], 1, 0);
 
@@ -45,7 +45,7 @@ public class GameBase : MonoBehaviour
 
         DistributeCards(settings);
 
-        round = 0;
+        SBU.round = 0;
 
         guiManager = GetComponent<GUIManager>();
 
@@ -81,7 +81,7 @@ public class GameBase : MonoBehaviour
             return;
         }
 
-        if (SBU.gameState.turn == 1) { round++; }
+        if (SBU.gameState.turn == 1) { SBU.round++; }
 
         UpdateGUI();
 
@@ -91,7 +91,7 @@ public class GameBase : MonoBehaviour
     {
         SBA search = new SBA(
             SBU.gameState,
-            settings.SearchDepth,
+            settings.MaxSearchDepth,
             SBU.gameState.turn,
             settings.FearBias
         );
@@ -214,7 +214,7 @@ public class GameBase : MonoBehaviour
         }
 
 
-        infoText.text = "Turn: " + SBU.gameState.turn + "   |   Round: " + round;
+        infoText.text = "Turn: " + SBU.gameState.turn + "   |   Round: " + SBU.round;
 
     }
 

@@ -21,7 +21,10 @@ public class SBA
     private int maximizer;
 
     private int maxDepth;
+    private int currentMaxDepth;
 
+
+    private int transpositionCounter = 0;
 
     public SBA(GameState g, int maxDepth, int maximizer, float fearBias) 
     {
@@ -35,14 +38,14 @@ public class SBA
 
     public void StartSearch()
     {
-        DepthSearch(maxDepth, -2147483647, 2147483647);
+        for (int depth = 1; depth <= maxDepth; depth++)
+        {
+            currentMaxDepth = depth;
+            DepthSearch(depth, -2147483647, 2147483647);
+        }
 
-        //for (int depth = 1; depth <= maxDepth; depth++)
-        //{
-
-        //    DepthSearch(depth, -2147483647, 2147483647);
-        //}
-
+        Debug.Log($"Transpositions used: {transpositionCounter}  | Transpositions stored: {TranspositionTable.table.Count()}");
+        TranspositionTable.table.Clear();
     }
 
 
@@ -50,9 +53,6 @@ public class SBA
     //Paranoid MIN MAX Algorithm 
     public int DepthSearch(int depth, int alpha, int beta)
     {
-
-        //Starts of being infinitely terrible for the current player
-        int p = (g.turn == maximizer ? 1 : -1) * -2147483647;
 
 
         //Checks if it is game over, if the current player is winning return infinity otherwise -infinity as there is nothing better/worse than winning/losing the game.
@@ -78,8 +78,8 @@ public class SBA
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
 
         //Due to alpha beta pruning working better when the good moves are searched first we estimate how good a move is and then sort them based on that
-        //22/11/2024: NPS: approx same, Positions Searched: halved.
-        Move priorityMove = depth == maxDepth ? this.bestMove : null;
+
+        Move priorityMove = this.bestMove; //depth == currentMaxDepth ? this.bestMove : null; //Even if I wanted to I could not tell you why removing the depth check reduces searched positions but it does...
         MoveOrdering(g, moves, priorityMove);
 
 
@@ -91,48 +91,77 @@ public class SBA
         {
             foreach (Move move in moves)
             {
+
                 g.DoMove(move);
 
                 //For each move search deeper and see how good the position is
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
-
-                // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
-                if (eval > p) { bestMove = move; }
-                p = Math.Max(p, eval);
-
                 g.UndoMove(move);
 
 
-                //alpha beta pruning
-                alpha = Math.Max(alpha, p);
-                if (beta <= alpha) { break; }
+                //alpha beta pruning. 
+                if (eval >= beta) { break; }
+
+
+                // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
+                if (eval > alpha) 
+                { 
+                    bestMove = move;
+                    alpha = eval;
+                }
+
+
             }
         }
-        else //The same thing but for minimizers so some > become < and Max() becomes Min() 
+        else //The same thing but for minimizers so some > become <
         {
             foreach (Move move in moves)
             {
 
                 g.DoMove(move);
-
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
+                if (eval >= beta) { break; }
 
-                if (eval < p) { bestMove = move; }
-                p = Math.Min(p, eval);
+
+                if (eval < beta) 
+                { 
+                    bestMove = move;
+                    beta = eval;
+                }
+
 
                 g.UndoMove(move);
-
-                beta = Math.Min(beta, p);
-                if (beta <= alpha) { break; }
 
             }
         }
 
         this.bestMove = bestMove;
 
-        return p;
+        return maximizer == g.turn ? alpha : beta;
+    }
+
+    /// <summary>
+    /// For each position if the position already is stored in the Transposition Table use it, otherwise continue depth search and store the end result in the table.
+    /// </summary>
+    public int TranspositionSearch(GameState g, int depth, int alpha, int beta)
+    {
+
+        Transposition transposition = TranspositionTable.TryGetTransposition(g);
+        int eval;
+        if (!transposition.isEmpty && depth == transposition.depth)
+        {
+            transpositionCounter++;
+            //eval = transposition.evaluation;
+        }
+        else
+        {
+            eval = DepthSearch(depth - 1, alpha, beta);
+            TranspositionTable.AddTransposition(g, eval, depth, currentMaxDepth - depth);
+        }
+
+        return 1;
     }
 
 
@@ -141,9 +170,11 @@ public class SBA
         //the move ordering assumes that moves where more cards are put down are better and that picking up cards generally is worse
         foreach (Move move in moves)
         {
-            if (priorityMove is not null && move.CompareMoves(priorityMove)) { move.scoreEstimate = 10000; }
-            if (!move.isDrawMove) { move.scoreEstimate = move.moveLength * 100 + move.moveMin; }
-            else { move.scoreEstimate = 0; }
+            if (priorityMove?.cardDif is not null && move.CompareMoves(priorityMove)) { move.scoreEstimate = 100000; continue; }
+
+            if (!move.isDrawMove) { move.scoreEstimate = move.moveLength * 100 + move.moveMin; continue; }
+
+            move.scoreEstimate = 0;
         }
 
         moves.Sort();
