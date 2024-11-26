@@ -108,8 +108,9 @@ public class GameBase : MonoBehaviour
             "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s"
             ); 
         }
-
         SBU.gameState.DoMove(search.bestMove);
+
+        Debug.Log(search.bestEval);
 
         //Store moves
         if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
@@ -148,6 +149,15 @@ public class GameBase : MonoBehaviour
             BotMove(false);
         }
     }
+
+    public bool top;
+    public bool flipped;
+    public int handIndex;
+    public void fix()
+    {
+        TakeCard(top, flipped, handIndex);
+    }
+
 
     //Activated from buttons ingame
     public void TakeCard(bool top, bool flipped, int handindex)

@@ -23,6 +23,7 @@ public class SBA
     private int maxDepth;
     private int currentMaxDepth;
 
+    public int bestEval;
 
     private int transpositionCounter = 0;
 
@@ -54,6 +55,7 @@ public class SBA
     public int DepthSearch(int depth, int alpha, int beta)
     {
 
+        int inv = g.turn == maximizer ? 1 : -1;
 
         //Checks if it is game over, if the current player is winning return infinity otherwise -infinity as there is nothing better/worse than winning/losing the game.
         //This does not follow the paranoid algorithm as to get reasonable result you must presume that even the minimizers have some sense of self-preservation.
@@ -61,7 +63,7 @@ public class SBA
         if (g.isGameOver())
         {
             searchedPositions++;
-            return g.getWinningPlayer() == g.turn ? 2147483646 : -2147483646;
+            return g.getWinningPlayer() == g.turn ? 2147483646 * inv : -2147483646 * inv;
         }
 
 
@@ -100,8 +102,6 @@ public class SBA
                 g.UndoMove(move);
 
 
-                //alpha beta pruning. 
-                if (eval >= beta) { break; }
 
 
                 // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
@@ -112,6 +112,8 @@ public class SBA
                 }
 
 
+                //alpha beta pruning. 
+                if (alpha >= beta) { break; }
             }
         }
         else //The same thing but for minimizers so some > become <
@@ -122,7 +124,7 @@ public class SBA
                 g.DoMove(move);
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
-                if (eval >= beta) { break; }
+                g.UndoMove(move);
 
 
                 if (eval < beta) 
@@ -131,14 +133,14 @@ public class SBA
                     beta = eval;
                 }
 
+                if (alpha >= beta) { break; }
 
-                g.UndoMove(move);
 
             }
         }
 
         this.bestMove = bestMove;
-
+        bestEval = maximizer == g.turn ? alpha : beta;
         return maximizer == g.turn ? alpha : beta;
     }
 
