@@ -63,7 +63,11 @@ public class SBA
         if (g.isGameOver())
         {
             searchedPositions++;
-            return g.getWinningPlayer() == g.turn ? 2147483646 * inv : -2147483646 * inv;
+           
+            return g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -2147483646 : 2147483646;
+
+            
+
         }
 
 

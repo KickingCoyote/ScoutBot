@@ -231,11 +231,16 @@ public class GameBase : MonoBehaviour
     private void GameEnd()
     {
         gameOver = true;
-
-
-
+        for (int i = 0; i < 4; i++)
+        {
+            SBU.gameState.playerPoints[i] -= SBU.gameState.getPlayerCards(i + 1).ArrayLength();
+        }
         UpdateGUI();
-        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + MathF.Round(gameTimer.Timer(), 3));
+        float time = MathF.Round(gameTimer.Timer(), 3);
+        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + time);
+
+        Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, time, "");
+
     }
 
 }
