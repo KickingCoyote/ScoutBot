@@ -1,5 +1,5 @@
 Extra Information: 
-Time: 73.008
+Time: 68.562
 Seed: 865188289
 PlayerID: . . . . 
 

@@ -85,11 +85,11 @@ public class DragCards : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
             //Take card move
             if (previousParent.GetSiblingIndex() == 0 && playerHand.GetSiblingIndex() == SBU.gameState.turn)
             {
-                gameBase.TakeCard(
-                    SBU.gameState.getPlayerCards(0)[0] != int.Parse(transform.name),
-                    isFlipped,
-                    0
-                );
+                //gameBase.TakeCard(
+                //    SBU.gameState.getPlayerCards(0)[0] != int.Parse(transform.name),
+                //    isFlipped,
+                //    0
+                //);
 
             }
             //Put card move

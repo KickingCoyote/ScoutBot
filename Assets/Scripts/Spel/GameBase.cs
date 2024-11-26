@@ -61,7 +61,10 @@ public class GameBase : MonoBehaviour
 
     public static void DistributeCards(Settings settings)
     {
-        if (settings.GameSeed != 0) { UnityEngine.Random.InitState((int)settings.GameSeed); }
+
+        if (settings.GameSeed == 0) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); }
+
+        UnityEngine.Random.InitState((int)settings.GameSeed);
 
         for (int i = 0; i < 44; i++)
         {
@@ -110,7 +113,7 @@ public class GameBase : MonoBehaviour
         }
         SBU.gameState.DoMove(search.bestMove);
 
-        Debug.Log(search.bestEval);
+        //Debug.Log(search.bestEval);
 
         //Store moves
         if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
@@ -150,20 +153,21 @@ public class GameBase : MonoBehaviour
         }
     }
 
-    public bool top;
-    public bool flipped;
-    public int handIndex;
-    public void fix()
-    {
-        TakeCard(top, flipped, handIndex);
-    }
-
 
     //Activated from buttons ingame
-    public void TakeCard(bool top, bool flipped, int handindex)
+    public void TakeCard(bool flipped)
     {
+        bool top = SBU.getCardHandIndex(SBU.gameState.cards[int.Parse(guiManager.selectedCards.Where(c => SBU.getCardOwner(SBU.gameState.cards[int.Parse(c.name)]) == 0).First().name)]) != 0;
 
-        Move m = new Move(SBU.gameState.cards, top, flipped, SBU.gameState.turn, handindex);
+        int heldCard = guiManager.selectedCards
+            .Select(c => int.Parse(c.name))
+            .Where(c => SBU.getCardOwner(SBU.gameState.cards[c]) != 0)
+            .DefaultIfEmpty(-1)
+            .First();
+
+        int handIndex = heldCard == -1 ? 0 : SBU.getCardHandIndex(SBU.gameState.cards[heldCard]) + 1;
+
+        Move m = new Move(SBU.gameState.cards, top, flipped, SBU.gameState.turn, handIndex);
         if (m != null)
         {
             SBU.gameState.DoMove(m);

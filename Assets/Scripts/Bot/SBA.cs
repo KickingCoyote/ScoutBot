@@ -44,8 +44,7 @@ public class SBA
             currentMaxDepth = depth;
             DepthSearch(depth, -2147483647, 2147483647);
         }
-
-        Debug.Log($"Transpositions used: {transpositionCounter}  | Transpositions stored: {TranspositionTable.table.Count()}");
+        //Debug.Log($"Transpositions used: {transpositionCounter}  | Transpositions stored: {TranspositionTable.table.Count()}");
         TranspositionTable.table.Clear();
     }
 
@@ -57,18 +56,18 @@ public class SBA
 
         int inv = g.turn == maximizer ? 1 : -1;
 
+
         //Checks if it is game over, if the current player is winning return infinity otherwise -infinity as there is nothing better/worse than winning/losing the game.
         //This does not follow the paranoid algorithm as to get reasonable result you must presume that even the minimizers have some sense of self-preservation.
         //Its technically infinity -1 cause losing is still better than not finding a move and casting an error.
+
         if (g.isGameOver())
         {
             searchedPositions++;
-           
-            return g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -2147483646 : 2147483646;
-
-            
+            return SBH.Evaluate(g, maximizer);//g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -2147483646 : 2147483646;
 
         }
+        
 
 
         //When at the wanted depth return the evalutation of the position
@@ -143,9 +142,10 @@ public class SBA
             }
         }
 
+
         this.bestMove = bestMove;
         bestEval = maximizer == g.turn ? alpha : beta;
-        return maximizer == g.turn ? alpha : beta;
+        return bestEval;
     }
 
     /// <summary>
