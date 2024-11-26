@@ -221,7 +221,13 @@ public struct GameState
 
     public int getWinningPlayer()
     {
-        return Array.IndexOf(playerPoints, Enumerable.Max(playerPoints)) + 1;
+        int[] points = new int[4];
+        for (int i = 0; i < 4; i++)
+        {
+            points[i] = playerPoints[i] - getPlayerCards(i + 1).ArrayLength();
+        }
+
+        return Array.IndexOf(points, Enumerable.Max(points)) + 1;
     }
 
 

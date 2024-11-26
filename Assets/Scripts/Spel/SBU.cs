@@ -214,7 +214,4 @@ public static class SBU
         string[] str = cardStr.Split(':');
         return getCardFromValue(cards, int.Parse(str[0]) * 16 + int.Parse(str[1]));
     }
-
-
-
 }
