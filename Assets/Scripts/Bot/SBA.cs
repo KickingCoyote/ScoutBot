@@ -64,7 +64,8 @@ public class SBA
         if (g.isGameOver())
         {
             searchedPositions++;
-            return SBH.Evaluate(g, maximizer);//g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -2147483646 : 2147483646;
+
+            return SBH.Evaluate(g, maximizer) + (g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -100000 : 100000) / (currentMaxDepth - depth);
 
         }
         
