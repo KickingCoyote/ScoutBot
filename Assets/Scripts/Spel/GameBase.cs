@@ -6,6 +6,7 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 
@@ -21,6 +22,7 @@ public class GameBase : MonoBehaviour
 
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
+    [SerializeField] Toggle flipTakenCardToggle;
     public TextMeshProUGUI infoText;
 
     private List<Move> moveHistory;
@@ -155,7 +157,8 @@ public class GameBase : MonoBehaviour
 
 
     //Activated from buttons ingame
-    public void TakeCard(bool flipped)
+
+    public void TakeCard()
     {
         bool top = SBU.getCardHandIndex(SBU.gameState.cards[int.Parse(guiManager.selectedCards.Where(c => SBU.getCardOwner(SBU.gameState.cards[int.Parse(c.name)]) == 0).First().name)]) != 0;
 
@@ -167,7 +170,7 @@ public class GameBase : MonoBehaviour
 
         int handIndex = heldCard == -1 ? 0 : SBU.getCardHandIndex(SBU.gameState.cards[heldCard]) + 1;
 
-        Move m = new Move(SBU.gameState.cards, top, flipped, SBU.gameState.turn, handIndex);
+        Move m = new Move(SBU.gameState.cards, top, flipTakenCardToggle.isOn, SBU.gameState.turn, handIndex);
         if (m != null)
         {
             SBU.gameState.DoMove(m);

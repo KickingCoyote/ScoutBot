@@ -33,7 +33,7 @@ public static class TranspositionTable
         }
     }
 
-    public static ulong HashGameState(GameState g)
+    private static ulong HashMove(GameState g, Move m)
     {
         ulong h = 0;
 
@@ -43,12 +43,14 @@ public static class TranspositionTable
         {
             h ^= (ulong)hashKey[x, g.cards[x]];
         }
+
         return h;
     }
 
-    public static Transposition TryGetTransposition(GameState g)
+
+    public static Transposition TryGetTransposition(GameState g, Move m)
     {
-        ulong hash = HashGameState(g);
+        ulong hash = HashMove(g, m);
 
         if (table.TryGetValue(hash, out Transposition result))
         {
@@ -57,34 +59,26 @@ public static class TranspositionTable
         return new Transposition { isEmpty = true };
     }
 
-    public static TranspositonData TryGetTransposition(GameState g, Move m)
+
+
+    public static void AddTransposition(GameState g, Move m, int eval, int depth, int maxDepth, Quality quality = Quality.Low)
     {
-        Transposition t = TryGetTransposition(g);
-
-        if (t.isEmpty) { return new TranspositonData { isEmpty = true }; }
-
-        return t.TryGetPosition(m);
-    }
-
-
-    public static void AddTransposition(GameState g, int eval, int depth, int depthFromRoot, Quality quality = Quality.Low)
-    {
-        const int maxTableSize = 16000000;
-        ulong hash = HashGameState(g);
+        const int maxTableSize = 6400000;
+        ulong hash = HashMove(g, m);
         if (table.Count > maxTableSize)
         {
             table.Remove(table.ElementAt(0).Key);
         }
 
-        Transposition transpositionData = new Transposition(depth, depthFromRoot, hash);
+        Transposition transposition = new Transposition(depth, maxDepth, eval, quality);
 
-        if (!table.TryAdd(hash, transpositionData))
+        if (!table.TryAdd(hash, transposition))
         {
 
-            //If this runs it means that the same hash has been generated for 2 diffrent gamestates which never should happen as the probablility is less than 1 in 17 quadrillion
-            //if (transpositionData.depth == table[hash].depth) { Debug.Log("Error: Colliding hashes"); }
+            //If this runs it means that the same hash has been generated for 2 diffrent gamestates which never should happen as the probablility is miniscule
+            if (transposition.maxDepth == table[hash].maxDepth) { Debug.Log($"Error: Colliding hashes {hash}" ); }
 
-            table[hash] = transpositionData;
+            table[hash] = transposition;
         }
 
     }
@@ -96,74 +90,27 @@ public struct Transposition
 {
     public bool isEmpty;
 
-    private readonly ulong hash;
 
     public readonly int depth;
-    public readonly int depthFromRoot;
-    private Dictionary<ulong, TranspositonData> positions;
+    public readonly int maxDepth;
+    public readonly int eval;
+    public readonly Quality quality;
 
-
-    public Transposition(int depth, int depthFromRoot, ulong hash)
+    public Transposition(int depth, int maxDepth, int eval, Quality quality)
     {
         this.depth = depth;
-        this.depthFromRoot = depthFromRoot;
-        this.hash = hash;
-        positions = new Dictionary<ulong, TranspositonData>();
-        isEmpty = false;
-    }
-
-
-    public ulong HashMove(Move m)
-    {
-        ulong h = 0;
-
-        foreach (int i in m.cardDif)
-        {
-            h ^= (ulong)i ^ hash;
-        }
-
-        return h;
-    }
-
-    public void AddPosition(Move m, int evaluation, Quality quality)
-    {
-        ulong h = HashMove(m);
-        if (!positions.TryAdd(h, new TranspositonData(evaluation, quality)))
-        {
-            positions[h] = new TranspositonData(evaluation, quality);
-        }
-    }
-
-    public TranspositonData TryGetPosition(Move m)
-    {
-        ulong h = HashMove(m);
-        if (positions.TryGetValue(hash, out TranspositonData result))
-        {
-            return result;
-        }
-        return new TranspositonData { isEmpty = true };
-    }
-
-}
-
-
-public struct TranspositonData
-{
-    public bool isEmpty;
-
-    public int evaluation;
-    public Quality quality;
-
-    public TranspositonData(int evaluation, Quality quality)
-    {
-        this.evaluation = evaluation;
+        this.maxDepth = maxDepth;
+        this.eval = eval;
         this.quality = quality;
         isEmpty = false;
     }
+
+
 }
 
 public enum Quality
 {
     Low,
+    Medium,
     High
 }
