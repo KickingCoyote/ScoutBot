@@ -243,8 +243,12 @@ public class GameBase : MonoBehaviour
         float time = MathF.Round(gameTimer.Timer(), 3);
         Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + time);
 
-        Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, time, "");
+    }
 
+
+    public void StoreGame()
+    {
+       Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), "");
     }
 
 }
