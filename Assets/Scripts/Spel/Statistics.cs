@@ -44,7 +44,7 @@ public static class Statistics
 
     }
 
-    public static void AddRoundsDataToTextfile(StreamWriter writer, string[] playerIdentification, List<Move> moves, GameState EndGameState)
+    public static void AddRoundsDataToTextfile(StreamWriter writer, string[] playerIdentification, List<Move> moves, GameState EndGameState, bool gameOver = true)
     {
 
         GameState currentState = EndGameState;
@@ -56,6 +56,15 @@ public static class Statistics
             int playerPoints2 = currentState.playerPoints[1];
             int playerPoints3 = currentState.playerPoints[2];
             int playerPoints4 = currentState.playerPoints[3];
+
+            int x = 1;
+            int[] playerPoints = new int[4];
+            foreach (int point in currentState.playerPoints)
+            {
+               // playerPoints[x] = po
+            }
+
+           
 
             writer.WriteLine("");
             writer.WriteLine("Move: " + (moves.Count - i+1));
@@ -75,6 +84,11 @@ public static class Statistics
                     }
                 }
                 writer.WriteLine("Hand" + v + " :" + playerHand);
+                if (i == 1 && gameOver)
+                {
+                    currentState.playerPoints[v-1] += playerHandArray.ArrayLength();
+
+                }
             }
             
             //Debug.Log("Current players turn: " + currentState.turn + " || Player 1s points: " + currentState.playerPoints[0]);
