@@ -248,7 +248,7 @@ public class GameBase : MonoBehaviour
 
     public void StoreGame()
     {
-       Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), "");
+       Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), "", gameOver);
     }
 
 }

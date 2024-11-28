@@ -5,7 +5,7 @@ using System.IO;
 
 public static class Statistics
 {
-    public static void StoreData(string[] playerIdentification, List<Move> moves, int winningPlayer, GameState EndGameState, int seed, float time, string extraInfo)
+    public static void StoreData(string[] playerIdentification, List<Move> moves, int winningPlayer, GameState EndGameState, int seed, float time, string extraInfo, bool gameOver = true)
     {
         string path = Application.dataPath + "/Statistics";
         
@@ -35,7 +35,7 @@ public static class Statistics
                 writer.WriteLine("Seed: " + seed);
                 writer.WriteLine("PlayerID: " + playerIDString + "\n");
 
-                AddRoundsDataToTextfile(writer, playerIdentification, moves, EndGameState);
+                AddRoundsDataToTextfile(writer, playerIdentification, moves, EndGameState, gameOver);
                 writer.Close();
             }
             
