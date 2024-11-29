@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.VisualScripting;
 using UnityEngine;
 /// <summary>
 /// Scout Bot Algorithm.
@@ -54,12 +55,6 @@ public class SBA
     public int DepthSearch(int depth, int alpha, int beta)
     {
 
-        int inv = g.turn == maximizer ? 1 : -1;
-
-
-        //Checks if it is game over, if the current player is winning return infinity otherwise -infinity as there is nothing better/worse than winning/losing the game.
-        //This does not follow the paranoid algorithm as to get reasonable result you must presume that even the minimizers have some sense of self-preservation.
-        //Its technically infinity -1 cause losing is still better than not finding a move and casting an error.
 
         if (g.isGameOver())
         {
@@ -80,16 +75,14 @@ public class SBA
 
 
         List<Move> moves = Move.GetPossibleMoves(g, g.turn);
-        
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
 
-        //Due to alpha beta pruning working better when the good moves are searched first we estimate how good a move is and then sort them based on that
 
+
+        //Due to alpha beta pruning working better when the good moves are searched first we estimate how good a move is and then sort them based on that
         Move priorityMove = this.bestMove; //depth == currentMaxDepth ? this.bestMove : null; //Even if I wanted to I could not tell you why removing the depth check reduces searched positions but it does...
         MoveOrdering(g, moves, priorityMove);
 
-
-        if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); return 0; }
 
         Move bestMove = new Move();
 
@@ -104,8 +97,6 @@ public class SBA
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
                 g.UndoMove(move);
-
-
 
 
                 // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
@@ -149,26 +140,20 @@ public class SBA
         return bestEval;
     }
 
-    /// <summary>
-    /// For each position if the position already is stored in the Transposition Table use it, otherwise continue depth search and store the end result in the table.
-    /// </summary>
-    public int TranspositionSearch(GameState g, int depth, int alpha, int beta)
+    //Currently unused due to colliding hashes
+    private int TranspositionSearch(Move m, int depth, int alpha, int beta)
     {
-
-        Transposition transposition = TranspositionTable.TryGetTransposition(g);
-        int eval;
-        if (!transposition.isEmpty && depth == transposition.depth)
-        {
-            transpositionCounter++;
-            //eval = transposition.evaluation;
-        }
+        Transposition t = TranspositionTable.TryGetTransposition(g, m);
+        if (!t.isEmpty && t.maxDepth == maxDepth) { return t.eval; }
         else
         {
-            eval = DepthSearch(depth - 1, alpha, beta);
-            TranspositionTable.AddTransposition(g, eval, depth, currentMaxDepth - depth);
+            int eval = DepthSearch(depth - 1, alpha, beta);
+
+            TranspositionTable.AddTransposition(g, m, eval, depth, currentMaxDepth, Quality.Low);
+
+            return eval;
         }
 
-        return 1;
     }
 
 
@@ -181,7 +166,6 @@ public class SBA
 
             if (!move.isDrawMove) { move.scoreEstimate = move.moveLength * 100 + move.moveMin; continue; }
 
-            move.scoreEstimate = 0;
         }
 
         moves.Sort();

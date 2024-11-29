@@ -14,7 +14,7 @@ public class Move : IComparable<Move>
 
     public bool isDrawMove;
 
-    public int scoreEstimate;
+    public int scoreEstimate = 0;
 
     public int moveLength;
     public int moveMin;
