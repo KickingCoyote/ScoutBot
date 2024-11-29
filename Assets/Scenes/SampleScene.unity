@@ -1174,6 +1174,7 @@ MonoBehaviour:
   - {fileID: 630941454}
   - {fileID: 684138110}
   flipTakenCardToggle: {fileID: 1173905945}
+  saveMenuInputField: {fileID: 1602842969}
   infoText: {fileID: 2064769862}
 --- !u!114 &571291627
 MonoBehaviour:
@@ -2098,7 +2099,7 @@ MonoBehaviour:
   m_InputType: 0
   m_AsteriskChar: 42
   m_KeyboardType: 0
-  m_LineType: 0
+  m_LineType: 2
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
   m_CharacterValidation: 0
@@ -3608,7 +3609,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 0
+  m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}

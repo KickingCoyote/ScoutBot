@@ -23,6 +23,7 @@ public class GameBase : MonoBehaviour
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
     [SerializeField] Toggle flipTakenCardToggle;
+    [SerializeField] TextMeshProUGUI saveMenuInputField;
     public TextMeshProUGUI infoText;
 
     private List<Move> moveHistory;
@@ -114,8 +115,6 @@ public class GameBase : MonoBehaviour
             ); 
         }
         SBU.gameState.DoMove(search.bestMove);
-
-        //Debug.Log(search.bestEval);
 
         //Store moves
         if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
@@ -251,7 +250,7 @@ public class GameBase : MonoBehaviour
 
     public void StoreGame()
     {
-       Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), "", gameOver);
+       Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), saveMenuInputField.text, gameOver);
     }
 
 }
