@@ -28,6 +28,9 @@ public class SBA
 
     private int transpositionCounter = 0;
 
+    private SBH heuristic;
+
+
     public SBA(GameState g, int maxDepth, int maximizer, float fearBias) 
     {
         this.g = g;
@@ -35,6 +38,8 @@ public class SBA
         this.fearBias = fearBias;
         this.maximizer = maximizer;
         bestMove = null;
+
+        heuristic = new SBH();
     }
 
 
@@ -60,7 +65,7 @@ public class SBA
         {
             searchedPositions++;
 
-            return SBH.Evaluate(g, maximizer) + (g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -100000 : 100000) / (currentMaxDepth - depth);
+            return heuristic.Evaluate(g, maximizer) + (g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -100000 : 100000) / (currentMaxDepth - depth);
 
         }
         
@@ -70,7 +75,7 @@ public class SBA
         if (depth == 0)
         {
             searchedPositions++;
-            return SBH.Evaluate(g, maximizer);
+            return heuristic.Evaluate(g, maximizer);
         }
 
 

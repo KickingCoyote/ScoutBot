@@ -10,11 +10,11 @@ using UnityEngine;
 /// The code for calculating how beneficial a position is for the bot
 /// using the assumptions from the paranoid algorithm
 /// </summary>
-public static class SBH
+public class SBH
 {
 
     //Takes in the state of the game and calculates its value
-    public static int Evaluate(GameState g, int maximizer)
+    public int Evaluate(GameState g, int maximizer)
     {
 
         int eval = 3 * g.EstimatePossibleMoveScore(maximizer); ;
