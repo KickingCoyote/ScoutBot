@@ -1176,6 +1176,7 @@ MonoBehaviour:
   flipTakenCardToggle: {fileID: 1173905945}
   saveMenuInputField: {fileID: 1602842969}
   infoText: {fileID: 2064769862}
+  defaultHeuristic: {fileID: 3757116448867717182, guid: 9f52b794641b8f54991d4eeb022a71f1, type: 3}
 --- !u!114 &571291627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1757,9 +1758,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28439ccb5853ee54392bcf2529892960, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSearchDepth: 6
+  MaxSearchDepth: 4
   FearBias: 1
   GameSeed: 7
+  Heuristics:
+    heuristics:
+    - {fileID: 3757116448867717182, guid: 9f52b794641b8f54991d4eeb022a71f1, type: 3}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
 --- !u!4 &746588247
 Transform:
   m_ObjectHideFlags: 0

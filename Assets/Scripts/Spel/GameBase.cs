@@ -26,10 +26,14 @@ public class GameBase : MonoBehaviour
     [SerializeField] TextMeshProUGUI saveMenuInputField;
     public TextMeshProUGUI infoText;
 
+    [SerializeField] SBH defaultHeuristic;
+
+
     private List<Move> moveHistory;
     private int moveHistoryPointer;
 
     private bool gameOver;
+    private bool randomSeed = false;
 
     private SBTimer gameTimer;
 
@@ -62,10 +66,10 @@ public class GameBase : MonoBehaviour
 
 
 
-    public static void DistributeCards(Settings settings)
+    public void DistributeCards(Settings settings)
     {
 
-        if (settings.GameSeed == 0) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); }
+        if (settings.GameSeed == 0 || randomSeed) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); randomSeed = true; }
 
         UnityEngine.Random.InitState((int)settings.GameSeed);
 
@@ -95,11 +99,16 @@ public class GameBase : MonoBehaviour
 
     public void BotMove(bool logSearch = true)
     {
+
+        //Sets all undecided bots to FrogStackV1
+        if (settings.Heuristics.GetHeuristic(SBU.gameState.turn) is null) { settings.Heuristics.SetHeuristic(SBU.gameState.turn, defaultHeuristic); }
+
         SBA search = new SBA(
             SBU.gameState,
             settings.MaxSearchDepth,
             SBU.gameState.turn,
-            settings.FearBias
+            settings.FearBias,
+            settings.Heuristics.GetHeuristic(SBU.gameState.turn)
         );
 
         SBTimer timer = new SBTimer();

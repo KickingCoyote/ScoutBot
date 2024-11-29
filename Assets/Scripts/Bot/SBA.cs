@@ -26,12 +26,12 @@ public class SBA
 
     public int bestEval;
 
-    private int transpositionCounter = 0;
+    //private int transpositionCounter = 0;
 
     private SBH heuristic;
 
 
-    public SBA(GameState g, int maxDepth, int maximizer, float fearBias) 
+    public SBA(GameState g, int maxDepth, int maximizer, float fearBias, SBH heuristic) 
     {
         this.g = g;
         this.maxDepth = maxDepth;
@@ -39,7 +39,7 @@ public class SBA
         this.maximizer = maximizer;
         bestMove = null;
 
-        heuristic = new SBH();
+        this.heuristic = heuristic;
     }
 
 
@@ -86,7 +86,7 @@ public class SBA
 
         //Due to alpha beta pruning working better when the good moves are searched first we estimate how good a move is and then sort them based on that
         Move priorityMove = this.bestMove; //depth == currentMaxDepth ? this.bestMove : null; //Even if I wanted to I could not tell you why removing the depth check reduces searched positions but it does...
-        MoveOrdering(g, moves, priorityMove);
+        heuristic.MoveOrdering(g, moves, priorityMove);
 
 
         Move bestMove = new Move();
@@ -161,21 +161,6 @@ public class SBA
 
     }
 
-
-    private void MoveOrdering(GameState g, List<Move> moves, Move priorityMove)
-    {
-        //the move ordering assumes that moves where more cards are put down are better and that picking up cards generally is worse
-        foreach (Move move in moves)
-        {
-            if (priorityMove?.cardDif is not null && move.CompareMoves(priorityMove)) { move.scoreEstimate = 100000; continue; }
-
-            if (!move.isDrawMove) { move.scoreEstimate = move.moveLength * 100 + move.moveMin; continue; }
-
-        }
-
-        moves.Sort();
-
-    }
 
 }
 

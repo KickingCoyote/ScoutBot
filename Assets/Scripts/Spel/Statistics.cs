@@ -57,7 +57,6 @@ public static class Statistics
             int playerPoints3 = currentState.playerPoints[2];
             int playerPoints4 = currentState.playerPoints[3];
 
-            int x = 1;
             int[] playerPoints = new int[4];
             foreach (int point in currentState.playerPoints)
             {
