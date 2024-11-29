@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
@@ -33,11 +34,13 @@ public class CardBehavior : MonoBehaviour
     [SerializeField] TextMeshProUGUI lowerText;
 
 
-    GUIManager manager;
+    [HideInInspector] public GUIManager manager;
+    [HideInInspector] public EventSystem eventSystem;
 
     public void Awake()
     {
        manager  = GameObject.Find("GameManager").GetComponent<GUIManager>();
+       eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
     }
 
     // Update is called once per frame
@@ -60,5 +63,10 @@ public class CardBehavior : MonoBehaviour
     {
         selected = !selected;
         manager.selectCard(this.gameObject);
+    }
+
+    public void SetRayCastTarget(bool b)
+    {
+        frameImage.GetComponent<Image>().raycastTarget = b;
     }
 }

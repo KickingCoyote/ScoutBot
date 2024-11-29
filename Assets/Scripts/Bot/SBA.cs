@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.VisualScripting;
 using UnityEngine;
 /// <summary>
 /// Scout Bot Algorithm.
@@ -19,31 +21,49 @@ public class SBA
 
     private int maximizer;
 
-    public SBA(GameState g, int maximizer, float fearBias) 
+    private int maxDepth;
+    private int currentMaxDepth;
+
+    public int bestEval;
+
+    private int transpositionCounter = 0;
+
+    public SBA(GameState g, int maxDepth, int maximizer, float fearBias) 
     {
         this.g = g;
+        this.maxDepth = maxDepth;
         this.fearBias = fearBias;
         this.maximizer = maximizer;
+        bestMove = null;
     }
+
+
+    public void StartSearch()
+    {
+        for (int depth = 1; depth <= maxDepth; depth++)
+        {
+            currentMaxDepth = depth;
+            DepthSearch(depth, -2147483647, 2147483647);
+        }
+        //Debug.Log($"Transpositions used: {transpositionCounter}  | Transpositions stored: {TranspositionTable.table.Count()}");
+        TranspositionTable.table.Clear();
+    }
+
+
 
     //Paranoid MIN MAX Algorithm 
     public int DepthSearch(int depth, int alpha, int beta)
     {
 
-        int inverter = g.turn == maximizer ? 1 : -1;
 
-
-        //Starts of being infinitely terrible for the current player
-        int p =  inverter * -2147483647;
-
-
-        //Checks if it is game over, if the maximizer is winning return infinity otherwise -infinity as there is nothing better/worse than winning/losing the game
-        //Its technically infinity -1 cause losing is still better than not finding a move and casting an error
         if (g.isGameOver())
         {
             searchedPositions++;
-            return g.getWinningPlayer() == maximizer ? 2147483646 : -2147483646;
+
+            return SBH.Evaluate(g, maximizer) + (g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -100000 : 100000) / (currentMaxDepth - depth);
+
         }
+        
 
 
         //When at the wanted depth return the evalutation of the position
@@ -55,13 +75,14 @@ public class SBA
 
 
         List<Move> moves = Move.GetPossibleMoves(g, g.turn);
-        
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
 
-        //Current move ordering decreases NPS by 25% and doubles amount of searched positions.
-        //MoveOrdering(moves);
 
-        if (moves.Count == 0) { Debug.Log("NO POSSIBLE MOVES AT DEPTH: " + depth); return 0; }
+
+        //Due to alpha beta pruning working better when the good moves are searched first we estimate how good a move is and then sort them based on that
+        Move priorityMove = this.bestMove; //depth == currentMaxDepth ? this.bestMove : null; //Even if I wanted to I could not tell you why removing the depth check reduces searched positions but it does...
+        MoveOrdering(g, moves, priorityMove);
+
 
         Move bestMove = new Move();
 
@@ -70,178 +91,87 @@ public class SBA
             foreach (Move move in moves)
             {
 
-                g.Move(move);
+                g.DoMove(move);
 
                 //For each move search deeper and see how good the position is
                 int eval = DepthSearch(depth - 1, alpha, beta);
 
-                // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
-                if (eval > p) { bestMove = move; }
-                p = Math.Max(p, eval);
-
                 g.UndoMove(move);
 
-                alpha = Math.Max(alpha, p);
-                if (beta <= alpha) { break; }
+
+                // > and not >= cause if we assume move ordering puts good moves first it should always pick the first one if they are equal to the evaluation
+                if (eval > alpha) 
+                { 
+                    bestMove = move;
+                    alpha = eval;
+                }
+
+
+                //alpha beta pruning. 
+                if (alpha >= beta) { break; }
             }
         }
-        else //The same thing but for minimizer so some > become < and Max() becomes Min() 
+        else //The same thing but for minimizers so some > become <
         {
             foreach (Move move in moves)
             {
 
-                g.Move(move);
-
+                g.DoMove(move);
                 int eval = DepthSearch(depth - 1, alpha, beta);
-
-                if (eval < p) { bestMove = move; }
-                p = Math.Min(p, eval);
 
                 g.UndoMove(move);
 
-                beta = Math.Min(beta, p);
-                if (beta <= alpha) { break; }
+
+                if (eval < beta) 
+                { 
+                    bestMove = move;
+                    beta = eval;
+                }
+
+                if (alpha >= beta) { break; }
+
 
             }
         }
 
+
         this.bestMove = bestMove;
-        
-        return p;
+        bestEval = maximizer == g.turn ? alpha : beta;
+        return bestEval;
+    }
+
+    //Currently unused due to colliding hashes
+    private int TranspositionSearch(Move m, int depth, int alpha, int beta)
+    {
+        Transposition t = TranspositionTable.TryGetTransposition(g, m);
+        if (!t.isEmpty && t.maxDepth == maxDepth) { return t.eval; }
+        else
+        {
+            int eval = DepthSearch(depth - 1, alpha, beta);
+
+            TranspositionTable.AddTransposition(g, m, eval, depth, currentMaxDepth, Quality.Low);
+
+            return eval;
+        }
+
     }
 
 
-    private void MoveOrdering(List<Move> moves)
+    private void MoveOrdering(GameState g, List<Move> moves, Move priorityMove)
     {
-        
-        foreach(Move move in moves)
+        //the move ordering assumes that moves where more cards are put down are better and that picking up cards generally is worse
+        foreach (Move move in moves)
         {
-            if (!move.isDrawMove)
-            {
-                move.scoreEstimate = 100;
-            }
-            else
-            {
-                //if the neighbouring cards are not ladder / match asume its bad
-            }
+            if (priorityMove?.cardDif is not null && move.CompareMoves(priorityMove)) { move.scoreEstimate = 100000; continue; }
+
+            if (!move.isDrawMove) { move.scoreEstimate = move.moveLength * 100 + move.moveMin; continue; }
+
         }
 
         moves.Sort();
-    }
 
+    }
 
 }
 
 
-
-
-public struct GameState
-{
-    public int[] cards;
-
-    public int turn;
-
-    public int currentPileHolder;
-
-    private int[][] playerCards;
-
-    public int[] playerPoints;
-
-    /// <summary>
-    /// When checking player cards for the first time store them in playerCards and on cosecutive checks retreive the data from the variable
-    /// </summary>
-    /// <param name="player"></param>
-    /// <returns></returns>
-    public int[] getPlayerCards(int player) { return playerCards[player] = playerCards[player] == null ? getPlayerCards(cards, player) : playerCards[player]; }
-
-    public int getPlayerPoints(int player) { return playerPoints[player - 1]; }
-
-    public GameState(int[] cards, int turn, int currentPileHolder)
-    {
-        this.cards = cards;
-        this.turn = turn;
-        this.currentPileHolder = currentPileHolder;
-        playerCards = new int[][] { null, null, null, null, null};
-        playerPoints = new int[4];
-    }
-
-
-    public void Move(Move move)
-    {
-        if (!move.isDrawMove) { playerPoints[turn - 1] += getPlayerCards(cards, 0).ArrayLength(); }
-        else {  playerPoints[currentPileHolder - 1]++; }
-
-        cards = ArrayExtensions.AddArray(cards, move.cardDif);
-        currentPileHolder += move.pileHolderDif;
-
-        //Reset the playerCards data for the current player and middle pile
-        playerCards = new int[][] { null, null, null, null, null };
-
-        //Increment the turn by 1, if 4 set to 1
-        turn = turn == 4 ? 1 : (turn + 1);
-    }
-
-    public void UndoMove(Move move)
-
-    {
-        cards = ArrayExtensions.AddArray(cards, move.cardDif, true);
-        currentPileHolder -= move.pileHolderDif;
-        playerCards = new int[][] { null, null, null, null, null };
-
-        turn = turn == 1 ? 4 : (turn - 1);
-
-        if (!move.isDrawMove) { playerPoints[turn - 1] -= getPlayerCards(cards, 0).ArrayLength(); }
-        else { playerPoints[currentPileHolder - 1]--; }
-
-    }
-
-
-    /// <summary>
-    /// Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
-    /// </summary>
-    /// <param name="cards"></param>
-    /// <param name="player"></param>
-    /// <returns>A 15 long array of card indexes where emtpy values are -10</returns>
-    public static int[] getPlayerCards(int[] cards, int player)
-    {
-        int[] pCards = new int[15].SetArray(-10);
-
-        for (int i = 0; i < cards.Length; i++)
-        {
-            //HandIndex 15 represents the card being a point and not actually in the hand
-            if (SBU.getCardOwner(cards[i]) == player && SBU.getCardHandIndex(cards[i]) != 15)
-            {
-                pCards[SBU.getCardHandIndex(cards[i])] = i;
-            }
-
-        }
-
-        return pCards;
-    }
-
-    public int getWinningPlayer()
-    {
-        return Array.IndexOf(playerPoints, Enumerable.Max(playerPoints)) + 1;
-    }
-
-
-
-    /// <summary>
-    /// Function that checks if it is game over or not
-    /// </summary>
-    public bool isGameOver()
-    {
-        if (currentPileHolder == turn)
-        {
-            return true;
-        }
-        //check previous player due to game over being check post turn incrementing
-        if (getPlayerCards(turn == 1 ? 4 : (turn - 1)).ArrayLength() == 0)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-}

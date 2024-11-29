@@ -17,19 +17,18 @@ public static class SBH
     public static int Evaluate(GameState g, int maximizer)
     {
 
-        int currentScore = 0;
+        int eval = 3 * g.EstimatePossibleMoveScore(maximizer); ;
+        eval += 3000 * g.getPlayerPoints(maximizer);
 
-        
         for (int i = 1; i < 5; i++)
         {
             if (i == maximizer) { continue; }
-
-            int weight = 1;
-
-            currentScore -= weight * g.getPlayerPoints(i);
+            
+            eval -= 1000 * g.getPlayerPoints(i);
+            eval -= g.EstimatePossibleMoveScore(i);
         }
-        
-        return currentScore + 3 * g.getPlayerPoints(maximizer);
+
+        return eval;
     }
     
 

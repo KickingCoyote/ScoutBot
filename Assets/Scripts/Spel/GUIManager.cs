@@ -1,21 +1,25 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class GUIManager : MonoBehaviour
 {
 
     List<GameObject>[] cardObjects = new List<GameObject>[5];
 
-    public List<int> selectedCards = new List<int>();
+    public List<int> selectedCardIndexes = new List<int>();
+    [HideInInspector] public List<GameObject> selectedCards = new List<GameObject>();
+
 
     [SerializeField] GameObject cardPrefab;
     [SerializeField] GameObject parentObject;
+    public GameObject canvas;
 
-    // Start is called before the first frame update
     void Awake()
     {
         for (int i = 0; i < cardObjects.Length; i++)
@@ -46,8 +50,8 @@ public class GUIManager : MonoBehaviour
             card.name = i.ToString();
 
             CardBehavior cardBehavior = card.GetComponent<CardBehavior>();
-            cardBehavior.upperDigit = SBU.getCurrentCardValue(SBU.getValueOfCard(cards, i));
-            cardBehavior.lowerDigit = SBU.getValueOfCard(cards, i) - (16 * SBU.getCurrentCardValue(SBU.getValueOfCard(cards, i)));
+            cardBehavior.upperDigit = SBU.getCurrentCardValue(SBU.GetCardValue(cards, i));
+            cardBehavior.lowerDigit = SBU.GetCardValue(cards, i) - (16 * SBU.getCurrentCardValue(SBU.GetCardValue(cards, i)));
 
             cardObjects[owner].Add(card);
 
@@ -69,57 +73,52 @@ public class GUIManager : MonoBehaviour
 
     public void selectCard(GameObject card)
     {
+
+        int inverter = -1;
+        if (card.GetComponent<CardBehavior>().selected) 
+        {
+            inverter = 1;
+            selectedCardIndexes.Add(int.Parse(card.name));
+            selectedCards.Add(card);
+        }
+        else 
+        { 
+            selectedCardIndexes.Remove(int.Parse(card.name)); 
+            selectedCards.Remove(card);
+        }
+
         int cardIndex = -1;
-        int cardOwner = -1;
+        List<GameObject> cards = new List<GameObject>();
         for (int i = 0; i < cardObjects.Length; i++)
         {
             cardIndex = cardObjects[i].IndexOf(card);
-            if (cardIndex != -1)
-            {
-                cardOwner = i;
-                break;
-            }
+
+            if (cardIndex != -1) { cards = cardObjects[i]; break; }
         }
 
-        //Code for shifting cards around when they are selected
-        int shift = 50;
-        int inverter = -1;
 
-        if (card.GetComponent<CardBehavior>().selected) 
-        { 
-            inverter = 1;
-            selectedCards.Add(int.Parse(card.name));
+        ScaleCard(card, inverter * 0.16f);
 
-        }
-        else
+        //First card / previous card is selected => only shift other
+        if (cardIndex != 0 && !cards[cardIndex - 1].GetComponent<CardBehavior>().selected) { ShiftCards(cards, cardIndex, inverter * 25); }
+
+        //Last card / next card is selected => only shift self
+        if (cardIndex != cards.Count - 1 && !cards[cardIndex + 1].GetComponent<CardBehavior>().selected) { ShiftCards(cards, cardIndex + 1, inverter * 25); }
+
+    }
+
+    public void ScaleCard(GameObject card, float scale)
+    {
+        card.transform.localScale = new Vector3(card.transform.localScale.x + scale, card.transform.localScale.y + scale, 1);
+    }
+
+
+    public void ShiftCards(List<GameObject> cards, int index, int shift)
+    {
+        for (int i = index; i < cards.Count; i++)
         {
-            selectedCards.Remove(int.Parse(card.name));
+            cards[i].transform.localPosition = new Vector3(cards[i].transform.localPosition.x + shift, 0, 0);
         }
-        card.transform.localScale = new Vector3(card.transform.localScale.x + (inverter * 0.16f), card.transform.localScale.y + (inverter * 0.16f), 1);
-        int k = 0;
-        foreach (GameObject obj in cardObjects[cardOwner])
-        {
-          
-            if (k == cardIndex && k != 0)
-            {
-                if (cardObjects[cardOwner][k - 1].GetComponent<CardBehavior>().selected) { shift -= 25; }
-
-                else { card.transform.localPosition = new Vector3(card.transform.localPosition.x + (inverter * 25), 0, 0); }
-            }
-
-            if (k == cardIndex && k == 0) { shift -= 25; }
-
-            if (k == cardIndex + 1 && obj.GetComponent<CardBehavior>().selected) { shift -= 25; }
-
-
-            if (k > cardIndex)
-            {
-                obj.transform.localPosition = new Vector3(obj.transform.localPosition.x + inverter * shift, 0, 0);
-            }
-            k++;
-        }
-
-
     }
 
     public void DeleteCards()
@@ -132,9 +131,17 @@ public class GUIManager : MonoBehaviour
                 hand.RemoveAt(0);
             }
         }
+        selectedCardIndexes.Clear();
         selectedCards.Clear();
     }
 
+    public void SetRaycastTransparencyForAll(bool b)
+    {
+        foreach (List<GameObject> hand in cardObjects)
+        {
+            hand.ForEach(a => a.GetComponent<CardBehavior>().SetRayCastTarget(b));
+        }
+    }
 
     private int handIndex(GameObject obj)
     {
@@ -144,9 +151,4 @@ public class GUIManager : MonoBehaviour
         return SBU.getCardHandIndex(SBU.gameState.cards[cardIndex]);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

@@ -1,22 +1,19 @@
-using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Scripting.APIUpdating;
-using UnityEngine.SocialPlatforms.Impl;
 
 
 /// <summary>
-/// Scout Bot Utilities, All functions required to run the base game
+/// Scout Bot Utilities, functions required to parse and use the game data
 /// </summary>
 public static class SBU
 {
     public static GameState gameState;
+
+    public static int round;
+
 
     //gameState.cards
     //All cards are stored in 1 44 length int[], the index represents which card it is and the value has all the needed data about that card 
@@ -24,12 +21,26 @@ public static class SBU
     //the right most 3 digits represents who has the card (0 for middle pile, 1..4 for player 1..4)
     //the middle digit represents if the card is flipped or not, where the LARGEST VALUE is always flipped DOWN if it's 0
     //the left most 4 digit represents the index of where in the players hand (or middle pile) the card is located, if the digits are 1111 that represents the card being a point instead of a card
-    
+
     //gameState.turn
     //A variable between 1 and 4 representing which players turn it is
 
     //gameState.currentPileHolder
     //Keeps track of who the cards in the middle belonged to, for giving points
+
+
+
+    /* Dictionary:
+     * 
+     *  Card index: the index to a card in the gameState.cards array
+     *  Card: the value correlated with a card index, stored at gameState.cards[cardIndex]
+     *  Card Value: the value of card stored at cardValues[cardIndex], exclusively acquired through GetCardValue()
+     *  Draw move / take card move: a move where a player picks up a card from the middle pile
+     *  Put card move: a move where a player places cards in the middle pile
+     *  
+     */
+
+
 
     //Array containing the value of each card index, the value is value 1 * 16 + value 2, where value 1 always is the smaller of the two
     public static int[] cardValues = new int[44];
@@ -80,14 +91,18 @@ public static class SBU
     /// <returns>The bottom value of the cardValue</returns>
     public static int FlipCardValue(int cardValue)
     {
-        return cardValue % 16 * 16 + ((cardValue - (cardValue % 16)) / 16);
+        return ((cardValue & 0x0F) << 4) | ((cardValue & 0xF0) >> 4);
     }
 
 
+    public static int getCurrentCardValue(int[] cards, int cardIndex)
+    {
+        return getCurrentCardValue(GetCardValue(cards, cardIndex));
+    }
     //Returns the upwards facing value on a card given the card value
     public static int getCurrentCardValue(int cardValue)
     {
-        return (cardValue - (cardValue % 16)) / 16; 
+        return cardValue >> 4;
     }
 
 
@@ -97,22 +112,19 @@ public static class SBU
     /// <summary>
     /// Gets where in the player hand the card is located, where 0 is the first (left most) card
     /// </summary>
-    /// <param name="cardValue">card</param>
     /// <returns></returns>
     public static int getCardHandIndex(int card)
     {
-        //Uses same logic as getCurrentCardValue
-        return getCurrentCardValue(card);
+        return card >> 4;
     }
 
     /// <summary>
     /// Gets the owner of the card where 0 is the table pile and 1-4 is player 1-4
     /// </summary>
-    /// <param name="cardValue">card</param>
     /// <returns></returns>
     public static int getCardOwner(int card)
     {
-        return card % 8;
+        return card & 7;
     }
 
 
@@ -123,7 +135,7 @@ public static class SBU
     /// <returns>0 or 1 for unflipped / flipped cards</returns>
     public static int getCardFlip(int card)
     {
-        return ((card % 16) - (card % 8)) / 8;
+        return (card >> 3) & 1;
     }
 
 
@@ -161,7 +173,7 @@ public static class SBU
     {
         for (int i = 0; i < 44; i++)
         {
-            if (getValueOfCard(cards, i) == value)
+            if (GetCardValue(cards, i) == value)
             {
                 return i;
             }
@@ -178,17 +190,15 @@ public static class SBU
     /// <param name="cards"></param>
     /// <param name="cardIndex">Index of card</param>
     /// <returns></returns>
-    public static int getValueOfCard(int[] cards, int cardIndex)
+    public static int GetCardValue(int[] cards, int cardIndex)
     {
 
         if (getCardFlip(cards[cardIndex]) == 0)
         {
             return cardValues[cardIndex];
         }
-        else
-        {
-            return FlipCardValue(cardValues[cardIndex]);
-        }
+        return FlipCardValue(cardValues[cardIndex]);
+        
     }
 
 
@@ -199,7 +209,8 @@ public static class SBU
     /// <returns>string in format [value 1]:[value 2] </returns>
     public static string CardToString(int[] cards, int cardIndex)
     {
-        int value = getValueOfCard(cards, cardIndex);
+
+        int value = GetCardValue(cards, cardIndex);
         return getCurrentCardValue(value) + ":" + (value - (16 * getCurrentCardValue(value)));
     }
 

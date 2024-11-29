@@ -6,6 +6,7 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 
@@ -15,20 +16,19 @@ using UnityEngine;
 public class GameBase : MonoBehaviour
 {
 
-    private string inputString;
-
     [SerializeField] Settings settings;
 
     private GUIManager guiManager;
 
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
-    [SerializeField] TextMeshProUGUI infoText;
+    [SerializeField] Toggle flipTakenCardToggle;
+    [SerializeField] TextMeshProUGUI saveMenuInputField;
+    public TextMeshProUGUI infoText;
 
     private List<Move> moveHistory;
     private int moveHistoryPointer;
 
-    private int round;
     private bool gameOver;
 
     private SBTimer gameTimer;
@@ -39,6 +39,7 @@ public class GameBase : MonoBehaviour
         moveHistory = new List<Move>();
         moveHistoryPointer = moveHistory.Count - 1;
 
+        TranspositionTable.GenerateZobristHashKey();
 
         SBU.gameState = new GameState(new int[44], 1, 0);
 
@@ -47,7 +48,7 @@ public class GameBase : MonoBehaviour
 
         DistributeCards(settings);
 
-        round = 0;
+        SBU.round = 0;
 
         guiManager = GetComponent<GUIManager>();
 
@@ -63,7 +64,10 @@ public class GameBase : MonoBehaviour
 
     public static void DistributeCards(Settings settings)
     {
-        if (settings.GameSeed != 0) { UnityEngine.Random.InitState((int)settings.GameSeed); }
+
+        if (settings.GameSeed == 0) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); }
+
+        UnityEngine.Random.InitState((int)settings.GameSeed);
 
         for (int i = 0; i < 44; i++)
         {
@@ -76,14 +80,14 @@ public class GameBase : MonoBehaviour
 
     private void GameUpdate()
     {
-        
+
         if (SBU.gameState.isGameOver())
         {
             GameEnd();
             return;
         }
 
-        if (SBU.gameState.turn == 1) { round++; }
+        if (SBU.gameState.turn == 1) { SBU.round++; }
 
         UpdateGUI();
 
@@ -93,13 +97,14 @@ public class GameBase : MonoBehaviour
     {
         SBA search = new SBA(
             SBU.gameState,
+            settings.MaxSearchDepth,
             SBU.gameState.turn,
             settings.FearBias
         );
 
         SBTimer timer = new SBTimer();
         timer.StartTimer();
-        search.DepthSearch(settings.SearchDepth, -2147483647, 2147483647);
+        search.StartSearch();
 
 
         if (logSearch) { 
@@ -109,8 +114,7 @@ public class GameBase : MonoBehaviour
             "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s"
             ); 
         }
-
-        SBU.gameState.Move(search.bestMove);
+        SBU.gameState.DoMove(search.bestMove);
 
         //Store moves
         if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
@@ -138,7 +142,7 @@ public class GameBase : MonoBehaviour
     {
         if (moveHistoryPointer + 1 >= moveHistory.Count) { Debug.Log("No more moves to undo"); return; }
         moveHistoryPointer += 1;
-        SBU.gameState.Move(moveHistory[moveHistoryPointer]);
+        SBU.gameState.DoMove(moveHistory[moveHistoryPointer]);
     }
 
     public void SimulateGame()
@@ -150,17 +154,25 @@ public class GameBase : MonoBehaviour
         }
     }
 
+
     //Activated from buttons ingame
+
     public void TakeCard()
     {
-        string[] s = inputString.Split(' ');
+        bool top = SBU.getCardHandIndex(SBU.gameState.cards[int.Parse(guiManager.selectedCards.Where(c => SBU.getCardOwner(SBU.gameState.cards[int.Parse(c.name)]) == 0).First().name)]) != 0;
 
+        int heldCard = guiManager.selectedCards
+            .Select(c => int.Parse(c.name))
+            .Where(c => SBU.getCardOwner(SBU.gameState.cards[c]) != 0)
+            .DefaultIfEmpty(-1)
+            .First();
 
+        int handIndex = heldCard == -1 ? 0 : SBU.getCardHandIndex(SBU.gameState.cards[heldCard]) + 1;
 
-        Move m = new Move(SBU.gameState.cards, bool.Parse(s[0]), bool.Parse(s[1]), SBU.gameState.turn, int.Parse(s[2]));
+        Move m = new Move(SBU.gameState.cards, top, flipTakenCardToggle.isOn, SBU.gameState.turn, handIndex);
         if (m != null)
         {
-            SBU.gameState.Move(m);
+            SBU.gameState.DoMove(m);
             moveHistory.Add(m);
             moveHistoryPointer += 1;
         }
@@ -175,10 +187,9 @@ public class GameBase : MonoBehaviour
 
     public void PutCard()
     {
-        guiManager.selectedCards.Sort((a, b) => SBU.getValueOfCard(SBU.gameState.cards, a).CompareTo(SBU.getValueOfCard(SBU.gameState.cards, b)));
+        guiManager.selectedCardIndexes.Sort((a, b) => GameObject.Find(a.ToString()).transform.GetSiblingIndex().CompareTo(GameObject.Find(b.ToString()).transform.GetSiblingIndex()));
 
-
-        Move m = new Move(SBU.gameState, guiManager.selectedCards.ToArray());
+        Move m = new Move(SBU.gameState, guiManager.selectedCardIndexes.ToArray());
 
         //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
         //THIS DOES NOT WORK DUE TO CONTAIN COMPARING BY REF
@@ -193,17 +204,13 @@ public class GameBase : MonoBehaviour
         //}
 
 
-        SBU.gameState.Move(m);
+        SBU.gameState.DoMove(m);
         moveHistory.Add(m);
         moveHistoryPointer += 1;
 
+        
         GameUpdate();
-    }
 
-    //ran every input field is deselected
-    public void UpdateString(string s)
-    {
-        inputString = s;
     }
 
 
@@ -223,15 +230,27 @@ public class GameBase : MonoBehaviour
         }
 
 
-        infoText.text = "Turn: " + SBU.gameState.turn + "   |   Round: " + round;
+        infoText.text = "Turn: " + SBU.gameState.turn + "   |   Round: " + SBU.round;
 
     }
 
     private void GameEnd()
     {
         gameOver = true;
+        for (int i = 0; i < 4; i++)
+        {
+            SBU.gameState.playerPoints[i] -= SBU.gameState.getPlayerCards(i + 1).ArrayLength();
+        }
         UpdateGUI();
-        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + MathF.Round(gameTimer.Timer(), 3));
+        float time = MathF.Round(gameTimer.Timer(), 3);
+        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + time);
+
+    }
+
+
+    public void StoreGame()
+    {
+       Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), saveMenuInputField.text, gameOver);
     }
 
 }
