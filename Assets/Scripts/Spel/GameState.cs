@@ -38,11 +38,18 @@ public struct GameState
 
     public void DoMove(Move move)
     {
-        if (!move.isDrawMove) { playerPoints[turn - 1] += getPlayerCards(cards, 0).ArrayLength(); }
-        else { playerPoints[currentPileHolder - 1]++; }
+        if (move?.cardDif == null)
+        {
+            playerPoints[turn - 1] -= 1;
+        }
+        else
+        {
+            if (!move.isDrawMove) { playerPoints[turn - 1] += getPlayerCards(cards, 0).ArrayLength(); }
+            else { playerPoints[currentPileHolder - 1]++; }
 
-        cards = ArrayExtensions.AddArray(cards, move.cardDif);
-        currentPileHolder += move.pileHolderDif;
+            cards = ArrayExtensions.AddArray(cards, move.cardDif);
+            currentPileHolder += move.pileHolderDif;
+        }
 
         //Reset the playerCards data for the current player and middle pile
         playerCards = new int[][] { null, null, null, null, null };
@@ -52,8 +59,18 @@ public struct GameState
     }
 
     public void UndoMove(Move move)
-
     {
+        if (move?.cardDif == null)
+        {
+            playerCards = new int[][] { null, null, null, null, null };
+
+            turn = turn == 1 ? 4 : (turn - 1);
+
+            playerPoints[turn - 1] += 1;
+
+            return;
+        }
+
         cards = ArrayExtensions.AddArray(cards, move.cardDif, true);
         currentPileHolder -= move.pileHolderDif;
         playerCards = new int[][] { null, null, null, null, null };

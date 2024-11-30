@@ -34,6 +34,7 @@ public class GameBase : MonoBehaviour
 
     private bool gameOver;
     private bool randomSeed = false;
+    private int startingPlayer = 1;
 
     private SBTimer gameTimer;
 
@@ -45,7 +46,7 @@ public class GameBase : MonoBehaviour
 
         TranspositionTable.GenerateZobristHashKey();
 
-        SBU.gameState = new GameState(new int[44], 1, 0);
+        SBU.gameState = new GameState(new int[44], startingPlayer, 0);
 
         //Maps all card indexes (0 - 44) to their actual values
         SBU.CreateCardValues();
@@ -82,7 +83,7 @@ public class GameBase : MonoBehaviour
     }
 
 
-    private void GameUpdate()
+    private void GameUpdate(bool doGUIUpdate = true)
     {
 
         if (SBU.gameState.isGameOver())
@@ -93,7 +94,10 @@ public class GameBase : MonoBehaviour
 
         if (SBU.gameState.turn == 1) { SBU.round++; }
 
-        UpdateGUI();
+        if (doGUIUpdate)
+        {
+            UpdateGUI();
+        }
 
     }
 
@@ -107,7 +111,6 @@ public class GameBase : MonoBehaviour
             SBU.gameState,
             settings.MaxSearchDepth,
             SBU.gameState.turn,
-            settings.FearBias,
             settings.Heuristics.GetHeuristic(SBU.gameState.turn)
         );
 
@@ -130,7 +133,7 @@ public class GameBase : MonoBehaviour
         moveHistory.Add(search.bestMove);
         moveHistoryPointer += 1;
 
-        GameUpdate();
+        GameUpdate(logSearch);
     }
 
 
@@ -156,11 +159,27 @@ public class GameBase : MonoBehaviour
 
     public void SimulateGame()
     {
-        if (gameOver) { Start(); }
-        while (!gameOver)
+        int[] tally = new int[4];
+
+        SBTimer timer = new SBTimer();
+        timer.StartTimer();
+
+        startingPlayer = 1;
+
+        for (int i = 0; i < settings.SimulationCount; i++)
         {
-            BotMove(false);
+            Start();
+
+            while (!gameOver)
+            {
+                BotMove(false);
+            }
+
+            tally[SBU.gameState.getWinningPlayer() - 1]++;
+            startingPlayer = startingPlayer == 4 ? 1 : (startingPlayer + 1);
+
         }
+        Debug.Log(string.Join(" : ", tally) + " | " + timer.Timer());
     }
 
 
@@ -246,13 +265,14 @@ public class GameBase : MonoBehaviour
     private void GameEnd()
     {
         gameOver = true;
+
+        float time = MathF.Round(gameTimer.Timer(), 3);
+        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + time);
         for (int i = 0; i < 4; i++)
         {
             SBU.gameState.playerPoints[i] -= SBU.gameState.getPlayerCards(i + 1).ArrayLength();
         }
         UpdateGUI();
-        float time = MathF.Round(gameTimer.Timer(), 3);
-        Debug.Log("GAME OVER, PLAYER " + SBU.gameState.getWinningPlayer() + " WON!    |    Total Time Elapsed: " + time);
 
     }
 

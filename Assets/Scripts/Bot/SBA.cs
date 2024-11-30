@@ -13,8 +13,6 @@ public class SBA
 
     public Move bestMove;
 
-    private float fearBias;
-
     public int searchedPositions = 0;
 
     private GameState g;
@@ -31,11 +29,10 @@ public class SBA
     private SBH heuristic;
 
 
-    public SBA(GameState g, int maxDepth, int maximizer, float fearBias, SBH heuristic) 
+    public SBA(GameState g, int maxDepth, int maximizer, SBH heuristic) 
     {
         this.g = g;
         this.maxDepth = maxDepth;
-        this.fearBias = fearBias;
         this.maximizer = maximizer;
         bestMove = null;
 
@@ -81,7 +78,6 @@ public class SBA
 
         List<Move> moves = Move.GetPossibleMoves(g, g.turn);
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
-
 
 
         //Due to alpha beta pruning working better when the good moves are searched first we estimate how good a move is and then sort them based on that
