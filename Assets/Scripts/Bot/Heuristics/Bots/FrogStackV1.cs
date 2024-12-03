@@ -5,7 +5,7 @@ using UnityEngine;
 public class FrogStackV1 : SBH
 {
     [SerializeField] int bias;
-
+    [SerializeField] int paranoia;
     public override int Evaluate(GameState g, int maximizer)
     {
 
@@ -16,8 +16,8 @@ public class FrogStackV1 : SBH
         {
             if (i == maximizer) { continue; }
 
-            eval -= bias * g.getPlayerPoints(i);
-            eval -= g.EstimatePossibleMoveScore(i);
+            eval -= paranoia * bias * g.getPlayerPoints(i);
+            eval -= paranoia * g.EstimatePossibleMoveScore(i);
         }
 
         return eval;

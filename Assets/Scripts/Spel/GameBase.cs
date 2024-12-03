@@ -127,7 +127,7 @@ public class GameBase : MonoBehaviour
             ); 
         }
         SBU.gameState.DoMove(search.bestMove);
-
+        Debug.Log(search.bestMove);
         //Store moves
         if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
         moveHistory.Add(search.bestMove);
