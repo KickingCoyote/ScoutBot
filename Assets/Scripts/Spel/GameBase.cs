@@ -53,8 +53,6 @@ public class GameBase : MonoBehaviour
 
         DistributeCards(settings);
 
-        SBU.round = 0;
-
         guiManager = GetComponent<GUIManager>();
 
         gameTimer = new SBTimer();
@@ -92,7 +90,6 @@ public class GameBase : MonoBehaviour
             return;
         }
 
-        if (SBU.gameState.turn == 1) { SBU.round++; }
 
         if (doGUIUpdate)
         {
@@ -258,7 +255,7 @@ public class GameBase : MonoBehaviour
         }
 
 
-        infoText.text = "Turn: " + SBU.gameState.turn + "   |   Round: " + SBU.round;
+        infoText.text = "Turn: " + SBU.gameState.turn + "   |   Round: " + SBU.gameState.round;
 
     }
 
