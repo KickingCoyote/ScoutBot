@@ -44,5 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0566e53cc8936c94d9864e76345e1a39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bias: 100
+  bias: 0
   paranoia: 1

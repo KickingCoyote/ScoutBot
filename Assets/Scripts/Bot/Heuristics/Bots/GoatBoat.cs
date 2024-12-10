@@ -16,23 +16,29 @@ public class GoatBoat : SBH
                 cardsOutsideGame++;
             }
         }
-
+       
         int newBias = bias;
 
-        if (cardsOutsideGame >= 12)
-        {
-            newBias += 1000;
-        }
+        //if (cardsOutsideGame >= 12)
+        //{
+        //    newBias += 1000;
+        //}
         
-        int eval = 3 * g.EstimatePossibleMoveScore(maximizer); ;
+        int eval = 3 * g.EstimateHandValueGoatBoat(maximizer); ;
+        Debug.Log("___");
+        Debug.Log("HandValue: " + eval);
         eval += 3 * newBias * g.getPlayerPoints(maximizer);
+        Debug.Log("PlayerPoints: " + g.getPlayerPoints(maximizer));
+
+
+
 
         for (int i = 1; i < 5; i++)
         {
             if (i == maximizer) { continue; }
 
             eval -= paranoia * newBias * g.getPlayerPoints(i);
-            eval -= paranoia * g.EstimatePossibleMoveScore(i);
+            eval -= paranoia * g.EstimateHandValueGoatBoat(i);
         }
         return eval;
     }
