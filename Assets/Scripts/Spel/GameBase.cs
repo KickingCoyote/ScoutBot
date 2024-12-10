@@ -169,14 +169,19 @@ public class GameBase : MonoBehaviour
         for (int i = 0; i < settings.SimulationCount; i++)
         {
             Start();
-
             while (!gameOver)
             {
                 BotMove(false);
             }
 
+            double procent;
             tally[SBU.gameState.getWinningPlayer() - 1]++;
             startingPlayer = startingPlayer == 4 ? 1 : (startingPlayer + 1);
+            if (i % 10 == 0)
+            {
+                procent = (double)i / (double)settings.SimulationCount;
+                Debug.Log(Math.Round(procent, 4)*100 + "%");
+            }
 
         }
         Debug.Log(string.Join(" : ", tally) + " | " + timer.Timer());
