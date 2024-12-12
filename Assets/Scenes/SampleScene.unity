@@ -1758,8 +1758,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28439ccb5853ee54392bcf2529892960, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSearchDepth: 3
-  SimulationCount: 100
+  MaxSearchDepth: 1
+  SimulationCount: 1
   GameSeed: 0
   Heuristics:
     heuristics:

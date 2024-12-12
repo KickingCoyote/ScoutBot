@@ -24,11 +24,13 @@ public class GoatBoat : SBH
         //    newBias += 1000;
         //}
         
-        int eval = 3 * g.EstimateHandValueGoatBoat(maximizer); ;
-        Debug.Log("___");
-        Debug.Log("HandValue: " + eval);
-        eval += 3 * newBias * g.getPlayerPoints(maximizer);
-        Debug.Log("PlayerPoints: " + g.getPlayerPoints(maximizer));
+        int handValue = 3 * g.EstimateHandValueGoatBoat(maximizer);
+        int points = 3 * newBias * g.getPlayerPoints(maximizer);
+
+       // Debug.Log("Handvalue " + handValue);
+       // Debug.Log(" Points " + points);
+        int eval = handValue + points;
+    
 
 
 

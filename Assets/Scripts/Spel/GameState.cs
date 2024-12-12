@@ -187,11 +187,17 @@ public struct GameState
         //Adds the players card into an array sorted like it is in the players hand, all empty spots are -10
         int[] pCards = getPlayerCards(player);
 
-        int previouslyCardValue = SBU.getCurrentCardValue(cards, pCards[0]);
+        int previouslyCardValue = 0;
+        if (pCards[0] != -10)
+        {
+            previouslyCardValue = SBU.getCurrentCardValue(cards, pCards[0]);
+        }
         for (int i = 1; i < pCards.Length && pCards[i] != -10; i++)
         {
             int currentCardValue = SBU.getCurrentCardValue(cards, pCards[i]);
             score -= (int)Math.Pow(currentCardValue - previouslyCardValue, 2) - 2;
+            //score -= (int)Math.Abs(currentCardValue - previouslyCardValue) - 2;
+            //score -= (int)Math.Abs(currentCardValue - previouslyCardValue) - 2;
             // If difference between cards are high --> Lower value
             // If difference between cards are 0 or 1 --> -2 still results in some extra points
 
