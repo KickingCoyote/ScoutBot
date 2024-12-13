@@ -12,8 +12,14 @@ public class SBA
 {
 
     public Move bestMove;
+    public int bestEval;
+
+    private Move currentBestMove;
+    private int currentBestEval;
 
     public int searchedPositions = 0;
+
+    public SBTimer timer;
 
     private GameState g;
 
@@ -22,11 +28,12 @@ public class SBA
     private int maxDepth;
     private int currentMaxDepth;
 
-    public int bestEval;
 
     //private int transpositionCounter = 0;
 
     private SBH heuristic;
+
+    private bool isCancelled;
 
 
     public SBA(GameState g, int maxDepth, int maximizer, SBH heuristic) 
@@ -34,7 +41,9 @@ public class SBA
         this.g = g;
         this.maxDepth = maxDepth;
         this.maximizer = maximizer;
+
         bestMove = null;
+        isCancelled = false;
 
         this.heuristic = heuristic;
     }
@@ -42,10 +51,23 @@ public class SBA
 
     public void StartSearch()
     {
+        timer.StartTimer();
+
         for (int depth = 1; depth <= maxDepth; depth++)
         {
+
             currentMaxDepth = depth;
             DepthSearch(depth, -2147483647, 2147483647);
+
+            if(isCancelled)
+            {
+                bestEval = currentBestEval;
+                bestMove = currentBestMove;
+                break;
+            }
+
+            currentBestEval = bestEval;
+            currentBestMove = bestMove;
         }
         //Debug.Log($"Transpositions used: {transpositionCounter}  | Transpositions stored: {TranspositionTable.table.Count()}");
         TranspositionTable.table.Clear();

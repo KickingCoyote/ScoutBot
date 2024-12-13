@@ -116,16 +116,14 @@ public class GameBase : MonoBehaviour
             settings.Heuristics.GetHeuristic(((SBU.gameState.turn - 1 + botOwnerIncrement) % 4) + 1)
         );
 
-        SBTimer timer = new SBTimer();
-        timer.StartTimer();
         search.StartSearch();
 
 
         if (logSearch) { 
             Debug.Log(
             "Searched Positions: " + search.searchedPositions + 
-            " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + 
-            "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s"
+            " \n Time Elapsed: " + MathF.Round(search.timer.Timer(), 3) + 
+            "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (search.timer.Timer() * 1000)) + "kN/s"
             ); 
         }
         SBU.gameState.DoMove(search.bestMove);

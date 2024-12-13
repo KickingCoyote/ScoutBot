@@ -19,6 +19,11 @@ public class Settings : MonoBehaviour
     /// </summary>
     public int GameSeed = 0;
 
+    /// <summary>
+    /// How long a move is allowed to take in seconds.
+    /// </summary>
+    public double MaxMoveDuration = 0.1;
+
 
     public HeuristicMenu Heuristics;
 }
