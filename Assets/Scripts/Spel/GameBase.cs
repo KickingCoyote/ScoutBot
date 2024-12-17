@@ -256,7 +256,7 @@ public class GameBase : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             string s;
-            if (i > 0) { s = "Player " + i + " (" + SBU.gameState.getPlayerPoints(i) + ")"; }
+            if (i > 0) { s = (settings.Heuristics.GetId(i) == "" ? "Anon" : settings.Heuristics.GetId(i)) + " (" + SBU.gameState.getPlayerPoints(i) + ")"; }
             else { s = "Table Pile: "; }
 
 
@@ -285,7 +285,7 @@ public class GameBase : MonoBehaviour
 
     public void StoreGame()
     {
-       Statistics.StoreData(new string[4], moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), saveMenuInputField.text, gameOver);
+       Statistics.StoreData(settings.Heuristics.ids, moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), saveMenuInputField.text, gameOver);
     }
 
 }
