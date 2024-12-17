@@ -12,9 +12,6 @@ public static class SBU
 {
     public static GameState gameState;
 
-    public static int round;
-
-
     //gameState.cards
     //All cards are stored in 1 44 length int[], the index represents which card it is and the value has all the needed data about that card 
     //each value is stored such as that when viewed in byte form it looks like XXXX X XXX.

@@ -12,10 +12,14 @@ public class SBA
 {
 
     public Move bestMove;
+    public int bestEval;
 
-    private float fearBias;
+    private Move currentBestMove;
+    private int currentBestEval;
 
     public int searchedPositions = 0;
+
+    public SBTimer timer;
 
     private GameState g;
 
@@ -23,27 +27,49 @@ public class SBA
 
     private int maxDepth;
     private int currentMaxDepth;
+    private float maxMoveDuration;
 
-    public int bestEval;
+    //private int transpositionCounter = 0;
 
-    private int transpositionCounter = 0;
+    private SBH heuristic;
 
-    public SBA(GameState g, int maxDepth, int maximizer, float fearBias) 
+    private bool isCancelled;
+
+
+    public SBA(GameState g, int maxDepth, int maximizer, float maxMoveDuration, SBH heuristic) 
     {
         this.g = g;
         this.maxDepth = maxDepth;
-        this.fearBias = fearBias;
         this.maximizer = maximizer;
+        this.maxMoveDuration = maxMoveDuration;
+
+        timer = new SBTimer();
         bestMove = null;
+        isCancelled = false;
+
+        this.heuristic = heuristic;
     }
 
 
     public void StartSearch()
     {
+        timer.StartTimer();
+
         for (int depth = 1; depth <= maxDepth; depth++)
         {
+
             currentMaxDepth = depth;
             DepthSearch(depth, -2147483647, 2147483647);
+
+            if(isCancelled)
+            {
+                bestEval = currentBestEval;
+                bestMove = currentBestMove;
+                break;
+            }
+
+            currentBestEval = bestEval;
+            currentBestMove = bestMove;
         }
         //Debug.Log($"Transpositions used: {transpositionCounter}  | Transpositions stored: {TranspositionTable.table.Count()}");
         TranspositionTable.table.Clear();
@@ -54,13 +80,18 @@ public class SBA
     //Paranoid MIN MAX Algorithm 
     public int DepthSearch(int depth, int alpha, int beta)
     {
+        if(depth > currentMaxDepth - 3 && timer.Timer() > maxMoveDuration)
+        {
+            isCancelled = true;
+            return 0; //This is a temporary and quite volatile solution.
+        }
 
 
         if (g.isGameOver())
         {
             searchedPositions++;
 
-            return SBH.Evaluate(g, maximizer) + (g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -100000 : 100000) / (currentMaxDepth - depth);
+            return heuristic.Evaluate(g, maximizer) + (g.getWinningPlayer() == g.turn ^ g.turn == maximizer ? -100000 : 100000) / (currentMaxDepth - depth);
 
         }
         
@@ -70,7 +101,7 @@ public class SBA
         if (depth == 0)
         {
             searchedPositions++;
-            return SBH.Evaluate(g, maximizer);
+            return heuristic.Evaluate(g, maximizer);
         }
 
 
@@ -78,10 +109,9 @@ public class SBA
         moves.AddRange(Move.getPossibleDrawCardMoves(g.cards, g.turn));
 
 
-
         //Due to alpha beta pruning working better when the good moves are searched first we estimate how good a move is and then sort them based on that
         Move priorityMove = this.bestMove; //depth == currentMaxDepth ? this.bestMove : null; //Even if I wanted to I could not tell you why removing the depth check reduces searched positions but it does...
-        MoveOrdering(g, moves, priorityMove);
+        heuristic.MoveOrdering(g, moves, priorityMove);
 
 
         Move bestMove = new Move();
@@ -156,21 +186,6 @@ public class SBA
 
     }
 
-
-    private void MoveOrdering(GameState g, List<Move> moves, Move priorityMove)
-    {
-        //the move ordering assumes that moves where more cards are put down are better and that picking up cards generally is worse
-        foreach (Move move in moves)
-        {
-            if (priorityMove?.cardDif is not null && move.CompareMoves(priorityMove)) { move.scoreEstimate = 100000; continue; }
-
-            if (!move.isDrawMove) { move.scoreEstimate = move.moveLength * 100 + move.moveMin; continue; }
-
-        }
-
-        moves.Sort();
-
-    }
 
 }
 
