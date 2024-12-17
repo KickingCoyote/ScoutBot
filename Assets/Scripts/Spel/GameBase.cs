@@ -293,7 +293,7 @@ public class GameBase : MonoBehaviour
         string[] adjustedIds = new string[4];
         for (int i = 0; i < 4; i++)
         {
-            adjustedIds[i] = settings.Heuristics.GetId((i + botOwnerIncrement) % 4);
+            adjustedIds[i] = settings.Heuristics.GetId(((i + botOwnerIncrement) % 4) + 1);
         }
         Statistics.StoreData(adjustedIds, moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), saveMenuInputField.text, gameOver);
     }
