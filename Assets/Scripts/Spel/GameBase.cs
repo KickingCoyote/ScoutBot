@@ -36,7 +36,7 @@ public class GameBase : MonoBehaviour
     private bool gameOver;
     [SerializeField] bool randomSeed = false;
     private int startingPlayer = 1;
-
+    private int botOwnerIncrement = 0;
     private SBTimer gameTimer;
 
     void Start()
@@ -105,9 +105,9 @@ public class GameBase : MonoBehaviour
 
     public void BotMove()
     {
-        BotMove(true, 0);
+        BotMove(true);
     }
-    public void BotMove(bool logSearch = true, int botOwnerIncrement = 0)
+    public void BotMove(bool logSearch = true)
     {
 
         //Sets all undecided bots to FrogStackV1
@@ -189,10 +189,11 @@ public class GameBase : MonoBehaviour
 
             while (!gameOver)
             {
-                BotMove(false, i % 4);
+                botOwnerIncrement = i % 4;
+                BotMove(false);
             }
 
-            tally[SBU.gameState.getWinningPlayer() - 1]++;
+            tally[((SBU.gameState.getWinningPlayer() - 1 + botOwnerIncrement) % 4) + 1]++;
             //startingPlayer = startingPlayer == 4 ? 1 : (startingPlayer + 1);
 
         }
@@ -256,7 +257,7 @@ public class GameBase : MonoBehaviour
         for (int i = 0; i < 5; i++)
         {
             string s;
-            if (i > 0) { s = (settings.Heuristics.GetId(i) == "" ? "Anon" : settings.Heuristics.GetId(i)) + " (" + SBU.gameState.getPlayerPoints(i) + ")"; }
+            if (i > 0) { s = (settings.Heuristics.GetId(((i - 1 + botOwnerIncrement) % 4) + 1) == "" ? "Anon" : settings.Heuristics.GetId(i)) + " (" + SBU.gameState.getPlayerPoints(i) + ")"; }
             else { s = "Table Pile: "; }
 
 
@@ -285,7 +286,12 @@ public class GameBase : MonoBehaviour
 
     public void StoreGame()
     {
-       Statistics.StoreData(settings.Heuristics.ids, moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), saveMenuInputField.text, gameOver);
+        string[] adjustedIds = new string[4];
+        for (int i = 0; i < 4; i++)
+        {
+            adjustedIds[i] = settings.Heuristics.GetId((i + botOwnerIncrement) % 4);
+        }
+        Statistics.StoreData(adjustedIds, moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), saveMenuInputField.text, gameOver);
     }
 
 }
