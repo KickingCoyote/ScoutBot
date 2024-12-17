@@ -27,8 +27,8 @@ public class GoatBoat : SBH
         int handValue = 3 * g.EstimateHandValueGoatBoat(maximizer);
         int points = 3 * newBias * g.getPlayerPoints(maximizer);
 
-       // Debug.Log("Handvalue " + handValue);
-       // Debug.Log(" Points " + points);
+        //Debug.Log("Handvalue " + handValue);
+        //Debug.Log(" Points " + points);
         int eval = handValue + points;
     
 
