@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,12 +34,16 @@ public class GameBase : MonoBehaviour
     private int moveHistoryPointer;
 
     private bool gameOver;
-    private bool randomSeed = false;
+    [SerializeField] bool randomSeed = false;
     private int startingPlayer = 1;
 
     private SBTimer gameTimer;
 
     void Start()
+    {
+        StartGame(true);
+    }
+    void StartGame(bool randomizeSeed)
     {
         gameOver = false;
         moveHistory = new List<Move>();
@@ -51,7 +56,7 @@ public class GameBase : MonoBehaviour
         //Maps all card indexes (0 - 44) to their actual values
         SBU.CreateCardValues();
 
-        DistributeCards(settings);
+        DistributeCards(settings, randomizeSeed);
 
         guiManager = GetComponent<GUIManager>();
 
@@ -65,12 +70,12 @@ public class GameBase : MonoBehaviour
 
 
 
-    public void DistributeCards(Settings settings)
+    public void DistributeCards(Settings settings, bool randomizeSeed)
     {
 
-        if (settings.GameSeed == 0 || randomSeed) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); randomSeed = true; }
+        if (randomSeed && randomizeSeed) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); }
 
-        UnityEngine.Random.InitState((int)settings.GameSeed);
+        UnityEngine.Random.InitState(settings.GameSeed);
 
         for (int i = 0; i < 44; i++)
         {
@@ -98,33 +103,36 @@ public class GameBase : MonoBehaviour
 
     }
 
-    public void BotMove(bool logSearch = true)
+    public void BotMove()
+    {
+        BotMove(true, 0);
+    }
+    public void BotMove(bool logSearch = true, int botOwnerIncrement = 0)
     {
 
         //Sets all undecided bots to FrogStackV1
-        if (settings.Heuristics.GetHeuristic(SBU.gameState.turn) is null) { settings.Heuristics.SetHeuristic(SBU.gameState.turn, defaultHeuristic); }
+        if (settings.Heuristics.GetHeuristic(((SBU.gameState.turn - 1 + botOwnerIncrement) % 4) + 1) is null) { settings.Heuristics.SetHeuristic(SBU.gameState.turn, defaultHeuristic); }
 
         SBA search = new SBA(
             SBU.gameState,
             settings.MaxSearchDepth,
             SBU.gameState.turn,
-            settings.Heuristics.GetHeuristic(SBU.gameState.turn)
+            settings.MaxMoveDuration,
+            settings.Heuristics.GetHeuristic(((SBU.gameState.turn - 1 + botOwnerIncrement) % 4) + 1)
         );
 
-        SBTimer timer = new SBTimer();
-        timer.StartTimer();
         search.StartSearch();
 
 
         if (logSearch) { 
             Debug.Log(
             "Searched Positions: " + search.searchedPositions + 
-            " \n Time Elapsed: " + MathF.Round(timer.Timer(), 3) + 
-            "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (timer.Timer() * 1000)) + "kN/s"
+            " \n Time Elapsed: " + MathF.Round(search.timer.Timer(), 3) + 
+            "   ||   Evaluation Speed: " + MathF.Round(search.searchedPositions / (search.timer.Timer() * 1000)) + "kN/s"
             ); 
         }
         SBU.gameState.DoMove(search.bestMove);
-        //Debug.Log(search.bestMove);
+
         //Store moves
         if (moveHistoryPointer > -1) { moveHistory.RemoveRange(moveHistoryPointer + 1, moveHistory.Count - moveHistoryPointer - 1); }
         moveHistory.Add(search.bestMove);
@@ -154,6 +162,11 @@ public class GameBase : MonoBehaviour
         SBU.gameState.DoMove(moveHistory[moveHistoryPointer]);
     }
 
+    /* Simulates many games of scout letting the bots play against eachother
+     * 
+     * Every fourth game the seed changes.
+     * Who plays as who changes with each round so everybody gets to play all hands before the seed switches.
+     */
     public void SimulateGame()
     {
         int[] tally = new int[4];
@@ -165,20 +178,22 @@ public class GameBase : MonoBehaviour
 
         for (int i = 0; i < settings.SimulationCount; i++)
         {
-            Start();
-            while (!gameOver)
+            if (i%4 == 0) //Change seed every fourth game
             {
-                BotMove(false);
+                StartGame(true);
+            }
+            else
+            {
+                StartGame(false);
             }
 
-            double procent;
-            tally[SBU.gameState.getWinningPlayer() - 1]++;
-            startingPlayer = startingPlayer == 4 ? 1 : (startingPlayer + 1);
-            if (i % 10 == 0)
+            while (!gameOver)
             {
-                procent = (double)i / (double)settings.SimulationCount;
-                Debug.Log(Math.Round(procent, 4)*100 + "%");
+                BotMove(false, i % 4);
             }
+
+            tally[SBU.gameState.getWinningPlayer() - 1]++;
+            //startingPlayer = startingPlayer == 4 ? 1 : (startingPlayer + 1);
 
         }
         Debug.Log(string.Join(" : ", tally) + " | " + timer.Timer());
@@ -186,13 +201,6 @@ public class GameBase : MonoBehaviour
 
 
     //Activated from buttons ingame
-
-
-
-    public void TestButton()
-    {
-        Debug.Log(SBU.gameState.EstimateHandValueGoatBoat(2));
-    }
 
     public void TakeCard()
     {
@@ -228,17 +236,6 @@ public class GameBase : MonoBehaviour
 
         Move m = new Move(SBU.gameState, guiManager.selectedCardIndexes.ToArray());
 
-        //Check if its a legal move, This can be made faster by not converting them to int[44]s before comparison
-        //THIS DOES NOT WORK DUE TO CONTAIN COMPARING BY REF
-        //if (SBU.GetPossibleMoves(SBU.gameState.turn, SBU.gameState.cards).Contains(m))
-        //{
-        //  SBU.gameState.cards = SBU.CopyArray(ArrayExtensions.AddArray(SBU.gameState.cards, m.cardDif));
-        //}
-        //else
-        //{
-        //    Debug.Log("Invalid Move, Cannot put down those cards");
-        //    return;
-        //}
 
 
         SBU.gameState.DoMove(m);
