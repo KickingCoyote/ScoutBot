@@ -22,7 +22,7 @@ public class Settings : MonoBehaviour
     /// <summary>
     /// How long a move is allowed to take in seconds.
     /// </summary>
-    public double MaxMoveDuration = 0.1;
+    public float MaxMoveDuration = 0.1f;
 
 
     public HeuristicMenu Heuristics;

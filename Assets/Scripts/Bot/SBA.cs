@@ -27,7 +27,7 @@ public class SBA
 
     private int maxDepth;
     private int currentMaxDepth;
-
+    private float maxMoveDuration;
 
     //private int transpositionCounter = 0;
 
@@ -36,12 +36,14 @@ public class SBA
     private bool isCancelled;
 
 
-    public SBA(GameState g, int maxDepth, int maximizer, SBH heuristic) 
+    public SBA(GameState g, int maxDepth, int maximizer, float maxMoveDuration, SBH heuristic) 
     {
         this.g = g;
         this.maxDepth = maxDepth;
         this.maximizer = maximizer;
+        this.maxMoveDuration = maxMoveDuration;
 
+        timer = new SBTimer();
         bestMove = null;
         isCancelled = false;
 
@@ -78,6 +80,11 @@ public class SBA
     //Paranoid MIN MAX Algorithm 
     public int DepthSearch(int depth, int alpha, int beta)
     {
+        if(depth > currentMaxDepth - 3 && timer.Timer() > maxMoveDuration)
+        {
+            isCancelled = true;
+            return 0; //This is a temporary and quite volatile solution.
+        }
 
 
         if (g.isGameOver())

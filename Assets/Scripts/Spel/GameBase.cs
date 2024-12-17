@@ -103,6 +103,10 @@ public class GameBase : MonoBehaviour
 
     }
 
+    public void BotMove()
+    {
+        BotMove(true, 0);
+    }
     public void BotMove(bool logSearch = true, int botOwnerIncrement = 0)
     {
 
@@ -113,6 +117,7 @@ public class GameBase : MonoBehaviour
             SBU.gameState,
             settings.MaxSearchDepth,
             SBU.gameState.turn,
+            settings.MaxMoveDuration,
             settings.Heuristics.GetHeuristic(((SBU.gameState.turn - 1 + botOwnerIncrement) % 4) + 1)
         );
 
