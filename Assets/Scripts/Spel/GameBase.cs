@@ -24,6 +24,7 @@ public class GameBase : MonoBehaviour
     //Used for UI
     [SerializeField] TextMeshProUGUI[] pText = new TextMeshProUGUI[5];
     [SerializeField] Toggle flipTakenCardToggle;
+    [SerializeField] Toggle saveSimulatedGamesToggle;
     [SerializeField] TextMeshProUGUI saveMenuInputField;
     public TextMeshProUGUI infoText;
 
@@ -192,8 +193,11 @@ public class GameBase : MonoBehaviour
                 botOwnerIncrement = i % 4;
                 BotMove(false);
             }
-
-            tally[((SBU.gameState.getWinningPlayer() - 1 + botOwnerIncrement) % 4) + 1]++;
+            if(saveSimulatedGamesToggle.isOn)
+            {
+                StoreGame();
+            }
+            tally[(SBU.gameState.getWinningPlayer() - 1 + botOwnerIncrement) % 4]++;
             //startingPlayer = startingPlayer == 4 ? 1 : (startingPlayer + 1);
 
         }
