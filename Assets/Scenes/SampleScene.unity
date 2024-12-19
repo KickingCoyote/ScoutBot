@@ -760,7 +760,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 560, y: 120}
+  m_AnchoredPosition: {x: 560, y: 210}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &368706109
@@ -1264,7 +1264,7 @@ MonoBehaviour:
   saveMenuInputField: {fileID: 1602842969}
   infoText: {fileID: 2064769862}
   defaultHeuristic: {fileID: 3757116448867717182, guid: 9f52b794641b8f54991d4eeb022a71f1, type: 3}
-  randomSeed: 0
+  randomSeed: 1
 --- !u!114 &571291627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1846,15 +1846,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28439ccb5853ee54392bcf2529892960, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxSearchDepth: 6
+  MaxSearchDepth: 3
   SimulationCount: 10
   GameSeed: 7
   MaxMoveDuration: 0.1
   Heuristics:
     heuristics:
-    - {fileID: -713271728194616458, guid: 4515ba296262729418d9dd67e719c1c3, type: 3}
+    - {fileID: 3757116448867717182, guid: 9f52b794641b8f54991d4eeb022a71f1, type: 3}
     - {fileID: 3757116448867717182, guid: f1208a2e43b35504f962c614774aea99, type: 3}
-    - {fileID: -713271728194616458, guid: 4515ba296262729418d9dd67e719c1c3, type: 3}
+    - {fileID: 3757116448867717182, guid: e36753ad404914945aded97b5b1ca0ba, type: 3}
     - {fileID: 3757116448867717182, guid: cca741ca32e083046a5ee2cd52689bb9, type: 3}
     ids:
     - emki
