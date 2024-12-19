@@ -26,20 +26,20 @@ public class GoatBoat : SBH
         
         int handValue = 3 * g.EstimateHandValueGoatBoat(maximizer);
         int points = 3 * newBias * g.getPlayerPoints(maximizer);
-
+        points = 0; //Just for testing
         //Debug.Log("Handvalue " + handValue);
         //Debug.Log(" Points " + points);
         int eval = handValue + points;
     
 
 
-
+         
 
         for (int i = 1; i < 5; i++)
         {
             if (i == maximizer) { continue; }
 
-            eval -= paranoia * newBias * g.getPlayerPoints(i);
+            //eval -= paranoia * newBias * g.getPlayerPoints(i); //Just for testing
             eval -= paranoia * g.EstimateHandValueGoatBoat(i);
         }
         return eval;
