@@ -26,6 +26,7 @@ public class BeeTree : SBH
 
         int handValue = 3 * g.EstimateHandValueBeeTree(maximizer);
         int points = 3 * newBias * g.getPlayerPoints(maximizer);
+        points = 0;
         //Debug.Log("Handvalue " + handValue);
         //Debug.Log(" Points " + points);
         int eval = handValue + points;
@@ -38,7 +39,7 @@ public class BeeTree : SBH
         {
             if (i == maximizer) { continue; }
 
-            eval -= paranoia * newBias * g.getPlayerPoints(i);
+            //eval -= paranoia * newBias * g.getPlayerPoints(i);
             eval -= paranoia * g.EstimateHandValueBeeTree(i);
         }
         return eval;

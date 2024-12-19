@@ -73,9 +73,8 @@ public class GameBase : MonoBehaviour
 
     public void DistributeCards(Settings settings, bool randomizeSeed)
     {
-
         if (randomSeed && randomizeSeed) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); }
-
+        
         UnityEngine.Random.InitState(settings.GameSeed);
 
         for (int i = 0; i < 44; i++)
@@ -293,7 +292,7 @@ public class GameBase : MonoBehaviour
         string[] adjustedIds = new string[4];
         for (int i = 0; i < 4; i++)
         {
-            adjustedIds[i] = settings.Heuristics.GetId(((i + botOwnerIncrement) % 4) + 1);
+            adjustedIds[i] = settings.Heuristics.GetId((i + botOwnerIncrement) % 4);
         }
         Statistics.StoreData(adjustedIds, moveHistory, SBU.gameState.getWinningPlayer(), SBU.gameState, settings.GameSeed, MathF.Round(gameTimer.Timer(), 3), saveMenuInputField.text, gameOver);
     }

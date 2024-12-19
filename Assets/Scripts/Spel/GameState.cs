@@ -226,7 +226,7 @@ public struct GameState
         for (int i = 1; i < pCards.Length && pCards[i] != -10; i++)
         {
             int currentCardValue = SBU.getCurrentCardValue(cards, pCards[i]);
-            score -= (int)Math.Abs(currentCardValue - previouslyCardValue) - 2;
+            score += (int) - Math.Abs(currentCardValue - previouslyCardValue) + 2;
             // If difference between cards are high --> Lower value
             // If difference between cards are 0 or 1 --> -2 still results in some extra points
 
