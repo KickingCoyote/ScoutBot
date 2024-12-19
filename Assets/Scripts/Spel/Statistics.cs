@@ -2,15 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.Linq;
 
 public static class Statistics
 {
+
     public static void StoreData(string[] playerIdentification, List<Move> moves, int winningPlayer, GameState EndGameState, int seed, float time, string extraInfo, bool gameOver = true)
     {
         string path = Application.dataPath + "/Statistics";
-        
-        int fileNumber = Directory.GetFiles(path).Length/2+1;
-        
+        int fileNumber = Directory.GetFiles(path).Select(x => int.Parse(x.Split('\\').Last().Split('.').First())).OrderByDescending(x => x).FirstOrDefault() + 1;
+
         string textFilePath = path + "/" + fileNumber.ToString() + ".txt";
 
         string playerIDString = "";
