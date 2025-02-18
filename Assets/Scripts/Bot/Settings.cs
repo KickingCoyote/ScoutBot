@@ -19,6 +19,9 @@ public class Settings : MonoBehaviour
     /// </summary>
     public int GameSeed = 0;
 
+
+    public bool randomizeSeed = true;
+
     /// <summary>
     /// How long a move is allowed to take in seconds.
     /// </summary>

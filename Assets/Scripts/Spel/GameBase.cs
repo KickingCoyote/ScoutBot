@@ -35,7 +35,6 @@ public class GameBase : MonoBehaviour
     private int moveHistoryPointer;
 
     private bool gameOver;
-    [SerializeField] bool randomSeed = false;
     private int startingPlayer = 1;
     private int botOwnerIncrement = 0;
     private SBTimer gameTimer;
@@ -74,7 +73,7 @@ public class GameBase : MonoBehaviour
     public void DistributeCards(Settings settings, bool randomizeSeed)
     {
 
-        if (randomSeed && randomizeSeed) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); }
+        if (settings.randomizeSeed && randomizeSeed) { settings.GameSeed = UnityEngine.Random.Range(0, 1000000000); }
 
         UnityEngine.Random.InitState(settings.GameSeed);
 
