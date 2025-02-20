@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Settings : MonoBehaviour
+[CreateAssetMenu]
+public class Settings : ScriptableObject
 {
     /// <summary>
     /// How many moves into the future that are looked at.

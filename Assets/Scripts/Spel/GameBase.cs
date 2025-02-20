@@ -7,6 +7,7 @@ using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
@@ -251,6 +252,10 @@ public class GameBase : MonoBehaviour
 
     }
 
+    public void ToSettings()
+    {
+        SceneManager.LoadScene(sceneName:"SettingScene");
+    }
 
     private void UpdateGUI()
     {
@@ -285,7 +290,6 @@ public class GameBase : MonoBehaviour
         UpdateGUI();
 
     }
-
 
     public void StoreGame()
     {
